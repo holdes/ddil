@@ -52,7 +52,7 @@ export function useRaceMetrics() {
   }, []);
 
   const { connected, connect, disconnect } = useWebSocket({
-    url: `ws://${window.location.hostname}:8000/api/race/status`,
+    url: `ws://${window.location.host}/api/race/status`,
     onMessage: handleMessage,
   });
 

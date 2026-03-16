@@ -21,9 +21,9 @@ check() {
   local status="$2"  # pass, warn, fail
   local detail="$3"
   case "$status" in
-    pass) echo "  ✓ $label: $detail"; ((PASS++)) ;;
-    warn) echo "  ⚠ $label: $detail"; ((WARN++)) ;;
-    fail) echo "  ✗ $label: $detail"; ((FAIL++)) ;;
+    pass) echo "  ✓ $label: $detail"; ((PASS++)) || true ;;
+    warn) echo "  ⚠ $label: $detail"; ((WARN++)) || true ;;
+    fail) echo "  ✗ $label: $detail"; ((FAIL++)) || true ;;
   esac
 }
 

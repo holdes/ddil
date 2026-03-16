@@ -1,61 +1,36 @@
-version: "3.9"
-
-# DDIL Kit — DGX Spark services
-# Deploy on the Spark (192.168.1.20) with: docker compose up -d
-# Prerequisite: sudo sysctl -w vm.max_map_count=262144
+# DDIL Kit — Framework Desktop (192.168.1.10)
+# Presentation layer: app + CPU ES data node + Kibana
+#
+# Start:  docker compose up -d
+# Stop:   docker compose down
+# Wipe:   docker compose down -v
+#
+# Prereq: sudo sysctl -w vm.max_map_count=262144
 
 services:
-  # ── Elasticsearch GPU Instance (port 9200) ──────────────────
-  # cuVS GPU-accelerated HNSW vector indexing
-  es-gpu:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
-    container_name: es-gpu
+  # ── Elasticsearch CPU Data Node ────────────────────────────
+  # Joins the ddil-vineyard cluster as the CPU-only data node
+  es-cpu:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.1
+    container_name: es-cpu
     environment:
-      - cluster.name=ddil-gpu
-      - node.name=spark-gpu
-      - discovery.type=single-node
+      - cluster.name=ddil-vineyard
+      - node.name=framework-cpu
+      - node.attr.accel=cpu
+      - discovery.seed_hosts=192.168.1.20:9300
+      - cluster.initial_master_nodes=spark-gpu,framework-cpu
+      - network.publish_host=192.168.1.10
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
-      - vectors.indexing.use_gpu=true
-      - "ES_JAVA_OPTS=-Xms16g -Xmx16g"
+      - xpack.license.self_generated.type=trial
+      - vectors.indexing.use_gpu=false
       - bootstrap.memory_lock=true
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - es-gpu-data:/usr/share/elasticsearch/data
+      - "ES_JAVA_OPTS=-Xms8g -Xmx8g"
     ports:
       - "9200:9200"
       - "9300:9300"
-    networks:
-      - ddil-net
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    restart: unless-stopped
-
-  # ── Elasticsearch CPU Instance (port 9201) ──────────────────
-  # Standard CPU HNSW — the "slow" side of the race
-  es-cpu:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
-    container_name: es-cpu
-    environment:
-      - cluster.name=ddil-cpu
-      - node.name=spark-cpu
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - xpack.security.http.ssl.enabled=false
-      - vectors.indexing.use_gpu=false
-      - "ES_JAVA_OPTS=-Xms16g -Xmx16g"
-      - bootstrap.memory_lock=true
+    volumes:
+      - es-cpu-data:/usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
@@ -63,40 +38,58 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    volumes:
-      - es-cpu-data:/usr/share/elasticsearch/data
-    ports:
-      - "9201:9200"
-      - "9301:9300"
-    networks:
-      - ddil-net
     restart: unless-stopped
 
-  # ── Ollama LLM Inference (port 11434) ───────────────────────
-  # GPU-accelerated: llama3.1:70b + nomic-embed-text
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
+  # ── Kibana ─────────────────────────────────────────────────
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.3.1
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es-cpu:9200
+      - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
+      - SERVER_HOST=0.0.0.0
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=ddil-vineyard-demo-kit-32char-key!
+      - XPACK_SECURITY_ENCRYPTIONKEY=ddil-vineyard-demo-kit-32char-key!
+      - XPACK_REPORTING_ENCRYPTIONKEY=ddil-vineyard-demo-kit-32char-key!
     ports:
-      - "11434:11434"
+      - "5601:5601"
+    depends_on:
+      - es-cpu
+    restart: unless-stopped
+
+  # ── Backend API ────────────────────────────────────────────
+  # FastAPI — orchestrates search, RAG, race, agentic pipeline
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    environment:
+      - VINEYARD_ES_MAIN_URL=http://es-cpu:9200
+      - VINEYARD_ES_GPU_URL=http://192.168.1.20:9200
+      - VINEYARD_DGX_SPARK_HOST=192.168.1.20
+      - VINEYARD_OLLAMA_EMBED_URL=http://192.168.1.20:11434
+      - VINEYARD_OLLAMA_LLM_URL=http://192.168.1.20:11434
+      - VINEYARD_DATA_DIR=/data
+    ports:
+      - "8000:8000"
     volumes:
-      - ollama-data:/root/.ollama
-    networks:
-      - ddil-net
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      - ./data/preprocessed:/data:ro
+      - ./data/tiles:/tiles:ro
+    depends_on:
+      - es-cpu
+    restart: unless-stopped
+
+  # ── Frontend ───────────────────────────────────────────────
+  # React + Vite dev server — proxies /api to backend
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
     restart: unless-stopped
 
 volumes:
-  es-gpu-data:
   es-cpu-data:
-  ollama-data:
-
-networks:
-  ddil-net:
-    driver: bridge

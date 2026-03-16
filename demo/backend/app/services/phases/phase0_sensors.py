@@ -29,33 +29,54 @@ async def run_phase0(
         return _mock_snapshot(block_id)
 
     try:
-        # Search vineyard-soil index for latest readings
-        query: dict = {"size": 1, "sort": [{"timestamp": {"order": "desc"}}]}
+        # Latest soil reading
+        soil_query: dict = {"size": 1, "sort": [{"timestamp": {"order": "desc"}}]}
         if block_id:
-            query["query"] = {"term": {"block_id": block_id}}
+            soil_query["query"] = {"term": {"block_id": block_id}}
         else:
-            query["query"] = {"match_all": {}}
+            soil_query["query"] = {"match_all": {}}
 
-        resp = await es.search(index="vineyard-soil", body=query)
-        hits = resp.get("hits", {}).get("hits", [])
+        soil_resp = await es.search(index="vineyard-soil", body=soil_query)
+        soil_hits = soil_resp.get("hits", {}).get("hits", [])
 
-        if not hits:
-            _progress(on_progress, "No sensor data found — using simulated data")
-            return _mock_snapshot(block_id)
+        # Latest NPK reading
+        npk_query: dict = {"size": 1, "sort": [{"timestamp": {"order": "desc"}}]}
+        if block_id:
+            npk_query["query"] = {"term": {"block_id": block_id}}
+        else:
+            npk_query["query"] = {"match_all": {}}
 
-        src = hits[0]["_source"]
-        _progress(on_progress, f"Retrieved sensor data for block {src.get('block_id', block_id or 'A1')}")
+        npk_resp = await es.search(index="vineyard-npk", body=npk_query)
+        npk_hits = npk_resp.get("hits", {}).get("hits", [])
+
+        soil = soil_hits[0]["_source"] if soil_hits else {}
+        npk = npk_hits[0]["_source"] if npk_hits else {}
+
+        bid = soil.get("block_id") or npk.get("block_id") or block_id or "BLK-A"
+        _progress(on_progress, f"Retrieved sensor data for {bid} ({soil.get('block_name', '')})")
+
+        moisture = soil.get("soil_moisture_pct")
+        potassium = npk.get("soil_potassium_mgkg")
+
+        # Determine health
+        health = "healthy"
+        if moisture is not None and moisture < 25:
+            health = "alert"
+        elif moisture is not None and moisture > 45:
+            health = "watch"
+        if potassium is not None and potassium < 100:
+            health = "alert"
 
         return SensorSnapshot(
-            block_id=src.get("block_id", block_id),
-            moisture=src.get("vwc_percent"),
-            temperature=src.get("soil_temp_c"),
-            nitrogen=src.get("nitrogen_ppm"),
-            phosphorus=src.get("phosphorus_ppm"),
-            potassium=src.get("potassium_ppm"),
-            ph=src.get("ph"),
-            health_status="healthy",
-            summary=_summarize(src),
+            block_id=bid,
+            moisture=moisture,
+            temperature=soil.get("soil_temp_6in_c"),
+            nitrogen=npk.get("soil_nitrogen_mgkg"),
+            phosphorus=npk.get("soil_phosphorus_mgkg"),
+            potassium=potassium,
+            ph=npk.get("ph"),
+            health_status=health,
+            summary=_summarize(soil, npk),
         )
     except Exception as e:
         logger.warning("Phase 0 ES query failed: %s", e)
@@ -63,28 +84,35 @@ async def run_phase0(
         return _mock_snapshot(block_id)
 
 
-def _summarize(src: dict) -> str:
+def _summarize(soil: dict, npk: dict) -> str:
     parts = []
-    if vwc := src.get("vwc_percent"):
-        status = "drought stress" if vwc < 28 else "low" if vwc < 33 else "optimal" if vwc < 42 else "saturated"
+    if vwc := soil.get("soil_moisture_pct"):
+        status = "drought stress" if vwc < 25 else "low" if vwc < 32 else "optimal" if vwc < 42 else "saturated"
         parts.append(f"Moisture {vwc:.1f}% ({status})")
-    if temp := src.get("soil_temp_c"):
+    if temp := soil.get("soil_temp_6in_c"):
         parts.append(f"Soil temp {temp:.1f}°C")
-    if n := src.get("nitrogen_ppm"):
-        parts.append(f"N:{n:.0f} mg/kg")
-    return " | ".join(parts) if parts else "No sensor summary available"
+    if ec := soil.get("electrical_conductivity"):
+        parts.append(f"EC {ec:.2f} dS/m")
+    if n := npk.get("soil_nitrogen_mgkg"):
+        parts.append(f"N:{n:.0f}")
+    if p := npk.get("soil_phosphorus_mgkg"):
+        parts.append(f"P:{p:.0f}")
+    if k := npk.get("soil_potassium_mgkg"):
+        parts.append(f"K:{k:.0f} mg/kg")
+    if ph := npk.get("ph"):
+        parts.append(f"pH:{ph:.1f}")
+    return " | ".join(parts) if parts else "No sensor data available"
 
 
 def _mock_snapshot(block_id: Optional[str] = None) -> SensorSnapshot:
-    """Simulated data when ES is unavailable."""
     return SensorSnapshot(
-        block_id=block_id or "B3",
-        moisture=31.2,
-        temperature=16.8,
-        nitrogen=42.0,
-        phosphorus=28.0,
-        potassium=145.0,
-        ph=6.2,
-        health_status="watch",
-        summary="Moisture 31.2% (low) | Soil temp 16.8°C | N:42 mg/kg",
+        block_id=block_id or "BLK-C",
+        moisture=46.2,
+        temperature=17.8,
+        nitrogen=52.0,
+        phosphorus=33.0,
+        potassium=50.0,
+        ph=6.8,
+        health_status="alert",
+        summary="Moisture 46.2% (saturated) | Soil temp 17.8°C | EC 0.78 dS/m | K:50 mg/kg",
     )

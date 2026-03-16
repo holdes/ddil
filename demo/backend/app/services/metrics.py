@@ -15,6 +15,7 @@ class PathMetrics:
     complete: bool = False
     start_time: float = 0.0
     elapsed_ms: float = 0.0
+    merge_phase: bool = False
 
     def record_batch(self, count: int, batch_ms: float):
         self.docs_indexed += count

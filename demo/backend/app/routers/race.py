@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.post("/start")
 async def start_race(req: RaceStartRequest | None = None):
-    req = req or RaceStartRequest()
+    req = req or RaceStartRequest(index_name="race-soil")
     asyncio.create_task(run_race(req.index_name, req.data_file))
     return {"status": "started", "index": req.index_name}
 

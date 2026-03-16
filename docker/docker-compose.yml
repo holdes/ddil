@@ -1,0 +1,50 @@
+# DDIL Kit — DGX Spark (192.168.1.20)
+# ES GPU data node with cuVS-accelerated HNSW graph construction
+#
+# Start:  sg docker -c "docker compose up -d"
+# Stop:   sg docker -c "docker compose down"
+# Wipe:   sg docker -c "docker compose down -v"
+
+services:
+  es-gpu:
+    build:
+      context: ./es-gpu
+    container_name: es-gpu
+    environment:
+      - cluster.name=ddil-vineyard
+      - node.name=spark-gpu
+      - node.attr.accel=gpu
+      - discovery.seed_hosts=192.168.1.10:9300
+      - cluster.initial_master_nodes=spark-gpu,framework-cpu
+      - network.publish_host=192.168.1.20
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.license.self_generated.type=trial
+      - vectors.indexing.use_gpu=true
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms16g -Xmx16g"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es-gpu-data:/usr/share/elasticsearch/data
+      - /home/blakester205/miniforge3/envs/cuvs-build/lib:/opt/cuvs/lib:ro
+      - /usr/local/cuda/lib64:/usr/local/cuda/lib64:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    restart: unless-stopped
+
+volumes:
+  es-gpu-data:

@@ -14,7 +14,9 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { useAgentStream, PhaseInfo } from "./useAgentStream";
+import { useAgentStream } from "./useAgentStream";
+import type { PhaseInfo } from "./useAgentStream";
+import { useAppContext } from "../../App";
 
 const PHASE_ICONS: Record<string, React.ReactNode> = {
   sensors: <Activity size={16} />,
@@ -33,10 +35,12 @@ const PHASE_COLORS: Record<string, string> = {
 };
 
 const SUGGESTED_QUERIES = [
-  "What's the moisture status of block B3 and should I irrigate?",
-  "Analyze disease risk across all blocks",
-  "Give me a soil health report for the north vineyard",
-  "What should I prioritize this week for crop management?",
+  "Why is La Rivière (BLK-C) underperforming since 2022?",
+  "Why was the 2020 Clos du Vent Syrah our best wine despite the drought?",
+  "Which blocks are at risk for disease this season?",
+  "What's happening with potassium levels in Block C?",
+  "Compare Block E (Vieilles Vignes) consistency across all vintages",
+  "What should I prioritize this week across the estate?",
 ];
 
 function StatusBadge({ status }: { status: PhaseInfo["status"] }) {
@@ -268,10 +272,70 @@ function PhaseDetail({
   }
 }
 
+interface CachedConversation {
+  query: string;
+  blockId: string | null;
+  phases: PhaseInfo[];
+  results: Record<string, unknown> | null;
+  elapsed: number;
+  timestamp: number;
+}
+
+const CACHE_KEY = "vineyard-conversations";
+const MAX_CACHED = 20;
+
+function loadCachedConversations(): CachedConversation[] {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveConversation(conv: CachedConversation) {
+  const existing = loadCachedConversations();
+  const updated = [conv, ...existing].slice(0, MAX_CACHED);
+  localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
+}
+
 export function AgentChat() {
   const [input, setInput] = useState("");
+  const [lastQuery, setLastQuery] = useState("");
+  const [history, setHistory] = useState<CachedConversation[]>(loadCachedConversations);
+  const [viewingCached, setViewingCached] = useState<CachedConversation | null>(null);
   const { state, startStream, reset } = useAgentStream();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { pendingQuery, setPendingQuery, selectedBlockId } = useAppContext();
+
+  // Auto-fire pending query from dashboard/map navigation
+  useEffect(() => {
+    if (pendingQuery && !state.isRunning) {
+      const q = pendingQuery;
+      setPendingQuery(null);
+      setLastQuery(q);
+      setViewingCached(null);
+      reset();
+      setTimeout(() => startStream(q, selectedBlockId || undefined), 100);
+    }
+  }, [pendingQuery]);
+
+  // Cache completed conversations
+  useEffect(() => {
+    if (state.results && lastQuery) {
+      const conv: CachedConversation = {
+        query: lastQuery,
+        blockId: selectedBlockId,
+        phases: state.phases,
+        results: state.results,
+        elapsed: state.elapsed,
+        timestamp: Date.now(),
+      };
+      saveConversation(conv);
+      setHistory(loadCachedConversations());
+    }
+  }, [state.results]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -280,8 +344,15 @@ export function AgentChat() {
   const handleSubmit = (query?: string) => {
     const msg = query || input.trim();
     if (!msg || state.isRunning) return;
+    setLastQuery(msg);
+    setViewingCached(null);
     setInput("");
     startStream(msg);
+  };
+
+  const handleNewQuery = () => {
+    setViewingCached(null);
+    reset();
   };
 
   const progressPct = state.phases.reduce(
@@ -304,9 +375,9 @@ export function AgentChat() {
             {state.elapsed}s
           </div>
         )}
-        {state.results && (
+        {(state.results || viewingCached) && (
           <button
-            onClick={reset}
+            onClick={handleNewQuery}
             className="text-sm px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
           >
             New Query
@@ -328,22 +399,21 @@ export function AgentChat() {
 
       {/* Main content area */}
       <div ref={scrollRef} className="flex-1 overflow-auto min-h-0">
-        {!state.isRunning && !state.results ? (
-          /* Initial state — show suggested queries */
-          <div className="flex flex-col items-center justify-center h-full gap-6">
-            <div className="text-center">
+        {!state.isRunning && !state.results && !viewingCached ? (
+          /* Initial state — show suggested queries + history */
+          <div className="flex flex-col h-full gap-6 overflow-auto">
+            <div className="text-center pt-4">
               <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
                 <Leaf size={32} className="text-emerald-400" />
               </div>
               <h3 className="text-lg font-medium text-slate-300">
                 Ask about your vineyard
               </h3>
-              <p className="text-sm text-slate-500 mt-1 max-w-md">
-                The AI advisor runs a 5-phase pipeline: sensor data, historical
-                context, risk analysis, recommendations, and action plan.
+              <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
+                5-phase agentic pipeline: sensor data, historical context, risk analysis, recommendations, and action plan.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full max-w-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full max-w-2xl mx-auto">
               {SUGGESTED_QUERIES.map((q) => (
                 <button
                   key={q}
@@ -354,6 +424,75 @@ export function AgentChat() {
                 </button>
               ))}
             </div>
+
+            {/* Conversation History */}
+            {history.length > 0 && (
+              <div className="max-w-2xl mx-auto w-full">
+                <h4 className="text-xs text-slate-500 font-medium mb-2 flex items-center gap-1.5">
+                  <Clock size={12} />
+                  Recent Investigations
+                </h4>
+                <div className="space-y-1.5">
+                  {history.slice(0, 8).map((conv, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setViewingCached(conv)}
+                      className="w-full text-left p-3 rounded-lg bg-slate-900/30 border border-slate-800/50 hover:border-slate-700 transition-colors group"
+                    >
+                      <div className="text-sm text-slate-300 group-hover:text-slate-100 truncate">
+                        {conv.query}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-600">
+                        {conv.blockId && <span className="text-emerald-500/60">{conv.blockId}</span>}
+                        <span>{conv.elapsed}s</span>
+                        <span>{new Date(conv.timestamp).toLocaleDateString()}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : viewingCached ? (
+          /* Viewing a cached conversation */
+          <div className="space-y-2 max-w-2xl mx-auto">
+            <div className="mb-4 p-3 rounded-lg bg-slate-800/40 border border-slate-700">
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-slate-500 mb-1">Previous Investigation</div>
+                <div className="text-[10px] text-slate-600">{new Date(viewingCached.timestamp).toLocaleString()}</div>
+              </div>
+              <div className="text-sm text-slate-200">{viewingCached.query}</div>
+            </div>
+
+            {viewingCached.phases.map((phase, i) => (
+              <PhaseCard
+                key={phase.id}
+                phase={phase}
+                isLast={i === viewingCached.phases.length - 1}
+              />
+            ))}
+
+            {viewingCached.results && (
+              <div className="mt-4 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                <div className="flex items-center gap-2 text-emerald-400 text-sm font-medium mb-2">
+                  <CheckCircle2 size={16} />
+                  Analysis Complete &middot; {viewingCached.elapsed}s
+                </div>
+                <p className="text-sm text-slate-300">
+                  {(
+                    (viewingCached.results.action_plan as Record<string, unknown>)
+                      ?.summary as string
+                  ) || "Review each phase above for details."}
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={() => handleSubmit(viewingCached.query)}
+              className="w-full mt-3 py-2.5 text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
+            >
+              Re-run this investigation
+            </button>
           </div>
         ) : (
           /* Pipeline phases */
@@ -364,7 +503,7 @@ export function AgentChat() {
                 <div className="text-xs text-slate-500 mb-1">Your Question</div>
                 <div className="text-sm text-slate-200">
                   {/* Extract from first event or show generic */}
-                  {input || "Processing..."}
+                  {lastQuery || input || "Processing..."}
                 </div>
               </div>
             )}

@@ -2,71 +2,240 @@
 
 ## Project Context
 
-This is a portable, airgapped AI search and RAG system in a Pelican case ("DDIL Kit"). Two compute nodes, no cloud dependency. The kit is a **multi-demo appliance** — the public/messaging brand on the kiosk display is "Sovereign AI · Context Engineering Anywhere"; individual demos (e.g. the Vineyard Intelligence agronomist below) plug in as runtimes.
+Portable, airgapped AI search and RAG system in a Pelican Air 1615 case ("DDIL Kit"). Two compute nodes, no cloud dependency. The kit is a **multi-demo appliance** — the public/messaging brand on the kiosk display is "Sovereign AI · Context Engineering Anywhere"; individual demos (e.g. the Vineyard Intelligence agronomist below) plug in as runtimes.
 
 ### Hardware
-- **Framework Desktop** (192.168.1.10): Ryzen AI Max+ 395, 64GB, x86_64 — runs frontend, backend, embeddings, **and the kiosk display**
-- **DGX Spark** (192.168.1.20): GB10 Blackwell, 128GB unified memory, aarch64 — runs Elasticsearch, LLM inference, GPU vector indexing
+- **DGX Spark** (192.168.1.20): GB10 Blackwell, 128GB unified memory, aarch64 — ES GPU node, LLM inference, cuVS acceleration
+- **Framework Desktop** (192.168.1.10): Ryzen AI Max+ 395, 64GB, x86_64 — ES CPU node, Kibana, app frontend/backend (all Docker), **and the kiosk display**
 - **Touchscreen** (HDMI from Framework): DeskPi 7.84″ 1280×400 TFT in a 2U rack mount. **Reports a fake "RTK FHD" 1920×1080 EDID** — Linux/`xrandr` can force the real 1280×400 modeline; macOS cannot easily, so dev/QA on Mac uses Chrome DevTools at 1280×400.
-- **Network**: UniFi Express 7 (gateway .1), Switch Flex Mini, JetKVM for remote console
+- **Network**: UniFi Express 7 (gateway .1), Switch Flex Mini, 1Gbps Cat6a, JetKVM for remote console
 
-### Demo Goals
+### Demo Flow (5-10 minute timed, repeatable)
 
-**Act 1 — Indexing Race:** GPU vs CPU vector indexing on the **same DGX Spark**. Two ES 9.x instances:
-- Port 9200: `vectors.indexing.use_gpu: true` (cuVS GPU-accelerated HNSW)
-- Port 9201: `vectors.indexing.use_gpu: false` (standard CPU HNSW)
-- Race corpus: 615K+ pre-embedded vectors (500K soil + 100K environmental + 15K disease images)
-- `vectors.indexing.use_gpu` is a **node-level** setting, NOT per-index — hence two ES instances
+1. **Adventure Chooser** — "Choose Your Adventure": Vineyard Intelligence (ready) or SEC Findings (TBD)
+2. **Architecture Overview** — System diagram: 2 nodes, hardware specs, Elastic AI data flow
+3. **Race Intro** — Explains datasets (841K soil, 17K imagery, 10K NPK), GPU vs CPU comparison
+4. **Indexing Race** — 60-second staged race: GPU (cuVS/Blackwell) finishes in ~15s at 28,500 v/s, CPU grinds to ~55s at 4,200 v/s. Explainer appears mid-race. Auto-starts from intro.
+5. **Main App** — Dashboard → Vineyard Map → AI Agronomist → Search. Everything clickable → triggers agent investigation.
+6. **Reset Demo** button in sidebar returns to Adventure Chooser
 
-**Act 2 — Context Engineering Anywhere:** Agentic multi-phase advisor, search, RAG, live sensors, image similarity — the full Elastic AI story running disconnected.
+---
 
-### Architecture: Agentic Chat Pipeline
+## Architecture
 
-The AI Agronomist uses a **5-phase agentic pipeline** modeled on CanadaBuys bid analysis. Each phase streams progress via SSE (Server-Sent Events).
+### One ES Cluster: `ddil-vineyard`
 
-**Phases:**
-1. **Phase 0 — Sensor Snapshot:** ES-only query for current sensor readings (no LLM)
-2. **Phase 1 — Historical Context:** kNN vector search for similar past conditions + LLM pattern analysis
-3. **Phase 2 — Risk Analysis:** LLM assessment of disease, moisture, nutrient, temperature risks
-4. **Phase 3 — Crop Recommendation:** LLM generates prioritized management actions
-5. **Phase 4 — Action Plan:** LLM creates concrete task list with assignments and deadlines
+Single Elasticsearch 9.3.1 cluster spanning both machines (mixed aarch64 + x86_64).
 
-**SSE Format:** `event: <type>\ndata: <json>\n\n`
-- Events: `job_start`, `phase_start`, `phase_progress`, `phase_complete`, `phase_error`, `job_complete`, `job_error`
-- Endpoint: `POST /api/chat/agent/stream`
+| Node | Host | Arch | Role | Custom |
+|------|------|------|------|--------|
+| `spark-gpu` | 192.168.1.20:9200 | aarch64 | Data node, GPU | cuVS JAR (aarch64 build) |
+| `framework-cpu` | 192.168.1.10:9200 | x86_64 | Data node, CPU | Stock ES |
 
-**Key backend files:**
-- `demo/backend/app/services/phases/pipeline.py` — SSE orchestrator
-- `demo/backend/app/services/phases/phase0_sensors.py` through `phase4_action_plan.py` — individual phase runners
-- `demo/backend/app/services/phases/prompts.py` — LLM prompt templates
-- `demo/backend/app/models/agent_models.py` — Pydantic models for all phases
-- `demo/backend/app/services/llm.py` — Ollama LLM wrapper (`invoke_llm`, `invoke_llm_json`)
+- Cluster discovery via `discovery.seed_hosts` pointing at each other's :9300
+- `cluster.initial_master_nodes: spark-gpu,framework-cpu`
+- `network.publish_host` set on both for cross-Docker visibility
+- Node attribute `node.attr.accel: gpu|cpu` for shard allocation filtering
 
-**Key frontend files:**
-- `demo/frontend/src/components/AgentChat/AgentChat.tsx` — Phase card UI with live progress
-- `demo/frontend/src/components/AgentChat/useAgentStream.ts` — SSE consumer hook
+### Elasticsearch Indices
 
-### cuVS on aarch64 (CRITICAL)
+**App indices** (no allocation filtering):
 
-The ES GPU plugin (cuVS) is x86_64-only due to 3 soft gates in cuvs-java. See `CUVS-AARCH64-BUILD.md` for the full build guide. Key gates:
-1. `CuVSServiceProvider.java:65` — `os.arch.equals("amd64")` check
-2. `LoaderUtils.java:52` — hardcoded `linux_x64` path (bypass via `CUVS_JAVA_SO_PATH` env var)
-3. `pom.xml:180` — packaging path
+| Index | Docs | Size | Key Fields |
+|-------|------|------|------------|
+| `vineyard-soil` | 841,536 | 148MB | soil_moisture_pct, soil_temp_6in_c, electrical_conductivity, reading_vector (8-dim), block_id, timestamp |
+| `vineyard-imagery` | 17,151 | 179MB | classification, image_embedding (2048-dim), block_id, timestamp |
+| `vineyard-npk` | 10,032 | 1.6MB | soil_nitrogen_mgkg, soil_phosphorus_mgkg, soil_potassium_mgkg, ph, npk_vector (7-dim) |
+| `vineyard-harvest` | 175 | 34KB | grape_mass_kg, sugar_brix, quality_score, variety, vintage_year |
+| `vineyard-wine` | 106 | 34KB | alcohol, volatile_acidity, quality, variety, vintage_year |
 
-**First task on DGX Spark:** Run `scripts/validate-dgx-cuvs.sh` to check CUDA, compute capability, build tools.
+**Race indices** (allocation-filtered via `index.routing.allocation.require.accel`):
 
-### Tech Stack
-- Frontend: React + Vite + TypeScript + Tailwind (on Framework)
-- Backend: FastAPI + elasticsearch-py + httpx (on Framework)
-- Search: Elasticsearch 9.x with dense_vector fields, hybrid RRF retrieval
-- Embeddings: Ollama nomic-embed-text (on Framework, port 11434)
-- LLM: Ollama llama3.1:70b (on DGX Spark, port 11434)
-- Sensors: RS485 Modbus soil probes, NPK sensors (live data)
-- **Kiosk** (separate React/Vite/TS/Tailwind app at `demo/kiosk/`, runs in Chromium on the touchscreen, port 3100)
+| Index | Pinned To | Purpose |
+|-------|-----------|---------|
+| `race-soil-gpu` | spark-gpu | GPU side of race |
+| `race-soil-cpu` | framework-cpu | CPU side of race |
+| `race-npk-gpu/cpu` | respective | NPK race pair |
+| `race-imagery-gpu/cpu` | respective | Imagery race pair |
 
-### Touchscreen Kiosk (Sovereign AI Shell)
+### Inference Endpoints (registered in ES)
 
-The 1280×400 panel runs an **independent React app** at `demo/kiosk/` — a meta-shell for the kit, **separate from the main demo frontend**. It's the "always-on" display: branding, system health, machine telemetry, easter egg. Demos themselves run on the main tablet/PC, not here.
+```
+PUT _inference/text_embedding/ollama-embeddings
+  → Ollama Jina v4 at 192.168.1.20:11434/v1/embeddings (2048 dims)
+
+PUT _inference/chat_completion/ollama-chat
+  → Ollama GPT-OSS 120B at 192.168.1.20:11434/v1/chat/completions
+```
+
+### Elastic Agent Builder (Kibana)
+
+**LLM Connector**: `Ollama GPT-OSS 120B` (.gen-ai, OpenAI-compatible → DGX :11434)
+
+**Custom Tools** (ES|QL):
+- `vineyard-sensor-snapshot` — Latest soil readings for a block
+- `vineyard-npk-profile` — Latest NPK nutrient readings
+- `vineyard-npk-trend` — Quarterly K/N/pH trends (detects potassium cliff)
+- `vineyard-harvest-history` — Vintage yield/quality by year
+- `vineyard-disease-scan` — Disease classification counts from imagery
+
+**Agent**: `vineyard-advisor` — Uses all 5 custom tools + platform.core.search + platform.core.execute_esql
+
+### Ollama (native on DGX Spark, port 11434)
+- `gpt-oss:120b` — 65GB MXFP4, ~45 tok/s (chat completion)
+- `hf.co/jinaai/jina-embeddings-v4-text-retrieval-GGUF:Q8_0` — 4.6GB (text embedding, 2048 dims)
+
+---
+
+## Vineyard Narrative: Domaine de la Cote Cachee
+
+Fictional 22-acre premium wine estate, Walla Walla AVA, Washington.
+Center coordinates: 46.015N, 118.38W (rural farmland south of town).
+
+### Blocks
+
+| Block | Name | Variety | Story Role |
+|-------|------|---------|------------|
+| BLK-A | Les Pierres | Cabernet Sauvignon | Star performer — south-facing, loess over basalt |
+| BLK-B | Clos du Vent | Syrah | Drought-vulnerable — wind-exposed ridge, shallow rocky |
+| BLK-C | La Riviere | Merlot | **CRITICAL: drainage failure since mid-2022**, K crashed 210 to 50 mg/kg |
+| BLK-D | Le Jardin | Chardonnay | Disease-prone — NE-facing, sandy loam, powdery mildew in wet years |
+| BLK-E | Vieilles Vignes | Cabernet Franc | Old vine resilience — 35yo vines, volcanic soil, remarkably consistent |
+| BLK-F | Le Plateau | Riesling | Cool climate — highest elevation (320m), limestone |
+
+### Baked-In Stories (AI discovers these)
+1. **Block C drainage failure** — mid-2022 onset, K depletion, persistent waterlogging, EC rising
+2. **2020 drought** — Block B hit hardest, but best Syrah wine (concentration effect)
+3. **2022 wet spring** — disease outbreak in Blocks C and D
+4. **Old vine resilience** — Block E buffers all weather extremes
+5. **Potassium cliff** — leading indicator in Block C NPK trend data
+
+### Data Generation
+All data from single causal model: weather to soil to NPK to disease to harvest to wine.
+Generator: `python3 -m demo.datagen.generate` from `~/ddil/` directory.
+
+- `demo/datagen/config.py` — Vineyard definition, blocks, soil types, weather events
+- `demo/datagen/weather.py` — 8-year daily weather model (2018-2025)
+- `demo/datagen/soil.py` — Soil moisture driven by weather + block properties
+- `demo/datagen/npk.py` — NPK nutrients with K depletion story
+- `demo/datagen/harvest.py` — Harvest yield/wine quality from growing season
+- `demo/datagen/generate.py` — Orchestrator
+
+Output: `demo/data/synthetic/` (JSONL files for bulk indexing).
+Grape image embeddings: re-tagged from PlantVillage dataset with block/timestamp context.
+
+---
+
+## Deployment
+
+### DGX Spark (192.168.1.20)
+
+```bash
+cd ~/ddil/docker
+sg docker -c "docker compose up -d"   # ES GPU with cuVS
+# Ollama runs native via systemd
+```
+
+Docker compose: `docker/docker-compose.yml`
+- `es-gpu`: Custom ES 9.3.1 image with aarch64 cuVS JAR
+  - Bind mounts: conda cuVS libs at /opt/cuvs/lib, CUDA at /usr/local/cuda/lib64
+  - GPU passthrough via NVIDIA Container Toolkit
+  - `vectors.indexing.use_gpu=true`
+
+### Framework Desktop (192.168.1.10)
+
+```bash
+cd ~/demo
+docker compose up -d   # ES CPU, Kibana, backend, frontend
+```
+
+Docker compose: `demo/docker-compose.yml`
+- `es-cpu`: Stock ES 9.3.1 (CPU HNSW, `vectors.indexing.use_gpu=false`)
+- `kibana`: 9.3.1 with encryption keys for Agent Builder/Workflows
+- `backend`: FastAPI (Python 3.12, uvicorn) — proxies to Kibana Agent Builder
+- `frontend`: React 19 + Vite 8 + Tailwind 4 + Leaflet
+
+Ports:
+- :3000 — Frontend (Vite dev server)
+- :8000 — Backend API
+- :5601 — Kibana
+- :9200 — ES CPU node
+- :9300 — ES transport
+
+### Data Indexing
+
+```bash
+# From DGX Spark (has direct ES access):
+bash demo/scripts/bulk-index-synthetic.sh http://localhost:9200
+```
+
+### Map Tiles
+Pre-downloaded CartoDB Dark Matter tiles at `demo/data/tiles/` (zoom 14-17).
+Served by backend at `/tiles/{z}/{x}/{y}.png`.
+
+---
+
+## Backend Architecture
+
+### Chat Pipeline (hybrid Agent Builder + Python)
+- **Phase 0 (Sensors)**: Python — direct ES query with correct field names, instant
+- **Phase 1 (Historical)**: Python — kNN vector search on reading_vector + LLM analysis
+- **Phase 2 (Risk)**: Python — LLM risk assessment with heartbeat streaming
+- **Phase 3 (Recommendation)**: Python — variety-specific LLM recommendations
+- **Phase 4 (Action Plan)**: Python — concrete task assignments from LLM
+- Agent Builder called for enrichment with real ES|QL tool queries
+
+All phases stream SSE events to frontend. Phases 2-4 run sequentially with heartbeats.
+
+### Race (staged simulation)
+- Simulates 841,536 vector indexing
+- GPU path: ~28,500 v/s, completes ~15s, 48ms merge
+- CPU path: ~4,200 v/s, completes ~55s, 340ms merge
+- Backend: `demo/backend/app/services/indexer.py`
+
+### Key API Endpoints
+- `GET /api/vineyard/config` — Block definitions + polygons for map
+- `GET /api/vineyard/blocks/{id}/summary` — Latest sensor/NPK/harvest for a block
+- `GET /api/vineyard/dashboard` — Vineyard-wide KPIs
+- `POST /api/chat/agent/stream` — SSE agentic pipeline
+- `POST /api/race/start` — Start indexing race
+- `WS /api/race/status` — WebSocket race metrics stream
+- `GET /tiles/{z}/{x}/{y}.png` — Map tiles
+
+---
+
+## Frontend Components
+
+| Component | Path | Purpose |
+|-----------|------|---------|
+| AdventureChooser | `src/components/AdventureChooser/` | Landing screen — Vineyard vs SEC |
+| Architecture | `src/components/Architecture/` | System diagram + data flow |
+| RaceIntro | `src/components/RaceIntro/` | Dataset explainer + GPU vs CPU comparison |
+| RaceDashboard | `src/components/RaceDashboard/` | Live race with explainer panel |
+| Dashboard | `src/components/Dashboard/` | Vineyard KPIs, block cards, mini Leaflet map, alerts |
+| VineyardMap | `src/components/VineyardMap/` | Full Leaflet map with block polygons + detail panel |
+| AgentChat | `src/components/AgentChat/` | 5-phase agent pipeline with conversation caching |
+| SearchPlayground | `src/components/SearchPlayground/` | Hybrid search (BM25/semantic/RRF) |
+| LeafScanner | `src/components/LeafScanner/` | Image similarity search |
+| SystemOverview | `src/components/SystemOverview/` | Hardware + service status |
+
+### App Context (shared state)
+- `selectedBlockId` — currently selected block (flows to agent chat)
+- `investigateBlock(blockId, query?)` — navigates to agent with pre-filled query
+- `investigate(query)` — fires agent query
+- `navigateTo(scene)` — scene navigation
+- `pendingQuery` — auto-consumed by AgentChat on mount
+- `resetDemo()` — returns to adventure chooser, clears conversation cache
+
+### Conversation Caching
+Agent conversations cached in localStorage (`vineyard-conversations`), max 20.
+Viewable from "Recent Investigations" in AgentChat initial state.
+
+---
+
+## Touchscreen Kiosk (Sovereign AI Shell)
+
+The 1280×400 panel runs an **independent React app** at `demo/kiosk/` — a meta-shell for the kit, **separate from the main demo frontend**. It's the "always-on" display: branding, system health, machine telemetry, easter egg. Demos themselves run on the main tablet/PC, not here. Runs in Chromium on the touchscreen attached to the Framework, port 3100.
 
 **Modes:**
 1. **Boot Diagnostics** — animated startup probe of ES-GPU/CPU, Ollama LLM/embed, backend, sensor bus. Auto-advances to Idle.
@@ -87,47 +256,33 @@ The 1280×400 panel runs an **independent React app** at `demo/kiosk/` — a met
 
 **Deploy (Framework, headless Ubuntu):** `cd demo/kiosk && npm run build && sudo ./deploy/install.sh`. The installer creates a `ddil` user, writes two systemd units (`ddil-kiosk-server` serves `dist/` on :3100; `ddil-kiosk` runs startx + Chromium kiosk on tty7), and `kiosk-launch.sh` registers a 1280×400 xrandr modeline before launching. Full guide: `demo/kiosk/deploy/DEPLOY.md`.
 
-### Key Files
-- `DEMO-PLAN.md` — Full implementation plan with wireframes
-- `SPARK-SETUP.md` — **Complete DGX Spark setup instructions (START HERE on Spark)**
-- `DATASET-STRATEGY.md` — 8 datasets, index schemas, data flow
-- `CUVS-AARCH64-BUILD.md` — Step-by-step cuVS build for aarch64
-- `scripts/validate-dgx-cuvs.sh` — Run this first on DGX Spark
-- `demo/backend/` — FastAPI app (config points to DGX ports)
-- `demo/frontend/` — React app with 7 scene components + AgentChat (the Vineyard demo)
-- `demo/kiosk/` — **Touchscreen kiosk app (Sovereign AI shell)** — see "Touchscreen Kiosk" section above; dev guide in `demo/kiosk/README.md`, deploy guide in `demo/kiosk/deploy/DEPLOY.md`
-- `demo/scripts/` — Dataset download, preprocess, index setup
+---
 
-### DGX Spark Tasks (Priority Order)
+## Config (demo/backend/app/config.py)
 
-> **Read `SPARK-SETUP.md` first** — it has copy-pasteable commands for everything below.
-
-1. **Docker Compose up** — `demo/docker-compose.yml` defines all 3 services:
-   - `es-gpu` on port 9200 with `vectors.indexing.use_gpu: true` + GPU passthrough
-   - `es-cpu` on port 9201 with `vectors.indexing.use_gpu: false` (no GPU)
-   - `ollama` on port 11434 with GPU passthrough
-   - Run: `sudo sysctl -w vm.max_map_count=262144 && docker compose up -d`
-2. **Pull Ollama models** — `docker exec ollama ollama pull llama3.1:70b && docker exec ollama ollama pull nomic-embed-text`
-3. **Apply Enterprise license** — `demo/license.json` included in repo, apply to both instances with `PUT /_license?acknowledge=true`
-4. **Run `scripts/validate-dgx-cuvs.sh`** — assess cuVS build feasibility
-5. **Create indices** — run `demo/scripts/setup-indices.sh` against both ES instances
-6. **Download & preprocess data** — run scripts in `demo/scripts/` (requires internet, do before airgap)
-7. **Bulk ingest data** — load JSONL files into both ES instances
-8. **Attempt cuVS aarch64 build** (stretch goal, see `CUVS-AARCH64-BUILD.md`)
-
-### Framework Desktop Tasks
-1. Frontend dev server: `cd demo/frontend && npm run dev` (port 3000)
-2. Backend: `cd demo/backend && python3 -m uvicorn app.main:app --port 8001`
-3. Vite proxy forwards `/api/*` to backend at `:8001`, which reaches ES/Ollama on Spark
-4. **Kiosk on the touchscreen:** `cd demo/kiosk && npm run build && sudo ./deploy/install.sh` — installs systemd units that auto-launch Chromium kiosk on tty7 with the correct 1280×400 modeline. After install, `journalctl -u ddil-kiosk -f` for live logs.
-
-### Config (demo/backend/app/config.py)
 ```
-DGX_SPARK_HOST = 192.168.1.20
-ES_GPU_PORT = 9200
-ES_CPU_PORT = 9201
-OLLAMA_EMBED_URL = http://192.168.1.10:11434  (Framework, local embeddings)
-OLLAMA_LLM_URL = http://192.168.1.20:11434    (Spark, GPU inference)
-LLM_MODEL = llama3.1:70b
+ES_MAIN_URL = http://es-cpu:9200          (Framework CPU node, local to backend container)
+ES_GPU_URL = http://192.168.1.20:9200     (DGX Spark GPU node)
+OLLAMA_EMBED_URL = http://192.168.1.20:11434
+OLLAMA_LLM_URL = http://192.168.1.20:11434
+LLM_MODEL = gpt-oss:120b
 EMBED_MODEL = nomic-embed-text
+DATA_DIR = /data                          (container mount from ./data/preprocessed)
 ```
+
+---
+
+## TODO / Next Steps
+
+### SEC Adventure (Adventure 2)
+- EDGAR dataset subset needed (user to provide)
+- Same app shell, different theme/data/prompts
+- Need: SEC-specific Agent Builder tools, index mappings, data generator
+
+### Enhancements
+- Elastic Workflows integration (YAML-based automation, tech preview in 9.3)
+- MCP server exposure for external agent access
+- semantic_text fields for text-based semantic search
+- Real cuVS race (not staged) once both nodes have data
+- Timeline slider for historical data scrubbing
+- NPK radar charts, yield trend charts

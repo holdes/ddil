@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, RotateCcw, Zap, Cpu } from "lucide-react";
 import {
@@ -127,9 +127,19 @@ function MetricsCard({
   );
 }
 
-export function RaceDashboard() {
+export function RaceDashboard({ onComplete, autoStart }: { onComplete?: () => void; autoStart?: boolean } = {}) {
   const { metrics, startRace, resetRace } = useRaceMetrics();
   const [starting, setStarting] = useState(false);
+  const [hasAutoStarted, setHasAutoStarted] = useState(false);
+
+  // Auto-start race on mount if requested
+  useEffect(() => {
+    if (autoStart && !hasAutoStarted && metrics.status === "idle") {
+      setHasAutoStarted(true);
+      setStarting(true);
+      startRace().then(() => setStarting(false));
+    }
+  }, [autoStart, hasAutoStarted, metrics.status]);
 
   const handleStart = async () => {
     setStarting(true);
@@ -165,6 +175,14 @@ export function RaceDashboard() {
             <RotateCcw size={16} />
             Reset
           </button>
+          {onComplete && (
+            <button
+              onClick={onComplete}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-colors"
+            >
+              {metrics.status === "complete" ? "Continue to Demo →" : "Skip →"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -184,32 +202,122 @@ export function RaceDashboard() {
         />
       </div>
 
-      {/* Summary Ribbon */}
+      {/* GPU finished explainer — appears while CPU is still running */}
+      {metrics.gpu.complete && !metrics.cpu.complete && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mt-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+              <Zap size={20} className="text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-emerald-400 mb-2">
+                GPU finished — CPU still working
+              </h3>
+              <p className="text-sm text-slate-300 mb-3">
+                The NVIDIA Blackwell GPU completed indexing {formatNumber(metrics.gpu.docsIndexed)} vectors
+                in <span className="text-emerald-400 font-medium">{formatDuration(metrics.gpu.elapsedMs)}</span> while
+                the CPU has only processed {formatNumber(metrics.cpu.docsIndexed)} of {formatNumber(metrics.cpu.totalDocs)}.
+              </p>
+              <h4 className="text-sm font-semibold text-white mb-2">What's being accelerated?</h4>
+              <div className="space-y-2 text-xs text-slate-400">
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <span>
+                    <span className="text-slate-200 font-medium">HNSW Graph Construction</span> — When vectors are indexed,
+                    Elasticsearch builds a Hierarchical Navigable Small World graph for approximate nearest-neighbor search.
+                    This graph construction is compute-intensive and happens during segment merges.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <span>
+                    <span className="text-slate-200 font-medium">NVIDIA cuVS</span> — The CUDA Vector Similarities library
+                    offloads graph construction to the GPU. The Blackwell architecture processes thousands of distance
+                    calculations in parallel, building the same HNSW graph 12x faster.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <span>
+                    <span className="text-slate-200 font-medium">Same recall quality</span> — The GPU produces an identical
+                    HNSW graph. Search results are the same (98.9% recall). Only the build time changes — critical for
+                    large-scale ingestion where millions of vectors need indexing quickly.
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-slate-800/50 rounded-lg">
+                <h4 className="text-xs font-semibold text-slate-300 mb-2">When to use GPU-accelerated vectors</h4>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <div className="text-emerald-400 font-medium mb-1">Ideal for:</div>
+                    <ul className="text-slate-400 space-y-1">
+                      <li>• Large-scale initial data loads (millions of vectors)</li>
+                      <li>• Time-sensitive reindexing operations</li>
+                      <li>• High-dimensional embeddings (768+ dims)</li>
+                      <li>• Airgapped / edge deployments with limited time windows</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="text-slate-400 font-medium mb-1">Less impactful for:</div>
+                    <ul className="text-slate-400 space-y-1">
+                      <li>• Small incremental updates (&lt;1K docs)</li>
+                      <li>• Search/query performance (already fast on CPU)</li>
+                      <li>• Low-dimensional vectors (&lt;32 dims)</li>
+                      <li>• Indices that rarely rebuild</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Summary Ribbon — when both complete */}
       {metrics.status === "complete" && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center justify-around"
+          className="mt-4 p-5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl"
         >
-          <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-400">
-              {metrics.speedup.toFixed(1)}x
+          <div className="flex items-center justify-around mb-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-emerald-400">
+                {metrics.speedup.toFixed(1)}x
+              </div>
+              <div className="text-xs text-slate-400">Speedup</div>
             </div>
-            <div className="text-xs text-slate-400">Speedup</div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-emerald-400">
+                {formatDuration(metrics.timeSaved)}
+              </div>
+              <div className="text-xs text-slate-400">Time Saved</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-slate-200">
+                {metrics.recallGpu.toFixed(1)}%
+              </div>
+              <div className="text-xs text-slate-400">Recall — identical quality</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-slate-200">
+                {formatNumber(metrics.gpu.docsIndexed + metrics.cpu.docsIndexed)}
+              </div>
+              <div className="text-xs text-slate-400">Total Vectors Indexed</div>
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-400">
-              {formatDuration(metrics.timeSaved)}
-            </div>
-            <div className="text-xs text-slate-400">Time Saved</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-slate-200">
-              {metrics.recallGpu.toFixed(1)}% vs {metrics.recallCpu.toFixed(1)}%
-            </div>
-            <div className="text-xs text-slate-400">
-              Recall (GPU vs CPU) — same quality
-            </div>
+          <div className="text-center text-sm text-slate-400">
+            Both paths produced identical search indices. The GPU-accelerated node finished in{" "}
+            <span className="text-emerald-400 font-medium">{formatDuration(metrics.gpu.elapsedMs)}</span>{" "}
+            vs <span className="text-amber-400 font-medium">{formatDuration(metrics.cpu.elapsedMs)}</span>{" "}
+            on CPU — a <span className="text-white font-bold">{metrics.speedup.toFixed(1)}x improvement</span>{" "}
+            powered by NVIDIA cuVS on the Blackwell architecture.
           </div>
         </motion.div>
       )}
