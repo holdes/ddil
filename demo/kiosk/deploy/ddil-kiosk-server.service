@@ -1,0 +1,20 @@
+[Unit]
+Description=DDIL Kiosk static server (built /dist on :3100)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ddil
+Group=ddil
+WorkingDirectory=/opt/ddil-kiosk/dist
+# python3's built-in http.server is on every Ubuntu by default — no extra deps.
+# Bind to 127.0.0.1 only since the kiosk Chromium runs on the same host.
+ExecStart=/usr/bin/python3 -m http.server 3100 --bind 127.0.0.1
+Restart=always
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

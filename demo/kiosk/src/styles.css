@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-elastic-pink: #f04e98;
+  --color-elastic-yellow: #fec514;
+  --color-elastic-teal: #00bfb3;
+  --color-elastic-blue: #1ba9f5;
+  --color-elastic-ink: #1d1e24;
+  --color-nvidia-green: #76b900;
+  --color-bg: #0b0d12;
+  --color-bg-elev: #12151c;
+  --color-line: #1f242e;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+}
+
+/* The kiosk frame: scales 1280x400 design to whatever viewport we're in. */
+.kiosk-frame {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg);
+}
+.kiosk-stage {
+  width: 1280px;
+  height: 400px;
+  position: relative;
+  background: var(--color-bg);
+  color: white;
+  overflow: hidden;
+  transform-origin: center center;
+}
+
+/* Subtle scanline + vignette to give the screen a "device" feel */
+.kiosk-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.015) 0px,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.cursor-blink::after {
+  content: "▌";
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s steps(1) infinite;
+  color: var(--color-elastic-teal);
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}

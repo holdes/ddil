@@ -1,12 +1,13 @@
-# DDIL Vineyard Intelligence Demo Kit
+# DDIL Demo Kit · Sovereign AI
 
 ## Project Context
 
-This is a portable, airgapped AI search and RAG system in a Pelican case ("DDIL Kit"). Two compute nodes, no cloud dependency.
+This is a portable, airgapped AI search and RAG system in a Pelican case ("DDIL Kit"). Two compute nodes, no cloud dependency. The kit is a **multi-demo appliance** — the public/messaging brand on the kiosk display is "Sovereign AI · Context Engineering Anywhere"; individual demos (e.g. the Vineyard Intelligence agronomist below) plug in as runtimes.
 
 ### Hardware
-- **Framework Desktop** (192.168.1.10): Ryzen AI Max+ 395, 64GB, x86_64 — runs frontend, backend, embeddings
+- **Framework Desktop** (192.168.1.10): Ryzen AI Max+ 395, 64GB, x86_64 — runs frontend, backend, embeddings, **and the kiosk display**
 - **DGX Spark** (192.168.1.20): GB10 Blackwell, 128GB unified memory, aarch64 — runs Elasticsearch, LLM inference, GPU vector indexing
+- **Touchscreen** (HDMI from Framework): DeskPi 7.84″ 1280×400 TFT in a 2U rack mount. **Reports a fake "RTK FHD" 1920×1080 EDID** — Linux/`xrandr` can force the real 1280×400 modeline; macOS cannot easily, so dev/QA on Mac uses Chrome DevTools at 1280×400.
 - **Network**: UniFi Express 7 (gateway .1), Switch Flex Mini, JetKVM for remote console
 
 ### Demo Goals
@@ -61,6 +62,30 @@ The ES GPU plugin (cuVS) is x86_64-only due to 3 soft gates in cuvs-java. See `C
 - Embeddings: Ollama nomic-embed-text (on Framework, port 11434)
 - LLM: Ollama llama3.1:70b (on DGX Spark, port 11434)
 - Sensors: RS485 Modbus soil probes, NPK sensors (live data)
+- **Kiosk** (separate React/Vite/TS/Tailwind app at `demo/kiosk/`, runs in Chromium on the touchscreen, port 3100)
+
+### Touchscreen Kiosk (Sovereign AI Shell)
+
+The 1280×400 panel runs an **independent React app** at `demo/kiosk/` — a meta-shell for the kit, **separate from the main demo frontend**. It's the "always-on" display: branding, system health, machine telemetry, easter egg. Demos themselves run on the main tablet/PC, not here.
+
+**Modes:**
+1. **Boot Diagnostics** — animated startup probe of ES-GPU/CPU, Ollama LLM/embed, backend, sensor bus. Auto-advances to Idle.
+2. **Idle** — 2-page swipe carousel.
+   - *Page 1 — Branding:* Elastic ↔ DGX Spark identity flanking a centered QR (locally-generated SVG via `qrcode.react`, points to `elastic.co/geospatial`), "Sovereign AI / Context Engineering Anywhere" headline, capability ticker.
+   - *Page 2 — Diagnostics:* live (mock) Framework + DGX Spark hardware cards (CPU/GPU/RAM/VRAM bars, temp, uptime, IP pills) + bottom strip (Network · WAN · Display · Console).
+3. **Easter Egg — INDEXER** *(hidden)* — Elastic-themed snake game. **Triggered by tapping the Elastic horizontal logo on the Branding page 5× in 3s.** ESC to exit. Dev hotkey: `3`.
+
+**Controls:**
+- Public-facing: **MODE ▸** button (cycles Boot ↔ Idle), swipe / arrow keys / page-dot buttons within Idle.
+- Dev hotkeys: `1`/`2`/`3` jump to mode; **`** toggles a debug HUD (`?debug=1` also works) showing viewport, scale, DPR, letterbox.
+
+**Stack independence:** The kiosk has its own `package.json` and is fully self-contained. `src/lib/health.ts` has a `MOCK = true` flag — flip to `false` once the demo backend on Framework is up; endpoints are pre-wired to `192.168.1.20:9200/9201/11434` and `/api/...`.
+
+**Layout constraint:** Designed to a fixed 1280×400 stage scaled via `useFitScale`. Don't introduce viewport-relative sizes — keep everything in pixels relative to the 3.2:1 stage. Status bar is 28px tall (`top-7` not `pt-7` — absolute children ignore padding).
+
+**Dev (any machine):** `cd demo/kiosk && npm install && npm run dev` → http://localhost:3100. Use Chrome DevTools at 1280×400 for pixel-accurate QA.
+
+**Deploy (Framework, headless Ubuntu):** `cd demo/kiosk && npm run build && sudo ./deploy/install.sh`. The installer creates a `ddil` user, writes two systemd units (`ddil-kiosk-server` serves `dist/` on :3100; `ddil-kiosk` runs startx + Chromium kiosk on tty7), and `kiosk-launch.sh` registers a 1280×400 xrandr modeline before launching. Full guide: `demo/kiosk/deploy/DEPLOY.md`.
 
 ### Key Files
 - `DEMO-PLAN.md` — Full implementation plan with wireframes
@@ -69,7 +94,8 @@ The ES GPU plugin (cuVS) is x86_64-only due to 3 soft gates in cuvs-java. See `C
 - `CUVS-AARCH64-BUILD.md` — Step-by-step cuVS build for aarch64
 - `scripts/validate-dgx-cuvs.sh` — Run this first on DGX Spark
 - `demo/backend/` — FastAPI app (config points to DGX ports)
-- `demo/frontend/` — React app with 7 scene components + AgentChat
+- `demo/frontend/` — React app with 7 scene components + AgentChat (the Vineyard demo)
+- `demo/kiosk/` — **Touchscreen kiosk app (Sovereign AI shell)** — see "Touchscreen Kiosk" section above; dev guide in `demo/kiosk/README.md`, deploy guide in `demo/kiosk/deploy/DEPLOY.md`
 - `demo/scripts/` — Dataset download, preprocess, index setup
 
 ### DGX Spark Tasks (Priority Order)
@@ -93,6 +119,7 @@ The ES GPU plugin (cuVS) is x86_64-only due to 3 soft gates in cuvs-java. See `C
 1. Frontend dev server: `cd demo/frontend && npm run dev` (port 3000)
 2. Backend: `cd demo/backend && python3 -m uvicorn app.main:app --port 8001`
 3. Vite proxy forwards `/api/*` to backend at `:8001`, which reaches ES/Ollama on Spark
+4. **Kiosk on the touchscreen:** `cd demo/kiosk && npm run build && sudo ./deploy/install.sh` — installs systemd units that auto-launch Chromium kiosk on tty7 with the correct 1280×400 modeline. After install, `journalctl -u ddil-kiosk -f` for live logs.
 
 ### Config (demo/backend/app/config.py)
 ```

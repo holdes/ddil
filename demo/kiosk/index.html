@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/elastic-logo.svg" />
+    <meta name="viewport" content="width=1280, initial-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Sovereign AI · Demo Kit</title>
+    <style>
+      html, body, #root {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background: #0b0d12;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        cursor: none;
+      }
+      /* Show cursor only when ?dev=1 is in the URL */
+      body.dev-cursor, body.dev-cursor * { cursor: auto !important; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if (new URLSearchParams(location.search).has('dev')) {
+        document.body.classList.add('dev-cursor');
+      }
+    </script>
+  </body>
+</html>
