@@ -12,32 +12,49 @@
 set -euo pipefail
 
 URL="${KIOSK_URL:-http://localhost:3100/}"
-MODE_NAME="1280x400_60.00"
-# cvt 1280 400 60  →  pixel clock 38.50 MHz · standard CVT timings
+PREFERRED_W="${KIOSK_W:-1280}"
+PREFERRED_H="${KIOSK_H:-400}"
+MODE_NAME="${PREFERRED_W}x${PREFERRED_H}_60.00"
+# cvt 1280 400 60  →  pixel clock 38.50 MHz · standard CVT timings.
+# Only used as a fallback if the panel doesn't already advertise the desired
+# mode — once amdgpu reads a real EDID, the panel advertises 1280x400 itself
+# and we skip the custom modeline to avoid pixel-clock mismatches.
 MODELINE=(38.50 1280 1304 1432 1616 400 403 413 423 -hsync +vsync)
 
-# 1) Pick the HDMI output the touchscreen is on. If you have multiple HDMI
-#    outputs, override with KIOSK_OUTPUT=HDMI-2 in the systemd unit.
+# 1) Pick the connected output the touchscreen is on. If you have multiple
+#    outputs, override with KIOSK_OUTPUT=<name> in the systemd unit.
 OUTPUT="${KIOSK_OUTPUT:-}"
 if [[ -z "$OUTPUT" ]]; then
-    OUTPUT=$(xrandr | awk '/ connected/ && /^HDMI/ {print $1; exit}')
+    OUTPUT=$(xrandr | awk '/ connected/ {print $1; exit}')
 fi
 if [[ -z "$OUTPUT" ]]; then
-    echo "kiosk-launch: no connected HDMI output found" >&2
+    echo "kiosk-launch: no connected output found" >&2
     xrandr >&2
     exit 1
 fi
 echo "kiosk-launch: using output $OUTPUT"
 
-# 2) Register the modeline (idempotent — newmode fails harmlessly if it exists)
-xrandr --newmode "$MODE_NAME" "${MODELINE[@]}" 2>/dev/null || true
-xrandr --addmode "$OUTPUT" "$MODE_NAME" 2>/dev/null || true
+# 2) If the panel already advertises the desired mode (real EDID), use it
+#    directly. Otherwise inject the CVT modeline.
+if xrandr | awk -v out="$OUTPUT" '$1==out{found=1; next} found && /[0-9]+x[0-9]+/{print $1}' \
+   | grep -qx "${PREFERRED_W}x${PREFERRED_H}"; then
+    echo "kiosk-launch: panel advertises ${PREFERRED_W}x${PREFERRED_H} natively"
+    NATIVE_MODE_NAME="${PREFERRED_W}x${PREFERRED_H}"
+else
+    echo "kiosk-launch: injecting CVT modeline $MODE_NAME"
+    xrandr --newmode "$MODE_NAME" "${MODELINE[@]}" 2>/dev/null || true
+    xrandr --addmode "$OUTPUT" "$MODE_NAME" 2>/dev/null || true
+    NATIVE_MODE_NAME="$MODE_NAME"
+fi
 
-# 3) Apply it. If the panel rejects the modeline you'll see a blank screen
-#    or a "configure crtc" error — fall back to the panel's preferred mode.
-if ! xrandr --output "$OUTPUT" --mode "$MODE_NAME"; then
-    echo "kiosk-launch: 1280x400 rejected, falling back to preferred mode" >&2
-    xrandr --output "$OUTPUT" --auto
+# 3) Cycle the output before applying the mode so the panel re-handshakes.
+#    On some panels (DeskPi RTK chip) the first mode-set after X start lands
+#    on a black frame — toggling forces a fresh HPD/EDID exchange.
+xrandr --output "$OUTPUT" --off || true
+sleep 1
+if ! xrandr --output "$OUTPUT" --mode "$NATIVE_MODE_NAME" 2>&1; then
+    echo "kiosk-launch: $NATIVE_MODE_NAME rejected, falling back to preferred" >&2
+    xrandr --output "$OUTPUT" --auto || true
 fi
 
 # 4) Map touch input to the kiosk output (so taps land on the right pixel
@@ -48,15 +65,15 @@ TOUCH_ID=$(xinput list --id-only 2>/dev/null | while read id; do
             echo "$id"; break
         fi
     fi
-done | head -1)
-if [[ -n "$TOUCH_ID" ]]; then
+done | head -1) || true
+if [[ -n "${TOUCH_ID:-}" ]]; then
     xinput map-to-output "$TOUCH_ID" "$OUTPUT" || true
 fi
 
-# 5) Kill power management so the kiosk never sleeps
-xset s off
-xset s noblank
-xset -dpms
+# 5) Kill power management so the kiosk never sleeps (best-effort)
+xset s off || true
+xset s noblank || true
+xset -dpms || true
 
 # 6) Hide the cursor unless a USB keyboard moves it (handy for debugging)
 if command -v unclutter >/dev/null 2>&1; then

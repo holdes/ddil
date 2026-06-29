@@ -64,6 +64,7 @@ install -m 644 "$DEPLOY_DIR/ddil-kiosk-server.service" /etc/systemd/system/
 install -m 644 "$DEPLOY_DIR/ddil-kiosk.service"        /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now ddil-kiosk-server.service
+systemctl enable ddil-kiosk.service
 systemctl restart ddil-kiosk.service
 
 cat <<EOF
