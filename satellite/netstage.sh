@@ -12,6 +12,9 @@
 #
 # WHAT IT DOES
 #
+# Auth is by ssh key (BatchMode - it never prompts). Privilege on the far end is
+# `sudo -n` where available, since adding a system connection needs root.
+#
 # For each host: adds (or updates) a NetworkManager profile for the new SSID,
 # gives it a higher autoconnect priority than everything else, and leaves the
 # CURRENT connection alone. Nothing is activated - the device keeps its existing
@@ -98,22 +101,30 @@ for H in "${HOSTS[@]}"; do
 set -e
 IF="$(nmcli -t -f DEVICE,TYPE device | awk -F: '$2=="wifi"{print $1; exit}')"
 [ -n "$IF" ] || { echo "no wifi device"; exit 1; }
-if nmcli -t -f NAME connection show | grep -qx "$NAME"; then
-  nmcli connection modify "$NAME" \
+
+# Adding a SYSTEM connection needs root. Interactively polkit would prompt, but
+# over ssh there is nobody to prompt, so it just fails. Raspberry Pi OS gives the
+# pi user passwordless sudo (rebuild-pi.sh depends on it), so prefer `sudo -n`
+# and fall back to bare nmcli where sudo is absent or would ask for a password.
+if sudo -n true 2>/dev/null; then NM="sudo -n nmcli"; else NM="nmcli"; fi
+
+if $NM -t -f NAME connection show | grep -qx "$NAME"; then
+  $NM connection modify "$NAME" \
     802-11-wireless.ssid "$SSID" \
     wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$PSK" \
     connection.autoconnect yes connection.autoconnect-priority "$PRIO"
-  echo "updated"
+  echo "updated via $NM"
 else
-  nmcli connection add type wifi con-name "$NAME" ifname "$IF" ssid "$SSID" \
+  $NM connection add type wifi con-name "$NAME" ifname "$IF" ssid "$SSID" \
     connection.autoconnect yes connection.autoconnect-priority "$PRIO" >/dev/null
-  nmcli connection modify "$NAME" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$PSK"
-  echo "added"
+  $NM connection modify "$NAME" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$PSK"
+  echo "added via $NM"
 fi
 REMOTE
 )"
   case "$OUT" in
-    *added*)   ok "profile '$CONNAME' added for SSID '$SSID' (priority $PRIORITY)" ;;
+    *added*)   ok "profile '$CONNAME' added for SSID '$SSID' (priority $PRIORITY)"
+               case "$OUT" in *"via nmcli"*) note "no passwordless sudo - if the profile does not stick, that is why" ;; esac ;;
     *updated*) ok "profile '$CONNAME' updated for SSID '$SSID' (priority $PRIORITY)" ;;
     *)         bad "could not stage: $OUT"; rc=1; continue ;;
   esac
