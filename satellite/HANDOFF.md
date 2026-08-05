@@ -373,6 +373,16 @@ pisat_sim.py           pulled from the groundstation; APIDs match spacecop-demo 
 
 ---
 
+## 8b. The full data path
+
+`DATAFLOW.md` documents every hop end to end: the 41 telemetry packets and 254
+commands the vehicle can emit, the UDP link, both ground-station consumers
+(COSMOS and the Zeek tap), the four shipper lanes, the field-by-field ECS
+mapping, and which detections fire on which feed. Read it before touching
+anything in the middle of that chain.
+
+---
+
 ## 9. What to do next, in order
 
 1. **Run `flight/check_stream_route.sh`** against the kit. Everything else on the

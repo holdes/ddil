@@ -1,6 +1,13 @@
 # Satellite / space-cyber demo — working instructions
 
-**Read `HANDOFF.md` first.** It carries the context that is not recoverable from
+**Read `HANDOFF.md` first**, then `DATAFLOW.md` if you are touching anything
+between the spacecraft and the alert.
+
+`HANDOFF.md` is the state of play.
+`DATAFLOW.md` is every network hop, everything the vehicle can emit, and how it
+becomes an ECS document and then an alert.
+
+**HANDOFF.md** It carries the context that is not recoverable from
 the code: which repo is stale, which detections actually fire, why the ports are
 what they are, and which mistakes have already been made. This file is only the
 operating manual.
