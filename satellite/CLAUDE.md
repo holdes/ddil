@@ -18,8 +18,10 @@ Where facts disagree, this order wins:
 2. `build-guide/10-connections.md` — the connection register, with
    PROVEN / ASSUMED / FAILED on every line
 3. The **email samples** in the "PiSat logs" thread — the live Zeek output
-4. `the-aerospace-corporation/spacecop-demo` — the flight software
-5. `rtinney1/pisat-gsw` — a byte-identical copy of `spacecop-demo/gsw/`; adds
+4. `reference/cosmos-targets/` — **the authoritative wire layout** for every
+   packet. Vendored here because the kit has no access to the upstream repos.
+5. `the-aerospace-corporation/spacecop-demo` — the flight software, if reachable
+6. `rtinney1/pisat-gsw` — a byte-identical copy of `spacecop-demo/gsw/`; adds
    nothing, do not treat as a separate source
 
 **Do not derive Zeek field lists from the repo.** The parameter-decoding fix is
@@ -66,8 +68,14 @@ trusting anything on the Elastic side.
 reflash, confirm the `dtoverlay=i2c-gpio` line is in `/boot/firmware/config.txt`**
 or nothing on I²C answers and it looks like new hardware damage.
 
-`netstage.sh` pre-loads a WiFi profile onto headless Pis without dropping the
-session doing it.
+`netstage.sh` pre-loads a WiFi profile onto headless Pis from another machine;
+`join-wifi.sh` does the same thing run on the device itself, which is simpler
+when you already have an ssh session and no key distributed. Neither activates
+the new network - that would cut the session doing the work.
+
+`reference/` holds vendored copies of what the upstream repos provide, so this
+machine works offline. Read `reference/README.md` first: the Zeek analyzer copy
+there is stale and must not be used for field lists.
 
 ---
 
