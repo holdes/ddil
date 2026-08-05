@@ -1,0 +1,13 @@
+# The CAD tree stays on the design machine. It is 64 MB of meshes and renders,
+# it is done (all 17 parts printed and fitted), and nothing downstream of here
+# needs it. Work on the kit is software and integration only.
+cad/
+
+# Derived: 1.8 MB single-file build of the mission console.
+# Rebuild with `python3 webapp/build.py` - but note it reads the CAD renders, so
+# it only rebuilds on the design machine.
+webapp/cubesat.html
+
+**/__pycache__/
+*.pyc
+.DS_Store

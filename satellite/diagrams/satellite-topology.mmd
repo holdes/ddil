@@ -1,0 +1,93 @@
+---
+title: 1U CubeSat demo - power and data topology (Phase 1)
+---
+flowchart TD
+
+%% ======================= POWER =======================
+subgraph PWR["POWER — 5 V 3 A USB-C supply"]
+  direction TB
+  PSU["USB-C PSU<br/>5 V / 3 A"]
+  BEC["5 V BEC / buck<br/>2 A+<br/><i>separate motor rail</i>"]
+  PSU -->|"5 V, ~350 mA"| PI
+  PSU -->|"5 V in"| BEC
+end
+
+%% ======================= COMPUTE =======================
+PI["<b>Raspberry Pi Zero 2 W</b><br/>65 x 30 mm · aarch64<br/>Floor 2 — avionics deck"]
+
+%% ======================= I2C =======================
+subgraph I2C["I²C BUS — Qwiic / STEMMA QT, no soldering"]
+  direction TB
+  PHAT["Qwiic pHAT v2.0<br/>SparkFun DEV-15945<br/><i>4x JST-SH ports</i>"]
+  BME["BME280<br/>temp · pressure · humidity"]
+  IMU["LSM6DSOX 6-DoF IMU<br/>gyro · accel"]
+  PCA["PCA9685<br/>16-ch servo driver"]
+  PHAT -->|"JST-SH 4-pin"| BME
+  BME -->|"daisy-chain"| IMU
+  IMU -->|"daisy-chain"| PCA
+end
+
+%% ======================= ACTUATION =======================
+subgraph WING["WING DEPLOYMENT — wow factor 1"]
+  direction TB
+  SV1["MG90S servo — PORT<br/>metal gear"]
+  SV2["MG90S servo — STBD<br/>metal gear"]
+  W1["Wing panel + root hub"]
+  W2["Wing panel + root hub"]
+  SV1 --> W1
+  SV2 --> W2
+end
+
+%% ======================= LIGHTING =======================
+subgraph LED["IDS ALERT LIGHTING — wow factor 2"]
+  direction TB
+  LS["74AHCT125<br/>level shifter 3V3 → 5 V"]
+  APA["APA102 / DotStar strip<br/>16–24 LEDs<br/><i>true SPI, no bit-banging</i>"]
+  LS -->|"data + clock"| APA
+end
+
+%% ======================= PAYLOAD =======================
+CAM["Arducam UC-261 Rev.D<br/>OV5647 5MP · CS mount<br/>Floor 2 — camera bracket"]
+
+%% ======================= LINKS =======================
+PI ---|"40-pin GPIO header"| PHAT
+PI -->|"SPI0 — GPIO10 MOSI / GPIO11 SCLK<br/>⚠ needs header access"| LS
+PI -->|"CSI — 22-pin 0.5 mm narrow<br/>⚠ Pi Zero cable, NOT the 15-pin"| CAM
+
+PCA -->|"PWM ch0"| SV1
+PCA -->|"PWM ch1"| SV2
+
+BEC -->|"5 V motor rail, ~1 A"| SV1
+BEC -->|"5 V motor rail"| SV2
+BEC -->|"5 V LED rail, ~1 A"| APA
+
+%% ======================= DOWNLINK =======================
+subgraph GND["GROUND SEGMENT — existing stack"]
+  direction TB
+  GS["Groundstation Pi 5<br/>'groundation' · 10.0.0.75"]
+  C3["OpenC3 COSMOS 7.2.1<br/>+ pisat-gsw plugin"]
+  ZK["Zeek CCSDS analyzer"]
+  ES["Elastic — SPARTA space-cyber SOC"]
+  GS --> C3
+  GS --> ZK
+  ZK --> ES
+end
+
+PI ==>|"<b>WiFi · UDP 5012 TM / 5013 TC</b><br/>CCSDS Space Packets, unicast"| GS
+ES -.->|"IDS alert → command"| PI
+
+%% ======================= STYLE =======================
+classDef power  fill:#fef3c7,stroke:#b45309,stroke-width:2px,color:#78350f
+classDef compute fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#1e1b4b
+classDef bus    fill:#dbeafe,stroke:#1d4ed8,color:#172554
+classDef act    fill:#dcfce7,stroke:#15803d,color:#052e16
+classDef light  fill:#fce7f3,stroke:#be185d,color:#500724
+classDef ground fill:#ede9fe,stroke:#6b21a8,color:#2e1065
+
+class PSU,BEC power
+class PI compute
+class PHAT,BME,IMU,PCA bus
+class SV1,SV2,W1,W2 act
+class LS,APA light
+class CAM compute
+class GS,C3,ZK,ES ground
