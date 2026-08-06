@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-sb-cmderr",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 Software-bus command-error surge \u2014 malformed or unauthorized command injection.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.CMDERRCNT"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-sb-cmderr",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "CFE_SB_HKMSG"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.CMDERRCNT"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

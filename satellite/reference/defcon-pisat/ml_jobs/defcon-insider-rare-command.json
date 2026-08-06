@@ -1,0 +1,47 @@
+{
+  "job_id": "defcon-insider-rare-command",
+  "job": {
+    "description": "DEFCON PiSat \u2014 rare command system-wide (population model; no operator identity on the wire)",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "rare",
+          "by_field_name": "command.name"
+        }
+      ],
+      "influencers": [
+        "source.ip",
+        "command.name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "32mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-insider-rare-command",
+    "indices": [
+      "logs.ecs.spacecraft.commands"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "exists": {
+              "field": "command.name"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

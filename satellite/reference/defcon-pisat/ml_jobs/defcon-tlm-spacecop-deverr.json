@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-spacecop-deverr",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 Onboard IDS device-error rise \u2014 the security monitor itself seeing faults.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.DEVICE_ERR_COUNT"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-spacecop-deverr",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "SPACECOP_HK_TLM"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.DEVICE_ERR_COUNT"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

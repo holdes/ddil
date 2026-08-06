@@ -8,6 +8,17 @@ recoverable from the code.
 The CAD is finished and stays on the design machine. From here it is software
 and integration only.
 
+> ### ⚠️ UPDATED 6 Aug — the Elastic side has landed
+>
+> `space_cyber_security` gained **51 commits** overnight, all `defcon-pisat:`.
+> The integration this document described as missing is now **built**: cluster
+> config, 27 rules, 21 ML jobs, the shipper bundle, and the Elastic side's own
+> data-flow diagram.
+>
+> Vendored at **`reference/defcon-pisat/`** — read its `README.md` and
+> `diagram.md` first. **It is authoritative over §3, §6 and §9 below**, which
+> are kept for the reasoning but are no longer current on which detections fire.
+
 ---
 
 ## 1. What the demo is
@@ -52,14 +63,14 @@ it is short, and it is ahead of every repo.
 | `rtinney1/pisat-gsw` | **A byte-identical copy of `spacecop-demo/gsw/`.** `diff -rq` across all 180 files is clean; it adds only a `.gitignore`. Track spacecop-demo; ignore this one. |
 | `Villegas12/space_cyber_security` | The Elastic SPARTA detection schema. 203 detections, 104 rules, grounded in NOS3 `cmd_tlm_db` and the SPARTA v3.2 STIX bundle. |
 
-### The gap
+### The gap — CLOSED 6 Aug
 
-`space_cyber_security` has **zero** references to spacecop, pisat, CubeSatSim, or
-the `ccsds_commands` / `ccsds_telemetry` Zeek streams — 0 matches across the
-whole tree, all file types. Its Zeek usage is the stock Elastic integration for
-the ground IT segment, not the CCSDS analyzer.
+It used to be that `space_cyber_security` had **zero** references to spacecop,
+pisat or the Zeek CCSDS streams. The two halves had been built independently.
 
-The two halves were built independently. Closing the gap is the integration work.
+**That is no longer true.** 63 files now reference them, under
+`demodocs/defcon-pisat/`. The integration exists. What remains is proving it
+end to end on the kit, not building it.
 
 ### ⚠️ The Aerospace repo is STALE
 

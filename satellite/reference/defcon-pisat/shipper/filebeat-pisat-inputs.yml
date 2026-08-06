@@ -1,0 +1,40 @@
+# Filebeat inputs for the PiSat -> Elastic feed. Add these to `filebeat.inputs:`
+# in /etc/filebeat/filebeat.yml. Each lane stamps `pipeline_source`, which the
+# Logstash pipeline (logstash-pisat.conf) routes and normalizes on.
+
+  # Zeek CCSDS frames (decoded) — BOTH commands and telemetry ship under ONE input,
+  # exactly as the pisat Zeek+Filebeat setup already produces them (pipeline_source
+  # "zeek-ccsds"). The Logstash pipeline splits command vs telemetry by content
+  # (a command record carries `command_name`; a telemetry record carries `packet_name`),
+  # so there is no need to split them into separate inputs here.
+  - type: filestream
+    id: zeek-ccsds
+    enabled: true
+    paths:
+      - /opt/zeek/logs/current/ccsds_commands.log
+      - /opt/zeek/logs/current/ccsds_telemetry.log
+    parsers:
+      - ndjson: { target: "", overwrite_keys: true }
+    fields: { pipeline_source: zeek-ccsds }
+    fields_under_root: true
+
+  # Zeek connection log -> the Elastic Zeek integration (raw line, no ndjson parse)
+  - type: filestream
+    id: zeek-conn
+    enabled: true
+    paths:
+      - /opt/zeek/logs/current/conn.log
+    fields: { pipeline_source: zeek-conn }
+    fields_under_root: true
+
+  # Access-portal auth log (REGISTER/LOGIN) -> attribution.  ADJUST THE PATH to
+  # wherever the pisat portal writes its access log.
+  - type: filestream
+    id: pisat-portal
+    enabled: true
+    paths:
+      - /var/log/pisat-portal/portal.log
+    parsers:
+      - ndjson: { target: "", overwrite_keys: true }
+    fields: { pipeline_source: pisat-portal }
+    fields_under_root: true

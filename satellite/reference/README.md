@@ -10,7 +10,7 @@ you can reach the real thing.** They are a snapshot taken 5 Aug 2026.
 |---|---|---|
 | `cosmos-targets/` | `the-aerospace-corporation/spacecop-demo` → `gsw/openc3-cosmos-cfs/targets/` | The command and telemetry definitions. **This is the authoritative wire layout for every packet** — field order, types, endianness. `ccsds.py` was built from `EPS/cmd_tlm/tlm.txt`; the same files define SYSMON, CAMERA, STPYLD, SPACECOP and the standard cFS apps. |
 | `plugin.txt` | same repo, `gsw/openc3-cosmos-cfs/plugin.txt` | The COSMOS plugin. Needed to make our `DEMOSAT_*` copy — every target name and `target_ip` is already a `VARIABLE`; only `INTERFACE PISAT_INT` is hardcoded and needs to become one. |
-| `sparta-rules/` | `Villegas12/space_cyber_security` → `sparta-analytics/rules/spacecraft.commands/` | The 13 command-side detections. `sparta-uace7-esql.ndjson` (replay) and `sparta-smsr6-esql.ndjson` (fault-management tamper) are the two that fire on the Zeek feed with nothing provisioned. |
+| `defcon-pisat/` | `Villegas12/space_cyber_security` → `demodocs/defcon-pisat/` | **The built integration, as of 6 Aug.** Cluster config, 27 rules, 21 ML jobs, the Filebeat/Logstash shipper with its enum dictionaries, and `diagram.md` — the Elastic side's own end-to-end data-flow doc. **This supersedes our earlier analysis of which detections fire.** |
 | `ccsds_full_analyzer.zeek` | same repo, `gsw/` | The Zeek CCSDS analyzer. |
 
 ## ⚠️ The analyzer copy is stale
@@ -28,7 +28,8 @@ structure, nothing more.
 
 The COSMOS plugin material is Aerospace Corporation, LGPL-3.0-or-later — see
 `COSMOS-PLUGIN-LICENSE.md`. The SPARTA rules are Apache-2.0, `author: ["Elastic"]`.
-Both are public repos. Nothing here is redistributed under different terms.
+`spacecop-demo` is public; `space_cyber_security` is private and shared between
+colleagues. Nothing here is redistributed under different terms.
 
 ## Getting the real thing
 

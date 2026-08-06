@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-disk-free",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 Disk filling up \u2014 illicit data staging before exfiltration.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "low_mean",
+          "field_name": "parameters.DiskFreeMB"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-disk-free",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "SYSMON_HK_TLM"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.DiskFreeMB"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

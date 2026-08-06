@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-cs-eepromerr",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 EEPROM checksum failures \u2014 persistent firmware tampering.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.EEPROMCSERRCOUNTER"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-cs-eepromerr",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "CS_HKPACKET"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.EEPROMCSERRCOUNTER"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

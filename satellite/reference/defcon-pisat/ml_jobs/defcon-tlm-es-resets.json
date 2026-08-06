@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-es-resets",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 cFE processor-reset count climbing \u2014 repeated exploitation or instability.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.PROCESSORRESETS"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-es-resets",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "CFE_ES_HKPACKET"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.PROCESSORRESETS"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

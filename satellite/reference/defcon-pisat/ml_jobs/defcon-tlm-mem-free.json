@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-mem-free",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 Memory exhaustion \u2014 a leak or a resident implant.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "low_mean",
+          "field_name": "parameters.FreeMemoryKB"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-mem-free",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "SYSMON_HK_TLM"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.FreeMemoryKB"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

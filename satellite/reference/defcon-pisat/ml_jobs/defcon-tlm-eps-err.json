@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-eps-err",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 EPS error surge \u2014 power-subsystem faults or command tampering.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.ErrorCount"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-eps-err",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "EPS_HK_TLM"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.ErrorCount"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

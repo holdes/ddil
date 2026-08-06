@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-batt-current",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 Abnormal battery discharge current \u2014 rogue power-consuming activity on the bus.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.BatteryMa"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-batt-current",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "EPS_HK_TLM"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.BatteryMa"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

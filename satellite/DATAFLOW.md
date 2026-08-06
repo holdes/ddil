@@ -7,6 +7,17 @@ packet samples in the "PiSat logs" mail thread.
 
 Written 5 Aug 2026. Where something is inferred rather than observed it says so.
 
+> ### ⚠️ Read `reference/defcon-pisat/diagram.md` alongside this
+>
+> On 6 Aug the Elastic side landed its own end-to-end integration and its own
+> data-flow document. **Where the two disagree, theirs wins** — it describes what
+> is deployed; this describes what the wire does.
+>
+> This document is still the better reference for the **spacecraft side**: the
+> full emission inventory, packet layouts, the endianness boundary and the
+> non-standard length. Their document is authoritative for **partitions,
+> detections and the shipper**. Sections 6 and 7 below are superseded.
+
 ---
 
 ## 0. The whole path in one picture

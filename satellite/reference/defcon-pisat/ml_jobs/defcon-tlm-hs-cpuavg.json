@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-hs-cpuavg",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 Sustained CPU-hog condition flagged by the onboard Health & Safety monitor.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.UTILCPUAVG"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-hs-cpuavg",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "HS_HKPACKET"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.UTILCPUAVG"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

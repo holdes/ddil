@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-cpu-load",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 CPU saturation on the flight host \u2014 malicious code, crypto-mining, or a flooding effect.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "high_mean",
+          "field_name": "parameters.CPULoadPercent"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-cpu-load",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "SYSMON_HK_TLM"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.CPULoadPercent"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

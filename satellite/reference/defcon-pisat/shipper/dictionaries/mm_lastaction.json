@@ -1,0 +1,16 @@
+{
+  "0": "NOACTION",
+  "1": "PEEK",
+  "2": "POKE",
+  "3": "LOAD_FROM_FILE",
+  "4": "LOAD_WID",
+  "5": "DUMP_TO_FILE",
+  "6": "DUMP_INEVENT",
+  "7": "FILL",
+  "8": "SYM_LOOKUP",
+  "9": "SYMTBL_SAVE",
+  "10": "EEPROMWRITE_ENA",
+  "11": "EEPROMWRITE_DIS",
+  "12": "NOOP",
+  "13": "RESET"
+}

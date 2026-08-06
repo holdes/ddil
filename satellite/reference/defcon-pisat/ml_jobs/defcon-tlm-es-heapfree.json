@@ -1,0 +1,52 @@
+{
+  "job_id": "defcon-tlm-es-heapfree",
+  "job": {
+    "description": "DEFCON PiSat telemetry anomaly \u2014 cFE heap exhaustion \u2014 a memory-consuming implant.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "function": "low_mean",
+          "field_name": "parameters.HEAPBYTESFREE"
+        }
+      ],
+      "influencers": [
+        "packet_name",
+        "target_name"
+      ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "groups": [
+      "defcon",
+      "pisat",
+      "pisat-telemetry"
+    ]
+  },
+  "datafeed": {
+    "job_id": "defcon-tlm-es-heapfree",
+    "indices": [
+      "logs-pisat-telemetry"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "packet_name": "CFE_ES_HKPACKET"
+            }
+          },
+          {
+            "exists": {
+              "field": "parameters.HEAPBYTESFREE"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
