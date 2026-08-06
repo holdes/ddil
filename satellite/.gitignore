@@ -1,12 +1,19 @@
 # The CAD tree stays on the design machine. It is 64 MB of meshes and renders,
-# it is done (all 17 parts printed and fitted), and nothing downstream of here
-# needs it. Work on the kit is software and integration only.
-cad/
-
-# Derived: 1.8 MB single-file build of the mission console.
-# Rebuild with `python3 webapp/build.py` - but note it reads the CAD renders, so
-# it only rebuilds on the design machine.
-webapp/cubesat.html
+# it is done (all 17 parts printed and fitted), and nothing downstream needs it.
+#
+# EXCEPT the web-sized drawings: build.py inlines those 17 PNGs as data URIs, so
+# without them the mission console cannot be rebuilt anywhere else. 336 KB, and
+# it is the difference between the app being reproducible on the kit and not.
+#
+# Re-including a path under an ignored directory needs the ladder below - git
+# will not look inside a directory it has already excluded, so each level has to
+# be un-excluded in turn.
+cad/*
+!cad/renders/
+cad/renders/*
+!cad/renders/blueprints/
+cad/renders/blueprints/*
+!cad/renders/blueprints/web/
 
 **/__pycache__/
 *.pyc
