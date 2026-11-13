@@ -65,11 +65,24 @@ services:
     container_name: backend
     environment:
       - VINEYARD_ES_MAIN_URL=http://es-cpu:9200
-      - VINEYARD_ES_GPU_URL=http://192.168.1.20:9200
-      - VINEYARD_DGX_SPARK_HOST=192.168.1.20
-      - VINEYARD_OLLAMA_EMBED_URL=http://192.168.1.20:11434
-      - VINEYARD_OLLAMA_LLM_URL=http://192.168.1.20:11434
+      - VINEYARD_ES_GPU_URL=http://es.ddil:9200
+      - VINEYARD_DGX_SPARK_HOST=spark.ddil
+      - VINEYARD_OLLAMA_EMBED_URL=http://ollama.ddil:11434
+      - VINEYARD_OLLAMA_LLM_URL=http://ollama.ddil:11434
       - VINEYARD_DATA_DIR=/data
+    # Containers don't inherit the host's /etc/hosts, and these cross-host
+    # services live on the Spark (not the compose network), so map the friendly
+    # .ddil names here. Mirror of the UniFi local-DNS records + host /etc/hosts.
+    extra_hosts:
+      - "spark.ddil:192.168.1.20"
+      - "es.ddil:192.168.1.20"
+      - "jina.ddil:192.168.1.20"
+      - "vllm.ddil:192.168.1.20"
+      - "ollama.ddil:192.168.1.20"
+      - "relay.ddil:192.168.1.20"
+      - "framework.ddil:192.168.1.10"
+      - "kibana.ddil:192.168.1.10"
+      - "gw.ddil:192.168.1.1"
     ports:
       - "8000:8000"
     volumes:

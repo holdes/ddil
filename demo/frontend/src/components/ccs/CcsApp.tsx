@@ -77,7 +77,7 @@ export function CcsApp({ onExit }: Props) {
           <div className="flex items-center gap-2">
             <HardDrive size={20} className="text-cyan-400" />
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">Sovereign AI · Edge Node</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">Sovereign AI · Edge Federation</div>
               <h1 className="text-lg font-semibold text-slate-100 tracking-tight">Field Collection · embedded on the Spark</h1>
             </div>
           </div>

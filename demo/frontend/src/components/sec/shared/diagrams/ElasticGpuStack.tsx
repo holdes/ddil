@@ -44,7 +44,7 @@ export function ElasticGpuStack({ compact = false }: { compact?: boolean }) {
       </div>
       {!compact && (
         <p className="text-[10px] text-slate-500 text-center mt-2 italic">
-          Elastic GPU Stack — bundled in Elasticsearch 9.4
+          Elastic GPU Stack — bundled in Elasticsearch 9.4.2
         </p>
       )}
     </div>

@@ -54,7 +54,7 @@ function Side({ tone, badge, instance, tagline, specs, esConfig, port, hostIp }:
 
       <div className="mt-5 pt-4 border-t border-slate-700/50">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 mb-2">
-          <Settings2 size={12} /> Elasticsearch 9.4.1 config
+          <Settings2 size={12} /> Elasticsearch 9.4.2 config
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs font-mono">
           {esConfig.map((c, i) => (

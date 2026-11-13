@@ -3,8 +3,8 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # ── Elasticsearch — one cluster, two data nodes ───────────────────────────
-    ES_MAIN_URL: str = "http://es-cpu:9200"            # Framework CPU node (local)
-    ES_GPU_URL: str = "http://192.168.1.20:9200"       # DGX Spark GPU node (airgapped default)
+    ES_MAIN_URL: str = "http://es-cpu:9200"            # Framework CPU node (compose-local)
+    ES_GPU_URL: str = "http://es.ddil:9200"            # DGX Spark GPU node (friendly DNS → 192.168.1.20)
 
     # Optional host/port overrides (used by the AWS bench .env). When the *_HOST
     # form is supplied it wins over the *_URL default above — this is what lets a
@@ -15,11 +15,11 @@ class Settings(BaseSettings):
     ES_CPU_PORT: int = 9201
 
     # ── DGX Spark — AI/ML powerhouse ──────────────────────────────────────────
-    DGX_SPARK_HOST: str = "192.168.1.20"
+    DGX_SPARK_HOST: str = "spark.ddil"                 # friendly DNS → 192.168.1.20
 
     # ── Ollama — local inference (airgapped) ──────────────────────────────────
-    OLLAMA_EMBED_URL: str = "http://192.168.1.20:11434"
-    OLLAMA_LLM_URL: str = "http://192.168.1.20:11434"
+    OLLAMA_EMBED_URL: str = "http://ollama.ddil:11434"
+    OLLAMA_LLM_URL: str = "http://ollama.ddil:11434"
     EMBED_MODEL: str = "nomic-embed-text"
     LLM_MODEL: str = "gpt-oss:120b"
 
@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     ES_PASSWORD: str | None = None
 
     # Kibana / Agent Builder
-    KIBANA_URL: str = "http://192.168.1.10:5601"
+    KIBANA_URL: str = "http://kibana.ddil:5601"        # friendly DNS → 192.168.1.10
     KIBANA_SPACE: str = "default"
     KIBANA_USER: str | None = None
     KIBANA_PASSWORD: str | None = None
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     # ── Jina multimodal + DLS demo (adventure 3) ──────────────────────────────
     # Local Jina omni embedding server (OpenAI-compatible /v1/embeddings) on the
     # Blackwell GPU. Speaks text + image (base64) into one shared vector space.
-    JINA_OMNI_URL: str = "http://192.168.1.20:8081"
+    JINA_OMNI_URL: str = "http://jina.ddil:8081"       # friendly DNS → 192.168.1.20
     JINA_OMNI_MODEL: str = "jina-embeddings-v5-omni-small"
     JINA_ES_URL: str | None = None              # falls back to es_gpu_url
     # Simple "search images by typing" track (ES-native inference, 768-d)

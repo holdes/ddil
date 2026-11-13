@@ -26,10 +26,10 @@ export interface ServiceResult {
 }
 
 export const SERVICES: ServiceCheck[] = [
-  { id: 'es-gpu',      label: 'Elasticsearch (GPU)',  endpoint: 'http://192.168.1.20:9200/_cluster/health',  detail: 'cuVS HNSW · DGX Spark' },
-  { id: 'es-cpu',      label: 'Elasticsearch (CPU)',  endpoint: 'http://192.168.1.20:9201/_cluster/health',  detail: 'Standard HNSW · DGX Spark' },
-  { id: 'ollama-llm',  label: 'Ollama LLM',           endpoint: 'http://192.168.1.20:11434/api/tags',         detail: 'llama3.1:70b · DGX Spark' },
-  { id: 'ollama-embed',label: 'Ollama Embeddings',    endpoint: 'http://192.168.1.10:11434/api/tags',         detail: 'nomic-embed-text · Framework' },
+  { id: 'es-gpu',      label: 'Elasticsearch (GPU)',  endpoint: 'http://es.ddil:9200/_cluster/health',         detail: 'cuVS HNSW · DGX Spark' },
+  { id: 'es-cpu',      label: 'Elasticsearch (CPU)',  endpoint: 'http://framework.ddil:9200/_cluster/health',  detail: 'Standard HNSW · Framework' },
+  { id: 'ollama-llm',  label: 'Ollama LLM',           endpoint: 'http://ollama.ddil:11434/api/tags',           detail: 'gpt-oss:120b · DGX Spark' },
+  { id: 'ollama-embed',label: 'Ollama Embeddings',    endpoint: 'http://ollama.ddil:11434/api/tags',           detail: 'nomic-embed-text · DGX Spark' },
   { id: 'backend',     label: 'Demo Backend',         endpoint: '/api/health',                                detail: 'FastAPI · Framework' },
   { id: 'sensors',     label: 'Field Sensor Bus',     endpoint: '/api/sensors/status',                        detail: 'RS485 Modbus · Telemetry' },
 ]

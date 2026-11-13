@@ -114,7 +114,7 @@ export function Architecture({ onContinue }: Props) {
               "NVIDIA cuVS Library (HNSW acceleration)",
             ]}
             services={[
-              { name: "Elasticsearch (GPU)", detail: "9.3.1 + cuVS JAR", color: "bg-emerald-500" },
+              { name: "Elasticsearch (GPU)", detail: "9.4.2 + cuVS JAR", color: "bg-emerald-500" },
               { name: "Ollama — GPT-OSS 120B", detail: "65 GB MXFP4", color: "bg-emerald-500" },
               { name: "Ollama — Jina v4", detail: "4.6 GB Embeddings", color: "bg-emerald-500" },
               { name: "Inference Endpoint", detail: "ES → Ollama", color: "bg-emerald-500" },
@@ -134,7 +134,7 @@ export function Architecture({ onContinue }: Props) {
               "CPU HNSW (race comparison node)",
             ]}
             services={[
-              { name: "Elasticsearch (CPU)", detail: "9.3.1 stock", color: "bg-blue-500" },
+              { name: "Elasticsearch (CPU)", detail: "9.4.2 stock", color: "bg-blue-500" },
               { name: "Kibana", detail: "Agent Builder + Workflows", color: "bg-blue-500" },
               { name: "React Frontend", detail: "Vite + Tailwind", color: "bg-blue-500" },
               { name: "FastAPI Backend", detail: "Python 3.12", color: "bg-blue-500" },

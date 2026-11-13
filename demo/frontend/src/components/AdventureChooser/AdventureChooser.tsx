@@ -203,7 +203,7 @@ export function AdventureChooser({ onChoose }: Props) {
         transition={{ delay: 0.6 }}
         className="mt-12 flex items-center gap-6 text-xs text-slate-600 relative z-10"
       >
-        <span>Elasticsearch 9.3 + NVIDIA cuVS</span>
+        <span>Elasticsearch 9.4.2 + NVIDIA cuVS</span>
         <span>&middot;</span>
         <span>GPT-OSS 120B on DGX Spark</span>
         <span>&middot;</span>
