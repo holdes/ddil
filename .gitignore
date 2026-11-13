@@ -23,6 +23,17 @@ demo/license.json
 demo/license.local.json
 *.elastic-license.json
 
+# TLS cert material for cluster security — never commit private keys
+docker/certs/
+*.p12
+
+# Local ops secrets — never commit (repo is PUBLIC)
+UNIFI-RECOVERY.md
+
+# Timestamped backup files (e.g. docker-compose.yml.bak-20260721-062349)
+*.bak
+*.bak-*
+
 # OS
 .DS_Store
 Thumbs.db

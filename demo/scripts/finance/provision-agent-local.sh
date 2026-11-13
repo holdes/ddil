@@ -79,7 +79,11 @@ upsert_tool '{
 
 echo
 echo "==> wire finance-analyst agent"
-curl -sS "${H[@]}" -X PUT "$KB/api/agent_builder/agents/finance-analyst" -d '{
+# Agent Builder (9.4): POST /agents creates (id in body); PUT /agents/{id} only
+# UPDATES and 404s if the agent doesn't exist yet. Delete-if-exists, then POST.
+curl -sS "${H[@]}" -X DELETE "$KB/api/agent_builder/agents/finance-analyst" >/dev/null 2>&1 || true
+curl -sS "${H[@]}" -X POST "$KB/api/agent_builder/agents" -d '{
+  "id": "finance-analyst",
   "name": "Financial Filings Analyst",
   "description": "Analyzes SEC 10-K filings using custom finance.* tools that compress multi-step lookups into single calls.",
   "configuration": {

@@ -86,6 +86,9 @@ def main() -> None:
     ap.add_argument("--model", default=os.environ.get("OMNI_MODEL", "jina-embeddings-v5-omni-small"))
     ap.add_argument("--batch", type=int, default=32)
     ap.add_argument("--max-docs", type=int, default=None)
+    ap.add_argument("--skip", type=int, default=0,
+                    help="skip the first N text chunks (resume an interrupted run "
+                         "without re-embedding what's already indexed)")
     args = ap.parse_args()
 
     data = Path(args.data)
@@ -118,7 +121,8 @@ def main() -> None:
         n_ok += ok
         n_fail += fail
 
-    print(f"==> text chunks from {chunks_path}")
+    print(f"==> text chunks from {chunks_path}" + (f" (skipping first {args.skip})" if args.skip else ""))
+    seen = 0
     with open(chunks_path, errors="replace") as f:
         for line in f:
             line = line.strip()
@@ -126,6 +130,10 @@ def main() -> None:
                 continue
             rec = json.loads(line)
             titles.setdefault(rec["parent_id"], rec.get("doc_title", ""))
+            # resume: titles still populated (cheap), but skip embedding what's done
+            if seen < args.skip:
+                seen += 1
+                continue
             pending.append(rec)
             n_text += 1
             if len(pending) >= args.batch:

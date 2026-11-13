@@ -31,28 +31,59 @@ import gzip
 import json
 import sys
 import time
+import urllib.error
 import urllib.request
 
 
-def embed_batch(ollama: str, model: str, texts: list[str], retries: int = 6) -> list[list[float]]:
-    """Embed a batch via Ollama /api/embed. Returns one vector per input text."""
+MAX_CHARS = 8000  # cap per chunk so an over-long doc can't 400/overflow the model
+
+
+def _sanitize(text: str) -> str:
+    """Non-empty, length-capped text. Empty/whitespace → '' (caller skips)."""
+    t = (text or "").strip()
+    return t[:MAX_CHARS]
+
+
+def _post_embed(ollama: str, model: str, texts: list[str], retries: int = 4):
+    """One Ollama /api/embed call with retries. Returns embeddings or raises."""
     body = json.dumps({"model": model, "input": texts}).encode()
     url = f"{ollama.rstrip('/')}/api/embed"
+    last = None
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url, data=body, method="POST",
                                          headers={"Content-Type": "application/json"})
             resp = urllib.request.urlopen(req, timeout=300).read()
-            payload = json.loads(resp)
-            embs = payload.get("embeddings")
+            embs = json.loads(resp).get("embeddings")
             if not embs or len(embs) != len(texts):
                 raise RuntimeError(f"expected {len(texts)} embeddings, got {len(embs) if embs else 0}")
             return embs
-        except Exception as e:  # noqa: BLE001 — retry any transport/model hiccup
-            wait = min(30, 2 ** attempt)
-            print(f"  batch err ({e!r}); retry in {wait}s", file=sys.stderr)
-            time.sleep(wait)
-    raise RuntimeError(f"batch failed after {retries} retries")
+        except urllib.error.HTTPError as e:
+            # 400 = malformed/over-long input; retrying the same batch won't help
+            if e.code == 400:
+                raise
+            last = e
+        except Exception as e:  # noqa: BLE001 — transient transport/model hiccup
+            last = e
+        wait = min(20, 2 ** attempt)
+        print(f"  batch err ({last!r}); retry in {wait}s", file=sys.stderr)
+        time.sleep(wait)
+    raise RuntimeError(f"batch failed after {retries} retries ({last!r})")
+
+
+def embed_batch(ollama: str, model: str, texts: list[str]) -> list:
+    """Embed a batch, returning one vector per input. On a batch-level failure,
+    recursively split so a single bad chunk is isolated and skipped (→ None)
+    instead of aborting the whole corpus."""
+    try:
+        return _post_embed(ollama, model, texts)
+    except Exception as e:  # noqa: BLE001
+        if len(texts) == 1:
+            print(f"  SKIP unembeddable chunk (len={len(texts[0])}): {e!r}", file=sys.stderr)
+            return [None]
+        mid = len(texts) // 2
+        return (embed_batch(ollama, model, texts[:mid])
+                + embed_batch(ollama, model, texts[mid:]))
 
 
 def iter_docs(src: str):
@@ -90,12 +121,23 @@ def main() -> None:
     t0 = time.time()
     pending_docs: list[dict] = []
 
+    skipped = [0]
+
     def flush(out_f, batch: list[dict]) -> None:
         nonlocal n, dims
         if not batch:
             return
-        vecs = embed_batch(args.ollama, args.model, [d["text"] for d in batch])
-        for doc, vec in zip(batch, vecs):
+        # sanitize + drop empty-text docs before embedding
+        clean = [(d, _sanitize(d.get("text", ""))) for d in batch]
+        clean = [(d, t) for d, t in clean if t]
+        skipped[0] += len(batch) - len(clean)
+        if not clean:
+            return
+        vecs = embed_batch(args.ollama, args.model, [t for _, t in clean])
+        for (doc, _), vec in zip(clean, vecs):
+            if vec is None:           # isolated unembeddable chunk — skip
+                skipped[0] += 1
+                continue
             if dims is None:
                 dims = len(vec)
                 print(f"  embedding dims = {dims}")
@@ -122,7 +164,7 @@ def main() -> None:
             flush(out_f, pending_docs)
 
     elapsed = time.time() - t0
-    print(f"done: {n} chunks → {args.out} ({dims}-d) in {elapsed:.0f}s")
+    print(f"done: {n} chunks → {args.out} ({dims}-d) in {elapsed:.0f}s  [skipped {skipped[0]}]")
     print(f"next: DIMS={dims} bash setup-index-local.sh {args.out}")
 
 

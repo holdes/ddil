@@ -14,11 +14,26 @@ services:
       - cluster.name=ddil-vineyard
       - node.name=spark-gpu
       - node.attr.accel=gpu
+      # ml role removed: ELSER is a platform-specific (x86) native model and ES
+      # refuses to deploy such models in a heterogeneous (ARM+x86) cluster. Making
+      # this ARM node non-ml leaves the x86 Framework node as the sole ML node so
+      # ELSER can allocate. cuVS/GPU vector indexing is unaffected (data-path only).
+      - node.roles=master,data,data_content,data_hot,data_warm,data_cold,data_frozen,ingest,transform,remote_cluster_client
       - discovery.seed_hosts=192.168.1.10:9300
       - cluster.initial_master_nodes=spark-gpu,framework-cpu
       - network.publish_host=192.168.1.20
-      - xpack.security.enabled=false
+      # ── Security: cluster-wide auth + API keys (required for Agent Builder /
+      #    gen-ai connectors). HTTP stays plaintext, so api_key + token services
+      #    must be force-enabled (ES auto-disables them when http.ssl is off).
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
       - xpack.security.http.ssl.enabled=false
+      # transport TLS is mandatory for a multi-node cluster with security on
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.truststore.path=certs/elastic-certificates.p12
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - xpack.license.self_generated.type=trial
       - vectors.indexing.use_gpu=true
       - bootstrap.memory_lock=true
@@ -28,6 +43,7 @@ services:
       - "9300:9300"
     volumes:
       - es-gpu-data:/usr/share/elasticsearch/data
+      - /home/blakester205/ddil/docker/certs/elastic-certificates.p12:/usr/share/elasticsearch/config/certs/elastic-certificates.p12:ro
       - /home/blakester205/miniforge3/envs/cuvs-build/lib:/opt/cuvs/lib:ro
       - /usr/local/cuda/lib64:/usr/local/cuda/lib64:ro
     deploy:
