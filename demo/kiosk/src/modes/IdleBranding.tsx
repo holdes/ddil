@@ -4,11 +4,12 @@ import { DiagnosticsPage } from './idle/DiagnosticsPage'
 
 interface Props {
   onSecretUnlock: () => void
+  onPongUnlock: () => void
 }
 
 const PAGE_COUNT = 2
 
-export function IdleBranding({ onSecretUnlock }: Props) {
+export function IdleBranding({ onSecretUnlock, onPongUnlock }: Props) {
   const [page, setPage] = useState(0)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
 
@@ -52,7 +53,7 @@ export function IdleBranding({ onSecretUnlock }: Props) {
         }}
       >
         <div className="relative" style={{ width: `${100 / PAGE_COUNT}%` }}>
-          <BrandingPage onSecretUnlock={onSecretUnlock} />
+          <BrandingPage onSecretUnlock={onSecretUnlock} onPongUnlock={onPongUnlock} />
         </div>
         <div className="relative" style={{ width: `${100 / PAGE_COUNT}%` }}>
           <DiagnosticsPage />

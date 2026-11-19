@@ -17,9 +17,10 @@ const QR_URL = 'https://www.elastic.co/geospatial'
 
 interface Props {
   onSecretUnlock: () => void
+  onPongUnlock: () => void
 }
 
-export function BrandingPage({ onSecretUnlock }: Props) {
+export function BrandingPage({ onSecretUnlock, onPongUnlock }: Props) {
   return (
     <div className="absolute inset-0 grid grid-cols-[1fr_1.4fr_1fr]">
       {/* LEFT: Elastic identity (also the secret tap target) */}
@@ -79,9 +80,12 @@ export function BrandingPage({ onSecretUnlock }: Props) {
         </div>
       </div>
 
-      {/* RIGHT: NVIDIA / DGX identity */}
+      {/* RIGHT: NVIDIA / DGX identity (the NVIDIA logo is the second secret tap
+          target — 5 taps in 3s opens the hidden PONG game) */}
       <div className="flex flex-col justify-center items-center gap-3 border-l border-white/5 px-4">
-        <NvidiaLogo variant="vertical" size={92} />
+        <SecretTap taps={5} windowMs={3000} onUnlock={onPongUnlock} className="cursor-pointer">
+          <NvidiaLogo variant="vertical" size={92} />
+        </SecretTap>
         <div className="text-white/50 text-[10px] uppercase tracking-[0.3em] text-center">
           DGX Spark · GB10 Blackwell · 128GB
         </div>
