@@ -17,10 +17,9 @@ const QR_URL = 'https://www.elastic.co/geospatial'
 
 interface Props {
   onSecretUnlock: () => void
-  onPongUnlock: () => void
 }
 
-export function BrandingPage({ onSecretUnlock, onPongUnlock }: Props) {
+export function BrandingPage({ onSecretUnlock }: Props) {
   return (
     <div className="absolute inset-0 grid grid-cols-[1fr_1.4fr_1fr]">
       {/* LEFT: Elastic identity (also the secret tap target) */}
@@ -80,10 +79,11 @@ export function BrandingPage({ onSecretUnlock, onPongUnlock }: Props) {
         </div>
       </div>
 
-      {/* RIGHT: NVIDIA / DGX identity (the NVIDIA logo is the second secret tap
-          target — 5 taps in 3s opens the hidden PONG game) */}
+      {/* RIGHT: NVIDIA / DGX identity (also a secret-tap target — both logos
+          open the ARCADE chooser; 5 taps in 3s. The Elastic logo on the left
+          is the reliable one on the kiosk touch panel.) */}
       <div className="flex flex-col justify-center items-center gap-3 border-l border-white/5 px-4">
-        <SecretTap taps={5} windowMs={3000} onUnlock={onPongUnlock} className="cursor-pointer">
+        <SecretTap taps={5} windowMs={3000} onUnlock={onSecretUnlock} className="cursor-pointer">
           <NvidiaLogo variant="vertical" size={92} />
         </SecretTap>
         <div className="text-white/50 text-[10px] uppercase tracking-[0.3em] text-center">
