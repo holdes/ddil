@@ -174,6 +174,38 @@ export function SearchPlayground() {
           </span>
         </div>
       )}
+
+      {/* Semantic + multimodal search lives in Jina — expand the story here */}
+      <div className="mt-8 border border-slate-50 bg-slate-900 p-5 shadow-[7px_7px_0_0_rgba(29,30,36,0.07)]">
+        <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-3">
+          <span className="w-2 h-2 bg-violet-500" />
+          Semantic + multimodal search &middot; Jina in Elastic
+        </div>
+        <p className="text-sm text-slate-300 leading-relaxed mb-4 max-w-3xl">
+          Vineyard records are structured sensor data, so this playground is{" "}
+          <span className="text-slate-50 font-semibold">lexical</span>. For
+          meaning-based and <span className="text-slate-50 font-semibold">cross-modal</span>{" "}
+          search, the kit runs{" "}
+          <span className="font-mono text-violet-500">Jina Embeddings v5 Omni</span> on the DGX
+          Spark — text and images share <span className="text-slate-50 font-semibold">one vector
+          space</span>, embedded by Elasticsearch&rsquo;s own inference endpoint.
+        </p>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            ["One vector space", "Text and images embed into the same space — type words, retrieve pictures, no CLIP glue."],
+            ["Native ES inference", "query_vector_builder embeds the query through the on-box Jina endpoint — nothing embedded app-side."],
+            ["Hybrid + DLS", "BM25 + kNN fused with RRF, plus document-level security scoping every result to the analyst's clearance."],
+          ].map(([t, b]) => (
+            <div key={t} className="border border-slate-700 bg-slate-900 p-3">
+              <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-violet-500 mb-1.5">{t}</div>
+              <div className="text-[12px] text-slate-400 leading-snug">{b}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 font-mono text-[11px] text-slate-400">
+          &rarr; See the <span className="text-violet-500 font-semibold">Multimodal Intelligence</span> adventure for the live Jina demo.
+        </div>
+      </div>
     </div>
   );
 }
