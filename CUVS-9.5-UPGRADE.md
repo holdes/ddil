@@ -1,112 +1,104 @@
-# cuVS GPU image — 9.4.2 → 9.5.x upgrade spike
+# cuVS GPU image — 9.4.2 → 9.5.x upgrade (PROVEN)
 
-**Question:** what does it take to keep the GPU vector-indexing race working after we
-upgrade Elasticsearch from 9.4.2 to 9.5.x? **Answer: a cuvs-java rebuild (version bump
-25.12.0 → 26.02.0), same proven path as the existing build — no architectural blocker.**
+**Question:** keep the GPU vector-indexing race working after upgrading Elasticsearch
+from 9.4.2 to 9.5.x. **Answer: no cuVS source rebuild needed — a one-class bytecode
+patch of the stock `cuvs-java` JAR + the matching aarch64 `libcuvs` conda libs.**
+**Verified end-to-end on 2026-11-20 on the DGX Spark: a real cuVS CAGRA graph index
+built on the GB10 under ES 9.5.6, aarch64.**
 
-Spike run **2026-11-20 on the DGX Spark** (where the es-gpu node lives). See the
-original build procedure in [`CUVS-AARCH64-BUILD.md`](./CUVS-AARCH64-BUILD.md); this
-doc is the delta for the version bump.
+Supersedes the earlier "rebuild the JAR from cuVS source" plan — that turned out to
+be unnecessary. See also the original 25.x procedure in `CUVS-AARCH64-BUILD.md`.
 
-## What was verified (hard facts, not assumptions)
+## What actually changed 9.4.2 → 9.5.x
 
-Inspected both stock Elastic images directly on the Spark:
-
-| | **9.4.2 (current, live)** | **9.5.5 (target)** |
+| | 9.4.2 (live) | 9.5.5 / 9.5.6 (target) |
 |---|---|---|
-| GPU module dir | `modules/gpu` | `modules/gpu` — **unchanged** ✅ |
-| bundled cuvs-java JAR | `cuvs-java-25.12.0.jar` | **`cuvs-java-26.02.0.jar`** ⚠️ |
-| codec / plugin jars | `elasticsearch-gpu-codec-9.4.2.jar`, `x-pack-gpu-9.4.2.jar` | `…-9.5.5.jar` |
+| GPU module dir | `modules/gpu` | `modules/gpu` — unchanged |
+| bundled cuvs-java | `cuvs-java-25.12.0.jar` | `cuvs-java-26.02.0.jar` (9.5.5 **and** 9.5.6 identical) |
+| native loading | embedded `.so` (25.x) | **System loader + Panama FFI** → `libcuvs_c.so` from `LD_LIBRARY_PATH` (no JNI wrapper, no embedded `.so`, arch-neutral) |
 
-Supporting facts:
-- The Dockerfile's `COPY … modules/gpu/…` path is **correct and unchanged** — the
-  `x-pack-gpu` path in the old build doc was stale.
-- Current native stack: conda env `cuvs-build` has **libcuvs 25.12.00 (cuda13)**;
-  repo JAR `docker/es-gpu/cuvs-java-25.12.0.jar` (rebuilt Mar 2026) matches it. The
-  live `es-gpu` container is Up on 9.4.2 with that 25.12.0 JAR. Baseline is consistent.
-- **Feasibility of the bump:** `rapidsai` publishes **libcuvs 26.02.00 (cuda13) for
-  aarch64** (confirmed via `conda search`; 26.06/26.08/26.10 also exist). So the native
-  26.02 rebuild is available on the same channel we already use.
+**The real blocker is a Java arch gate, not the native code.** `cuvs-java`'s
+`com.nvidia.cuvs.spi.CuVSServiceProvider$Holder.builtinProvider()` does:
 
-## Conclusion
-
-A simple `FROM …:9.5.5` + drop-in of the **same** JAR will **not** work: 9.5.x's
-`x-pack-gpu`/codec jars expect `cuvs-java-26.02.0.jar`, and the Java API shifted across
-the 25.12 → 26.02 cuVS cycle. We must **rebuild the aarch64 cuvs-java at 26.02** and bump
-the image. This is the same procedure already executed once for 25.12 — just re-pinned.
-
-Risk is **lower** than the first time: the module path is confirmed stable, and cuVS
-26.02 (Feb 2026) is far newer than the 25.06 the original concern was written against, so
-Blackwell `sm_121` support is more likely mature. The Blackwell index test is still the gate.
-
-## ES patch version — RESOLVED (either 9.5.5 or 9.5.6; same cuVS target)
-
-The rebuild is driven by the **bundled cuvs-java version**. Inspected all realistic
-targets on 2026-11-20:
-
-| ES version | bundled cuvs-java | available? |
-|---|---|---|
-| 9.5.5 | `cuvs-java-26.02.0.jar` | ✅ (running on `secdemo`) |
-| 9.5.6 | `cuvs-java-26.02.0.jar` — **identical** | ✅ (latest in the 9.5 line) |
-| 9.5.7 / 9.6.x | — | ❌ not released yet (latest is 9.5.6) |
-
-**9.5.5 and 9.5.6 bundle the exact same `cuvs-java-26.02.0.jar`** (byte-identical,
-1,369,789 B), so **the aarch64 rebuild is the same for both** — one JAR serves either.
-The version choice is therefore decoupled from the cuVS work: pick **9.5.6** for the
-latest patch, or **9.5.5** to match the `secdemo` cluster. **9.6 is not available** as of
-this spike.
-
-Re-inspect any future candidate version in ~10s before building:
-```bash
-sg docker -c "docker run --rm --entrypoint sh docker.elastic.co/elasticsearch/elasticsearch:<VER> \
-  -c 'ls /usr/share/elasticsearch/modules/gpu/'"
+```
+supported = os.name startsWith "Linux"  &&  os.arch equals "amd64"  &&  javaFeature > 21
+if supported -> load JDKProvider (the real provider)
+else         -> UnsupportedProvider("cuvs-java supports only x86")   // throws on use
 ```
 
-## Rebuild steps (on the DGX Spark)
+On aarch64, `os.arch` is `aarch64`, so the stock JAR returns the UnsupportedProvider,
+and Elasticsearch's `org.elasticsearch.gpu.CuVSGPUSupport` logs *"GPU based vector
+indexing is not supported on this platform; cuvs-java supports only x86"* and disables
+GPU. **Your live 9.4.2 node only works because `docker/es-gpu/` ships a custom-patched
+JAR** (`cuvs-java-25.12.0.jar`); the 9.5.x image ships the stock (ARM-rejecting) JAR.
 
-1. **New conda env at 26.02** (keep the 25.12 env for rollback):
+> A global `-Dos.arch=amd64` override is **NOT** a fix — it makes Lucene/JDK look for
+> amd64 vector natives and **crashes the JVM** (exit 134) on the real aarch64 host.
+> The gate must be patched surgically in cuvs-java only.
+
+## The fix (what's in this repo)
+
+1. **Native libs** — a conda env with `libcuvs 26.02` (aarch64, cuda13), bind-mounted at
+   `/opt/cuvs/lib`:
    ```bash
-   conda create -n cuvs-build-2602 -c conda-forge -c rapidsai \
-     libcuvs=26.02 libcuvs-headers=26.02 cuda-toolkit=13 cmake ninja openblas openmp python=3.12
+   conda create -n cuvs-2602 -c rapidsai -c conda-forge 'libcuvs=26.02' 'cuda-version=13'
    ```
-2. **Rebuild `libcuvs_java.so` + the cuvs-java JAR from the matching cuVS branch**
-   (`branch-26.02`), following `CUVS-AARCH64-BUILD.md` steps 2–6. **Check first whether the
-   3 aarch64 "soft gates" are still needed** — RAPIDS has been adding ARM/sbsa support, so
-   26.02 may support aarch64 upstream (less/no patching). Output must be named
-   **`cuvs-java-26.02.0.jar`** to match the stock module.
-3. **Dockerfile** (`docker/es-gpu/Dockerfile`): bump `FROM …:9.5.6` (or `:9.5.5`) and change the COPY to
-   `cuvs-java-26.02.0.jar → /usr/share/elasticsearch/modules/gpu/cuvs-java-26.02.0.jar`
-   (remove the 25.12.0 copy). Drop the new JAR into `docker/es-gpu/`.
-4. **Compose** (`docker/docker-compose.yml`): point the `/opt/cuvs/lib` bind mount at the
-   new env — `~/miniforge3/envs/cuvs-build-2602/lib:/opt/cuvs/lib:ro`. Host CUDA mount
-   (`/usr/local/cuda/lib64`) must be CUDA 13.x-compatible (the 26.02 build is cuda13).
-5. **Rebuild + boot**: `sg docker -c "docker compose build es-gpu && docker compose up -d es-gpu"`.
-6. **Verify** (gate): ES logs show GPU detection; create an index with
-   `vectors.indexing.use_gpu: true`; index a batch; confirm GPU utilization in `nvidia-smi`;
-   race GPU vs `use_gpu:false`.
+   (rapidsai publishes aarch64 `libcuvs 26.02`. The env ships `libcuvs_c.so` + CUDA runtime.)
+2. **Patched JAR** — `docker/es-gpu/cuvs-java-26.02.0-aarch64.jar`: the stock 26.02 JAR
+   with the `os.arch=="amd64"` gate in `CuVSServiceProvider$Holder` forced true. Built by
+   **`docker/es-gpu/patch-cuvs-aarch64.sh`** (reproducible; replaces the
+   `getProperty("os.arch").equals("amd64")` bytecode with `nop*9 + iconst_1`, preserving
+   `istore_2` and all offsets — no constant-pool/length/StackMapTable change).
+3. **Image** — `docker/es-gpu/Dockerfile.9.5.6`: `FROM …:9.5.6`, copies the patched JAR
+   over the stock one, sets `LD_LIBRARY_PATH=/opt/cuvs/lib:/usr/local/cuda/lib64`.
 
-## Cheap early experiment (~15 min, do before the full build)
+Rebuild the patched JAR for a new cuvs-java version:
+```bash
+# extract the stock JAR from the target ES image, then:
+docker/es-gpu/patch-cuvs-aarch64.sh cuvs-java-<ver>.jar cuvs-java-<ver>-aarch64.jar
+# if the constant-pool indices moved, the script says so — re-derive via javap (see script).
+```
 
-Boot a 9.5.5 es-gpu image with the **existing renamed 25.12 JAR** copied to
-`cuvs-java-26.02.0.jar` and read the startup logs. This tells you whether ES enforces the
-exact JAR version/API (expected: a load or linkage error) vs. tolerates a mismatch —
-confirming how strict the naming/API coupling is before you invest the compile time.
+## Proof it works (2026-11-20, GB10, ES 9.5.6)
 
-## Open items to confirm during the build (not blockers)
+Standalone single-node 9.5.6 + patched JAR + conda-2602 libs (no os.arch spoof):
+```
+INFO  CuVSGPUSupport — Initializing GPU support with CuVS provider ...GPUInfoProviderImpl
+INFO  CuVSGPUSupport — Found compatible GPU [NVIDIA GB10] (id: [0])
+# with xpack.license=trial, indexing 6000×128-d vectors + force-merge:
+DEBUG ES92GpuHnswVectorsWriter — Carga index created in: 30.92 ms; #num vectors: 6000
+DEBUG CuVSResourceManager     — Computation finished / Releasing resources to pool
+DEBUG ES92GpuHnswVectorsWriter — cagra_hnws index serialized to Lucene HNSW in: 3.36 ms
+```
+A real cuVS **CAGRA** graph built on the GB10 → sm_121/Blackwell works with cuVS 26.02.
 
-- Whether cuvs-java `branch-26.02` needs the 3 aarch64 soft-gate patches or supports ARM upstream.
-- Whether the 9.5.x gpu module loads the JAR by exact filename or a `cuvs-java-*.jar` glob.
-- Host CUDA on the Spark is 13.x-compatible for the cuda13 native libs.
-- Which cluster to cut first — validate on a throwaway before the main `ddil-vineyard`.
+> **License:** GPU indexing needs `xpack.license.self_generated.type=trial` (already set
+> in `docker-compose.yml`). On `basic` ES logs *"supports GPU indexing, but it is not
+> allowed by the current license"* and falls back to CPU.
+>
+> **GB10 note:** `nvidia-smi` reports `memory.used [N/A]` (unified memory); and CAGRA
+> builds are sub-100ms for small segments, so GPU-util polling can miss them — the DEBUG
+> `Carga index created` line is the reliable signal.
+
+## Cutover steps (Phase 3 — not yet done; live node is still 9.4.2)
+
+1. Create the `cuvs-2602` conda env (above).
+2. In `docker/docker-compose.yml` es-gpu service: set `build.dockerfile: Dockerfile.9.5.6`
+   and point the native mount at the new env —
+   `~/miniforge3/envs/cuvs-2602/lib:/opt/cuvs/lib:ro`.
+3. Bump the **framework-cpu** node to the same 9.5.x (both nodes must match).
+4. `sg docker -c "docker compose build es-gpu && docker compose up -d"`.
+5. Verify: logs show `Found compatible GPU [NVIDIA GB10]`; index vectors + force-merge;
+   confirm a `Carga index created` DEBUG line (set `logger.org.elasticsearch.gpu: DEBUG`).
 
 ## Rollback
 
-Fully reversible: the 9.4.2 image, the `cuvs-build` (25.12) env, the repo's
-`cuvs-java-25.12.0.jar`, and the `es-gpu-data` volume are all untouched until you flip the
-running container. Revert = rebuild `es-gpu` from the unchanged 9.4.2 Dockerfile.
+Fully reversible: the live `Dockerfile` (9.4.2), the `cuvs-build` (25.12) env, the repo's
+`cuvs-java-25.12.0.jar`, and `es-gpu-data` are untouched until you flip compose at cutover.
+Revert = restore the es-gpu service's `build.dockerfile`/mount and rebuild.
 
 ## Effort
 
-~2–3 h (vs. the original ~4–5 h — the path is already proven): mostly `libcuvs`/JAR
-compile + the Blackwell index test. Start this independently of the app merge; it gates
-the GPU-race demo and nothing else depends on it.
+The spike (this) consumed the hard part. Remaining cutover is ~30 min of config + the
+cluster version bump — no compile. ES version choice is free: **9.5.5 and 9.5.6 bundle the
+identical `cuvs-java-26.02.0.jar`**, so the same patched JAR serves either. 9.6 is not released.
