@@ -57,10 +57,11 @@ function NodeCard({
 export function SystemOverview() {
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-1">System Overview</h2>
-      <p className="text-sm text-slate-400 mb-6">
-        Everything you just saw is running from a Pelican case
-      </p>
+      <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-2">
+        <span className="w-2 h-2 bg-emerald-500" />
+        DDIL Kit &middot; Airgapped &middot; Two nodes in a Pelican case
+      </div>
+      <h2 className="text-[30px] leading-none font-bold tracking-[-0.02em] text-slate-50 mb-6">System Overview</h2>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-4 gap-3 mb-6">

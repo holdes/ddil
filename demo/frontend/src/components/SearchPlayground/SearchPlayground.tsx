@@ -75,10 +75,11 @@ export function SearchPlayground() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-1">Search Playground</h2>
-      <p className="text-sm text-slate-400 mb-6">
-        Hybrid retrieval across all vineyard indices &middot; 615K+ vectors
-      </p>
+      <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-2">
+        <span className="w-2 h-2 bg-emerald-500" />
+        Hybrid retrieval &middot; BM25 + kNN + RRF &middot; 615K+ vectors
+      </div>
+      <h2 className="text-[30px] leading-none font-bold tracking-[-0.02em] text-slate-50 mb-6">Search Playground</h2>
 
       {/* Search Input */}
       <div className="flex gap-2 mb-4">
