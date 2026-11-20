@@ -58,7 +58,15 @@ const empty: AgentChatState = {
   meta: {},
 };
 
-export function useAgentChat() {
+export interface AgentChatOptions {
+  /** Backend SSE endpoint. Defaults to the SEC finance proxy for back-compat. */
+  endpoint?: string;
+  /** When set, sent as `agent_id` in the body (the generic /api/agent/converse proxy). */
+  agentId?: string;
+}
+
+export function useAgentChat(opts: AgentChatOptions = {}) {
+  const endpoint = opts.endpoint ?? "/api/finance/agent/chat";
   const [state, setState] = useState<AgentChatState>(empty);
   const ctrlRef = useRef<AbortController | null>(null);
 
@@ -77,10 +85,10 @@ export function useAgentChat() {
 
     let resp: Response;
     try {
-      resp = await fetch("/api/finance/agent/chat", {
+      resp = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input }),
+        body: JSON.stringify(opts.agentId ? { input, agent_id: opts.agentId } : { input }),
         signal: ctrl.signal,
       });
     } catch (e) {
@@ -131,7 +139,7 @@ export function useAgentChat() {
     }
 
     setState((s) => (s.status === "streaming" ? { ...s, status: "done" } : s));
-  }, []);
+  }, [endpoint, opts.agentId]);
 
   return { state, send, reset };
 }
