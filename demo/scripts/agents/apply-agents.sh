@@ -30,6 +30,20 @@ apply() {  # $1 = api subpath (tools|agents), $2 = json file
     | python3 -c "import json,sys;d=json.load(sys.stdin);print(f'  {sys.argv[1]:7} {sys.argv[2]:30}', 'ERROR '+str(d.get('statusCode'))+' '+str(d.get('message',''))[:120] if d.get('statusCode') else 'ok')" "$kind" "$id"
 }
 
+# The tool-calling LLM connector the agents converse through. Qwen3 via Ollama with
+# enableNativeFunctionCalling — Nemotron Lightning (vLLM) is NOT usable here (its
+# tool-call token format leaks into answers). Stable id so the backend can reference it.
+VLLM_QWEN_URL="${QWEN_URL:-http://192.168.1.20:11434/v1/chat/completions}"
+QWEN_MODEL="${QWEN_MODEL:-qwen3:30b-a3b-instruct-2507-q4_K_M}"
+echo "== connector ddil-agent-qwen3 =="
+curl -sS "${H[@]}" -X DELETE "$KB/api/actions/connector/ddil-agent-qwen3" >/dev/null 2>&1 || true
+curl -sS "${H[@]}" -X POST "$KB/api/actions/connector/ddil-agent-qwen3" -d "{
+  \"name\":\"DDIL Agent LLM (Qwen3 — tool-calling)\",
+  \"connector_type_id\":\".gen-ai\",
+  \"config\":{\"apiProvider\":\"Other\",\"apiUrl\":\"$VLLM_QWEN_URL\",\"defaultModel\":\"$QWEN_MODEL\",\"verificationMode\":\"full\",\"enableNativeFunctionCalling\":true},
+  \"secrets\":{\"apiKey\":\"ollama\"}
+}" | python3 -c "import json,sys;d=json.load(sys.stdin);print('  connector:', d.get('id','ERR'), d.get('message','') if d.get('statusCode') else 'ok')"
+
 # Delete the agents first so their tools are no longer referenced (a referenced
 # tool can't be deleted), making the tool re-create below idempotent.
 echo "== unlink agents =="

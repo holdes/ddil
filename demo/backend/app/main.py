@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
-from app.routers import race, search, chat, images, sensors, vineyard, finance, jina, ccs
+from app.routers import race, search, chat, images, sensors, vineyard, finance, jina, ccs, agents
 from app.services.elasticsearch import close_clients
 
 
@@ -39,6 +39,7 @@ app.include_router(vineyard.router, prefix="/api/vineyard", tags=["vineyard"])
 app.include_router(finance.router, prefix="/api/finance", tags=["finance"])
 app.include_router(jina.router, prefix="/api/jina", tags=["jina"])
 app.include_router(ccs.router, prefix="/api/ccs", tags=["ccs"])
+app.include_router(agents.router, prefix="/api/agent", tags=["agent"])
 
 
 @app.get("/tiles/{z}/{x}/{y}.png")

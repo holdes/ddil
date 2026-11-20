@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     KIBANA_PASSWORD: str | None = None
     AGENT_BUILDER_AGENT_ID: str = "finance-analyst"
     AGENT_BUILDER_CONNECTOR_ID: str | None = None
+    # Tool-calling LLM connector every Choose-Your-Adventure agent converses through.
+    # Qwen3 (ddil-agent-qwen3) — NOT Nemotron (leaks tool-call tokens). See apply-agents.sh.
+    AGENT_LLM_CONNECTOR: str = "ddil-agent-qwen3"
     ES_INFERENCE_LLM_ID: str | None = None
 
     # ── Jina multimodal + DLS demo (adventure 3) ──────────────────────────────
