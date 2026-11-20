@@ -1,5 +1,20 @@
 # DDIL Demo Kit · Sovereign AI
 
+## Recent Updates (as of 2026-11-20)
+
+- **GTC DC** — the kit is being shown at GTC DC. A cross-demo map (this repo's AI
+  search/race/Jina adventures **plus** the space-cyber SPARTA pipeline, servo/LED
+  commanding, mission-ops O11y, EDOT relay, and the Nemotron Lightning brain, with
+  where each lives + how to launch) is in **`GTC-DC-DEMO.md`**.
+- **Kiosk arcade** — the hidden easter egg is now an **ARCADE** chooser with two
+  games: **INDEXER** (snake) and **RALLY** (GPU-vs-CPU pong, 1P/2P). Unlock = 5 taps
+  in 3s on *either* brand logo on the Idle→Branding page. Dev hotkeys: `3` = chooser,
+  `4` = RALLY. Detail in **`demo/kiosk/ARCADE.md`**; the kiosk README § "Modes" is
+  updated to match. (The § "Touchscreen Kiosk" below still describes the older
+  INDEXER-only trigger — ARCADE.md is now authoritative for the easter egg.)
+- **Secrets** — credentials are in a **gitignored `.env`**; a fresh clone needs it
+  recreated from `.env.example`.
+
 ## Project Context
 
 Portable, airgapped AI search and RAG system in a Pelican Air 1615 case ("DDIL Kit"). Two compute nodes, no cloud dependency. The kit is a **multi-demo appliance** — the public/messaging brand on the kiosk display is "Sovereign AI · Context Engineering Anywhere"; individual demos (e.g. the Vineyard Intelligence agronomist below) plug in as runtimes.

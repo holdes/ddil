@@ -6,12 +6,18 @@
 # Wipe:   docker compose down -v
 #
 # Prereq: sudo sysctl -w vm.max_map_count=262144
+#
+# Secrets come from a gitignored .env (this repo is PUBLIC) — copy .env.example
+# to .env and fill in before `docker compose up`. Cross-host services use the
+# friendly .ddil names (resolve via UniFi local DNS + host /etc/hosts); the
+# backend container gets them via extra_hosts (containers don't inherit the
+# host /etc/hosts). ES cluster transport stays on IPs (publish/discovery).
 
 services:
   # ── Elasticsearch CPU Data Node ────────────────────────────
   # Joins the ddil-vineyard cluster as the CPU-only data node
   es-cpu:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
     container_name: es-cpu
     environment:
       - cluster.name=ddil-vineyard
@@ -20,8 +26,18 @@ services:
       - discovery.seed_hosts=192.168.1.20:9300
       - cluster.initial_master_nodes=spark-gpu,framework-cpu
       - network.publish_host=192.168.1.10
-      - xpack.security.enabled=false
+      # ── Security: cluster-wide auth + API keys (required for Agent Builder /
+      #    gen-ai connectors). HTTP stays plaintext, so api_key + token services
+      #    must be force-enabled (ES auto-disables them when http.ssl is off).
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
       - xpack.security.http.ssl.enabled=false
+      # transport TLS is mandatory for a multi-node cluster with security on
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.truststore.path=certs/elastic-certificates.p12
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - xpack.license.self_generated.type=trial
       - vectors.indexing.use_gpu=false
       - bootstrap.memory_lock=true
@@ -31,6 +47,7 @@ services:
       - "9300:9300"
     volumes:
       - es-cpu-data:/usr/share/elasticsearch/data
+      - ./certs/elastic-certificates.p12:/usr/share/elasticsearch/config/certs/elastic-certificates.p12:ro
     ulimits:
       memlock:
         soft: -1
@@ -42,19 +59,48 @@ services:
 
   # ── Kibana ─────────────────────────────────────────────────
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.3.1
+    image: docker.elastic.co/kibana/kibana:9.4.2
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://es-cpu:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
       - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
       - SERVER_HOST=0.0.0.0
-      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=ddil-vineyard-demo-kit-32char-key!
-      - XPACK_SECURITY_ENCRYPTIONKEY=ddil-vineyard-demo-kit-32char-key!
-      - XPACK_REPORTING_ENCRYPTIONKEY=ddil-vineyard-demo-kit-32char-key!
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+      - XPACK_SECURITY_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+      - SEARCHHOMEPAGE_ENABLED=false
+      - MAP_EMSURL=http://192.168.1.10:8080
     ports:
       - "5601:5601"
     depends_on:
       - es-cpu
+    restart: unless-stopped
+
+  # ── Elastic Maps Server (offline EMS) ──────────────────────
+  # Provides vector basemaps + boundary tiles to Kibana when airgapped
+  elastic-maps-server:
+    image: docker.elastic.co/elastic-maps-service/elastic-maps-server:9.4.2
+    container_name: elastic-maps-server
+    environment:
+      - host=0.0.0.0
+      - ssl=false
+      - ELASTICSEARCH_HOST=http://es-cpu:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  # ── Satellite Tile Server (offline ArcGIS World_Imagery cache) ─
+  satellite-tile-server:
+    image: nginx:alpine
+    container_name: satellite-tile-server
+    volumes:
+      - ./data/tiles-satellite:/usr/share/nginx/html:ro
+    ports:
+      - "8081:80"
     restart: unless-stopped
 
   # ── Backend API ────────────────────────────────────────────
@@ -66,19 +112,32 @@ services:
     environment:
       - VINEYARD_ES_MAIN_URL=http://es-cpu:9200
       - VINEYARD_ES_GPU_URL=http://es.ddil:9200
+      # cluster security is on — basic auth for direct ES queries + Kibana/Agent Builder
+      - VINEYARD_ES_USER=elastic
+      - VINEYARD_ES_PASSWORD=${ELASTIC_PASSWORD}
+      - VINEYARD_KIBANA_USER=elastic
+      - VINEYARD_KIBANA_PASSWORD=${ELASTIC_PASSWORD}
       - VINEYARD_DGX_SPARK_HOST=spark.ddil
       - VINEYARD_OLLAMA_EMBED_URL=http://ollama.ddil:11434
       - VINEYARD_OLLAMA_LLM_URL=http://ollama.ddil:11434
-      # SEC Findings: query embeddings from Jina v5 Omni on the Spark (768-d),
-      # agent LLM reported as the Nemotron model the Kibana connector uses.
+      # SEC query embedding: Jina Embeddings v5 Omni on the Spark (768-d). The
+      # sec_10k_2026 index must be re-embedded with Jina before the demo; it was
+      # built with 768-d nomic (same dims, different vector space).
       - VINEYARD_EMBED_BACKEND=jina
-      - VINEYARD_JINA_OMNI_URL=http://jina.ddil:8081
       - VINEYARD_SEC_EMBED_DIMS=768
+      - VINEYARD_SEC_INDEX=sec_10k_2026
+      # Agent Builder connector: Nemotron 3.5 Lightning served by vLLM on the Spark.
+      - VINEYARD_AGENT_BUILDER_CONNECTOR_ID=finance-ollama-llm
       - VINEYARD_SEC_AGENT_LLM_MODEL=nemotron-3.5-lightning
+      # Jina multimodal media — served by the backend via FileResponse; mounted
+      # from ./data/jina (copied from the Spark) at /jina inside the container.
+      - VINEYARD_JINA_OMNI_URL=http://jina.ddil:8081
+      - VINEYARD_JINA_IMG_DIR=/jina/images
+      - VINEYARD_JINA_FIG_DIR=/jina/scale/extracted_imgs
+      - VINEYARD_JINA_PDF_DIR=/jina/scale/samples
       - VINEYARD_DATA_DIR=/data
-    # Containers don't inherit the host's /etc/hosts, and these cross-host
-    # services live on the Spark (not the compose network), so map the friendly
-    # .ddil names here. Mirror of the UniFi local-DNS records + host /etc/hosts.
+    # Containers don't inherit the host /etc/hosts; these cross-host services live
+    # on the Spark. Mirror of the UniFi local-DNS records + host /etc/hosts.
     extra_hosts:
       - "spark.ddil:192.168.1.20"
       - "es.ddil:192.168.1.20"
@@ -94,6 +153,7 @@ services:
     volumes:
       - ./data/preprocessed:/data:ro
       - ./data/tiles:/tiles:ro
+      - ./data/jina:/jina:ro
     depends_on:
       - es-cpu
     restart: unless-stopped

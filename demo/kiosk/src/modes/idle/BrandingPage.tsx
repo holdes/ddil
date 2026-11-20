@@ -79,9 +79,13 @@ export function BrandingPage({ onSecretUnlock }: Props) {
         </div>
       </div>
 
-      {/* RIGHT: NVIDIA / DGX identity */}
+      {/* RIGHT: NVIDIA / DGX identity (also a secret-tap target — both logos
+          open the ARCADE chooser; 5 taps in 3s. The Elastic logo on the left
+          is the reliable one on the kiosk touch panel.) */}
       <div className="flex flex-col justify-center items-center gap-3 border-l border-white/5 px-4">
-        <NvidiaLogo variant="vertical" size={92} />
+        <SecretTap taps={5} windowMs={3000} onUnlock={onSecretUnlock} className="cursor-pointer">
+          <NvidiaLogo variant="vertical" size={92} />
+        </SecretTap>
         <div className="text-white/50 text-[10px] uppercase tracking-[0.3em] text-center">
           DGX Spark · GB10 Blackwell · 128GB
         </div>

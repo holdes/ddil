@@ -21,7 +21,7 @@ but fully self-contained for laptop dev.
 |---|---|
 | **Boot Diagnostics** | Animated startup sequence — pings ES-GPU, ES-CPU, Ollama (LLM + embed), backend, and the sensor bus. Matrix-style log on the right, branded checklist on the left. Auto-advances to Idle on completion. |
 | **Idle** | A 2-page swipeable carousel. **Page 1 — Branding:** Elastic ↔ DGX Spark identity flanking a QR code that links to elastic.co/geospatial, plus a stack-capabilities ticker. **Page 2 — Diagnostics:** live (mock) telemetry for the Framework Desktop and DGX Spark — CPU, GPU, RAM/VRAM, temp, uptime — plus network/display info. Swipe horizontally on the touchscreen, ◂/▸ buttons under the page dots, or arrow keys. |
-| **Easter Egg — INDEXER** *(hidden)* | An Elastic-themed snake game. Eat documents, grow your index, don't bite your own shards. **Triggered by tapping the Elastic horizontal logo on the idle Branding page 5 times within 3 seconds.** Press `ESC` (or the ESC ✕ button in its side panel) to exit. The dev hotkey `3` also opens it. |
+| **Easter Egg — ARCADE** *(hidden)* | A hidden games chooser with two titles: **INDEXER** (an Elastic-themed snake — eat documents, grow your index, don't bite your shards) and **RALLY** (GPU-vs-CPU pong, 1P or 2P). **Triggered by tapping either brand logo (Elastic or NVIDIA) on the idle Branding page 5 times within 3 seconds.** Pick a card to play; `ESC` (or the ESC ✕ button) backs a game out to the chooser, then the chooser to Idle. Dev hotkeys: `3` opens the chooser, `4` jumps straight into RALLY. Full detail: **`ARCADE.md`**. |
 
 ## Dev (on a laptop)
 
@@ -32,7 +32,7 @@ npm run dev          # http://localhost:3100
 # add ?dev=1 to show the cursor
 ```
 
-**Mode controls:** the **MODE ▸** button in the top-right cycles between **Boot** and **Idle** (the public-facing modes). Dev hotkeys: `1` → Boot, `2` → Idle, `3` → INDEXER (hidden easter egg). `ESC` exits the easter egg back to Idle.
+**Mode controls:** the **MODE ▸** button in the top-right cycles between **Boot** and **Idle** (the public-facing modes). Dev hotkeys: `1` → Boot, `2` → Idle, `3` → ARCADE chooser, `4` → RALLY directly (hidden easter eggs). `ESC` backs a game out to the chooser, then the chooser to Idle.
 
 **Inside Idle:** swipe left/right on the touchscreen, tap the ◂ / ▸ buttons next to the page dots, or use `←` / `→` to switch between the Branding and Diagnostics pages.
 
