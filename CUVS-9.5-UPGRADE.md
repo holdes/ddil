@@ -39,15 +39,24 @@ Risk is **lower** than the first time: the module path is confirmed stable, and 
 26.02 (Feb 2026) is far newer than the 25.06 the original concern was written against, so
 Blackwell `sm_121` support is more likely mature. The Blackwell index test is still the gate.
 
-## ⚠️ Decide the ES patch version FIRST
+## ES patch version — RESOLVED (either 9.5.5 or 9.5.6; same cuVS target)
 
-The whole rebuild is driven by the **bundled cuvs-java version**, which can differ by ES
-patch release. This spike inspected **9.5.5** (already pulled, already running on the
-`secdemo` cluster). The Phase-0 decision said "9.5.6" — **9.5.6 may bundle a different
-cuvs-java version**, which would change the target JAR. Recommendation: **standardize on
-9.5.5** (one fewer variable, already validated here) unless there's a hard reason for 9.5.6.
+The rebuild is driven by the **bundled cuvs-java version**. Inspected all realistic
+targets on 2026-11-20:
 
-Re-inspect any candidate version in ~10s before building:
+| ES version | bundled cuvs-java | available? |
+|---|---|---|
+| 9.5.5 | `cuvs-java-26.02.0.jar` | ✅ (running on `secdemo`) |
+| 9.5.6 | `cuvs-java-26.02.0.jar` — **identical** | ✅ (latest in the 9.5 line) |
+| 9.5.7 / 9.6.x | — | ❌ not released yet (latest is 9.5.6) |
+
+**9.5.5 and 9.5.6 bundle the exact same `cuvs-java-26.02.0.jar`** (byte-identical,
+1,369,789 B), so **the aarch64 rebuild is the same for both** — one JAR serves either.
+The version choice is therefore decoupled from the cuVS work: pick **9.5.6** for the
+latest patch, or **9.5.5** to match the `secdemo` cluster. **9.6 is not available** as of
+this spike.
+
+Re-inspect any future candidate version in ~10s before building:
 ```bash
 sg docker -c "docker run --rm --entrypoint sh docker.elastic.co/elasticsearch/elasticsearch:<VER> \
   -c 'ls /usr/share/elasticsearch/modules/gpu/'"
@@ -65,7 +74,7 @@ sg docker -c "docker run --rm --entrypoint sh docker.elastic.co/elasticsearch/el
    3 aarch64 "soft gates" are still needed** — RAPIDS has been adding ARM/sbsa support, so
    26.02 may support aarch64 upstream (less/no patching). Output must be named
    **`cuvs-java-26.02.0.jar`** to match the stock module.
-3. **Dockerfile** (`docker/es-gpu/Dockerfile`): bump `FROM …:9.5.5` and change the COPY to
+3. **Dockerfile** (`docker/es-gpu/Dockerfile`): bump `FROM …:9.5.6` (or `:9.5.5`) and change the COPY to
    `cuvs-java-26.02.0.jar → /usr/share/elasticsearch/modules/gpu/cuvs-java-26.02.0.jar`
    (remove the 25.12.0 copy). Drop the new JAR into `docker/es-gpu/`.
 4. **Compose** (`docker/docker-compose.yml`): point the `/opt/cuvs/lib` bind mount at the
