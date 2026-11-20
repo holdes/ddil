@@ -1,0 +1,15 @@
+# es-gpu image for the ES 9.5.x cutover (cuVS GPU vector indexing on aarch64).
+# NOT yet the live image — the live node still builds from ./Dockerfile (9.4.2).
+# Swap `build.dockerfile: Dockerfile.9.5.6` in docker-compose.yml at cutover time,
+# alongside bumping the framework-cpu node to the same 9.5.x. See CUVS-9.5-UPGRADE.md.
+FROM docker.elastic.co/elasticsearch/elasticsearch:9.5.5
+USER root
+# aarch64-enabled cuvs-java: the STOCK 26.02 JAR with the CuVSServiceProvider$Holder
+# os.arch=="amd64" gate patched to accept aarch64 (built by patch-cuvs-aarch64.sh).
+# Replaces the stock cuvs-java-26.02.0.jar in the gpu module. The native side
+# (libcuvs_c.so) is arch-neutral and bind-mounted at /opt/cuvs/lib (conda libcuvs 26.02).
+COPY cuvs-java-26.02.0-aarch64.jar /usr/share/elasticsearch/modules/gpu/cuvs-java-26.02.0.jar
+ENV LD_LIBRARY_PATH="/opt/cuvs/lib:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+USER elasticsearch

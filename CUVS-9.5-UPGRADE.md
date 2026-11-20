@@ -1,4 +1,13 @@
-# cuVS GPU image — 9.4.2 → 9.5.x upgrade (PROVEN)
+# cuVS GPU image — 9.4.2 → 9.5.x upgrade (DONE — LIVE on 9.5.5)
+
+> **STATUS 2026-11-20: COMPLETE.** The live `ddil-vineyard` cluster was upgraded
+> 9.4.2 → **9.5.5** (both nodes), Kibana 9.5.5, with cold-volume backups taken first
+> (`~/es-backups/*-pre955.tgz` on each host). Cluster green, data intact, Agent Builder
+> connectors survived migration, and a real cuVS **CAGRA** graph build was confirmed on
+> the live `spark-gpu` node. Target is 9.5.5 (not 9.5.6) — the bundled `cuvs-java-26.02.0`
+> is identical, and .10 already had the 9.5.5 ES+Kibana images (secdemo). The es-gpu image
+> builds from `Dockerfile.9.5.5` with the same patched JAR.
+
 
 **Question:** keep the GPU vector-indexing race working after upgrading Elasticsearch
 from 9.4.2 to 9.5.x. **Answer: no cuVS source rebuild needed — a one-class bytecode

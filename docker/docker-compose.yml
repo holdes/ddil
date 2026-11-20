@@ -9,6 +9,7 @@ services:
   es-gpu:
     build:
       context: ./es-gpu
+      dockerfile: Dockerfile.9.5.5
     container_name: es-gpu
     environment:
       - cluster.name=ddil-vineyard
@@ -44,7 +45,7 @@ services:
     volumes:
       - es-gpu-data:/usr/share/elasticsearch/data
       - /home/blakester205/ddil/docker/certs/elastic-certificates.p12:/usr/share/elasticsearch/config/certs/elastic-certificates.p12:ro
-      - /home/blakester205/miniforge3/envs/cuvs-build/lib:/opt/cuvs/lib:ro
+      - /home/blakester205/miniforge3/envs/cuvs-2602/lib:/opt/cuvs/lib:ro
       - /usr/local/cuda/lib64:/usr/local/cuda/lib64:ro
     deploy:
       resources:
