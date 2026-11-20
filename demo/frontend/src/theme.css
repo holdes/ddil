@@ -1,27 +1,25 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   DDIL demo kit: Elastic brand theme layer.
+   DDIL demo kit: Elastic brand theme layer — LIGHT (matches the enablement HTML
+   decks: --bg #F5F7FA / --paper #FFF / --ink #1D1E24, Inter + IBM Plex Mono,
+   Elastic brand accents #0B64DD/#02BCB7/#F04E98/#FEC514).
 
-   Imported once from App.css, right after `@import "tailwindcss"`. It works by
-   overriding Tailwind v4 theme tokens, so every existing utility class in the
-   flow components (bg-slate-950, text-emerald-400, border-blue-500/20, ...)
-   picks up the brand palette without touching the components themselves.
+   It works by overriding Tailwind v4 theme tokens, so every existing utility class
+   in the flow components (bg-slate-950, text-slate-50, border-slate-700, ...) picks
+   up the palette without touching the components. The neutral `slate` ramp is
+   INVERTED vs the usual Tailwind order so the dark-theme-written components flip to
+   light: slate-950 = the lightest page ground, slate-50 = the darkest ink. Accent
+   ramps are tuned so the mid-tones the components use for text (text-blue-400,
+   text-emerald-400, ...) stay readable on a light ground.
 
-   Every ramp below stays monotonic (50 lightest, 950 darkest) so opacity
-   modifiers like /10 /20 /50 and light-on-dark pairings keep reading the same.
-   NVIDIA green stays as --color-nvidia (App.css) and is not remapped.
-
-   To revert the whole facelift: delete the `@import "./theme.css"` line in
-   App.css (plus this file and the AdventureChooser change).
+   To return to the dark theme, restore this file from git history (commit before
+   the light restyle). Fonts/radius are unchanged.
    ───────────────────────────────────────────────────────────────────────── */
 
-/* Self-hosted fonts. The kit is airgapped, so never load Google Fonts. */
 @font-face { font-family: "Inter"; font-weight: 300; font-style: normal; font-display: swap; src: url("/fonts/Inter-300.woff2") format("woff2"); }
 @font-face { font-family: "Inter"; font-weight: 400; font-style: normal; font-display: swap; src: url("/fonts/Inter-400.woff2") format("woff2"); }
 @font-face { font-family: "Inter"; font-weight: 500; font-style: normal; font-display: swap; src: url("/fonts/Inter-500.woff2") format("woff2"); }
 @font-face { font-family: "Inter"; font-weight: 600; font-style: normal; font-display: swap; src: url("/fonts/Inter-600.woff2") format("woff2"); }
 @font-face { font-family: "Inter"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/Inter-700.woff2") format("woff2"); }
-/* Inter ships 300-700 only; map 800/900 (font-extrabold/black) to the 700 file
-   instead of letting the browser synthesise a smeared bold. */
 @font-face { font-family: "Inter"; font-weight: 800 900; font-style: normal; font-display: swap; src: url("/fonts/Inter-700.woff2") format("woff2"); }
 @font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("/fonts/IBMPlexMono-400.woff2") format("woff2"); }
 @font-face { font-family: "IBM Plex Mono"; font-weight: 500; font-style: normal; font-display: swap; src: url("/fonts/IBMPlexMono-500.woff2") format("woff2"); }
@@ -33,8 +31,7 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Corners: squarer than Tailwind defaults, same order so nothing reflows.
-     rounded-full is untouched (status dots, avatars stay round). */
+  /* Corners: squarer than Tailwind defaults, matching the deck's flat look. */
   --radius-xs: 1px;
   --radius-sm: 2px;
   --radius-md: 3px;
@@ -44,172 +41,90 @@
   --radius-3xl: 12px;
   --radius-4xl: 16px;
 
-  /* Brand anchors (new tokens, usable as bg-brand-blue, text-brand-teal, ...) */
-  --color-brand-ground: #0B1633;
-  --color-brand-paper: #101C3F;
-  --color-brand-raised: #16285A;
-  --color-brand-line: #24345F;
+  /* Brand anchors (deck light palette) */
+  --color-brand-ground: #F5F7FA;   /* page --bg */
+  --color-brand-paper:  #FFFFFF;   /* card --paper */
+  --color-brand-raised: #E9EDF3;   /* raised/input/track */
+  --color-brand-line:   #D3DAE6;   /* --line */
   --color-brand-blue: #0B64DD;
-  --color-brand-blue-light: #5B9BFF;
-  --color-brand-teal: #48EFCF;
+  --color-brand-blue-light: #2B7FF5;
+  --color-brand-teal: #02BCB7;
   --color-brand-teal-mid: #02BCB7;
   --color-brand-pink: #F04E98;
   --color-brand-yellow: #FEC514;
-  --color-brand-poppy: #FF957D;
+  --color-brand-poppy: #FF7E62;
   --color-brand-midnight: #153385;
 
-  /* slate → Elastic navy ground + blue-grey text ramp.
-     950 ground · 900 surface · 800 raised · 700 border · 600..50 text. */
-  --color-slate-50:  #F5F7FA;
-  --color-slate-100: #E3E8F2;
-  --color-slate-200: #C9D3E3;
-  --color-slate-300: #B0BBD0;
-  --color-slate-400: #98A3BA;
-  --color-slate-500: #808CA5;
-  --color-slate-600: #5E6B8C;
-  --color-slate-700: #24345F;
-  --color-slate-800: #16285A;
-  --color-slate-900: #101C3F;
-  --color-slate-950: #0B1633;
+  /* NEUTRAL (slate) — INVERTED for light: 950 = lightest ground, 50 = darkest ink.
+     950 page · 900 card/paper · 800 raised/input · 700 line/border ·
+     600 muted · 400 secondary text · 200 char · 100/50 ink. */
+  --color-slate-50:  #1D1E24;  /* ink — primary text */
+  --color-slate-100: #26282F;
+  --color-slate-200: #343741;  /* char — secondary text */
+  --color-slate-300: #474E5C;
+  --color-slate-400: #69707D;  /* grey — meta text */
+  --color-slate-500: #828B99;
+  --color-slate-600: #98A2B3;  /* grey-l — muted / placeholder */
+  --color-slate-700: #D3DAE6;  /* line — default borders */
+  --color-slate-800: #E9EDF3;  /* raised surface / input / track */
+  --color-slate-900: #FFFFFF;  /* paper — card / panel surface */
+  --color-slate-950: #F5F7FA;  /* ground — page background */
 
-  /* emerald + teal → Elastic teal (#48EFCF / #02BCB7) */
-  --color-emerald-50:  #EAFBF8;
-  --color-emerald-100: #C8F9EE;
-  --color-emerald-200: #9DF5E2;
-  --color-emerald-300: #72F2D8;
-  --color-emerald-400: #48EFCF;
-  --color-emerald-500: #02BCB7;
-  --color-emerald-600: #0A8F8F;
-  --color-emerald-700: #0B6E72;
-  --color-emerald-800: #0C5F63;
-  --color-emerald-900: #0A4A50;
-  --color-emerald-950: #062C33;
+  /* emerald + teal → Elastic teal, cores readable on light */
+  --color-emerald-50:  #EAFBF8; --color-emerald-100: #C8F4EE; --color-emerald-200: #99E8DF;
+  --color-emerald-300: #4FD4CB; --color-emerald-400: #02BCB7; --color-emerald-500: #09A9A6;
+  --color-emerald-600: #0A8F8F; --color-emerald-700: #0B7276; --color-emerald-800: #0C5F63;
+  --color-emerald-900: #0A4A50; --color-emerald-950: #062C33;
+  --color-teal-50:  #EAFBF8; --color-teal-100: #C8F4EE; --color-teal-200: #99E8DF;
+  --color-teal-300: #4FD4CB; --color-teal-400: #02BCB7; --color-teal-500: #09A9A6;
+  --color-teal-600: #0A8F8F; --color-teal-700: #0B7276; --color-teal-800: #0C5F63;
+  --color-teal-900: #0A4A50; --color-teal-950: #062C33;
 
-  --color-teal-50:  #EAFBF8;
-  --color-teal-100: #C8F9EE;
-  --color-teal-200: #9DF5E2;
-  --color-teal-300: #72F2D8;
-  --color-teal-400: #48EFCF;
-  --color-teal-500: #02BCB7;
-  --color-teal-600: #0A8F8F;
-  --color-teal-700: #0B6E72;
-  --color-teal-800: #0C5F63;
-  --color-teal-900: #0A4A50;
-  --color-teal-950: #062C33;
+  /* blue + sky → Elastic blue, cores readable on light */
+  --color-blue-50:  #EEF5FF; --color-blue-100: #D9E8FF; --color-blue-200: #B8D5FF;
+  --color-blue-300: #6FA8FF; --color-blue-400: #1E72E6; --color-blue-500: #0B64DD;
+  --color-blue-600: #0A57BE; --color-blue-700: #0A499E; --color-blue-800: #0B3D80;
+  --color-blue-900: #0C2F60; --color-blue-950: #0A1E40;
+  --color-sky-50:  #EEF5FF; --color-sky-100: #D9E8FF; --color-sky-200: #B8D5FF;
+  --color-sky-300: #6FA8FF; --color-sky-400: #1E72E6; --color-sky-500: #0B64DD;
+  --color-sky-600: #0A57BE; --color-sky-700: #0A499E; --color-sky-800: #0B3D80;
+  --color-sky-900: #0C2F60; --color-sky-950: #0A1E40;
 
-  /* blue + sky → Elastic blue (#5B9BFF on dark, #0B64DD core) */
-  --color-blue-50:  #F1F6FF;
-  --color-blue-100: #D9E8FF;
-  --color-blue-200: #BFDBFF;
-  --color-blue-300: #8FC0FF;
-  --color-blue-400: #5B9BFF;
-  --color-blue-500: #2B7FF5;
-  --color-blue-600: #0B64DD;
-  --color-blue-700: #0A52B3;
-  --color-blue-800: #123E8A;
-  --color-blue-900: #12306A;
-  --color-blue-950: #0D2147;
+  /* cyan → Elastic light blue (Edge Federation adventure) */
+  --color-cyan-50:  #ECFBFF; --color-cyan-100: #CDEFF8; --color-cyan-200: #A6E2F0;
+  --color-cyan-300: #5FC6E2; --color-cyan-400: #17A6CC; --color-cyan-500: #0DA1C9;
+  --color-cyan-600: #0E8AAD; --color-cyan-700: #19799F; --color-cyan-800: #0F658A;
+  --color-cyan-900: #0A5476; --color-cyan-950: #003447;
 
-  --color-sky-50:  #F1F6FF;
-  --color-sky-100: #D9E8FF;
-  --color-sky-200: #BFDBFF;
-  --color-sky-300: #8FC0FF;
-  --color-sky-400: #5B9BFF;
-  --color-sky-500: #2B7FF5;
-  --color-sky-600: #0B64DD;
-  --color-sky-700: #0A52B3;
-  --color-sky-800: #123E8A;
-  --color-sky-900: #12306A;
-  --color-sky-950: #0D2147;
+  /* amber + yellow → Elastic yellow; mid/dark tones for readable text on light */
+  --color-amber-50:  #FFF8E1; --color-amber-100: #FFEDB3; --color-amber-200: #FFE07F;
+  --color-amber-300: #FBC63A; --color-amber-400: #E79A06; --color-amber-500: #C97E05;
+  --color-amber-600: #A66606; --color-amber-700: #855206; --color-amber-800: #6A4206;
+  --color-amber-900: #553606; --color-amber-950: #3D2A08;
+  --color-yellow-50:  #FFF8E1; --color-yellow-100: #FFEDB3; --color-yellow-200: #FFE07F;
+  --color-yellow-300: #FBC63A; --color-yellow-400: #E79A06; --color-yellow-500: #C97E05;
+  --color-yellow-600: #A66606; --color-yellow-700: #855206; --color-yellow-800: #6A4206;
+  --color-yellow-900: #553606; --color-yellow-950: #3D2A08;
 
-  /* cyan → Elastic light blue / EUI sky, kept distinct from blue and teal
-     (the Edge Federation adventure is cyan-keyed). */
-  --color-cyan-50:  #ECFBFF;
-  --color-cyan-100: #CFEEF7;
-  --color-cyan-200: #B5E5F2;
-  --color-cyan-300: #94D8EB;
-  --color-cyan-400: #63C8E3;
-  --color-cyan-500: #37B8DC;
-  --color-cyan-600: #0DA1C9;
-  --color-cyan-700: #19799F;
-  --color-cyan-800: #0F658A;
-  --color-cyan-900: #055476;
-  --color-cyan-950: #003447;
+  /* rose + pink → Elastic pink */
+  --color-rose-50:  #FFF0F8; --color-rose-100: #FDDDE9; --color-rose-200: #FFC2D8;
+  --color-rose-300: #F888B5; --color-rose-400: #F04E98; --color-rose-500: #E0287E;
+  --color-rose-600: #C71C6C; --color-rose-700: #A5185B; --color-rose-800: #801347;
+  --color-rose-900: #5E2140; --color-rose-950: #351725;
+  --color-pink-50:  #FFF0F8; --color-pink-100: #FDDDE9; --color-pink-200: #FFC2D8;
+  --color-pink-300: #F888B5; --color-pink-400: #F04E98; --color-pink-500: #E0287E;
+  --color-pink-600: #C71C6C; --color-pink-700: #A5185B; --color-pink-800: #801347;
+  --color-pink-900: #5E2140; --color-pink-950: #351725;
 
-  /* amber + yellow → Elastic yellow (#FEC514) */
-  --color-amber-50:  #FFF8E1;
-  --color-amber-100: #FFEDB3;
-  --color-amber-200: #FFE07F;
-  --color-amber-300: #FED54A;
-  --color-amber-400: #FEC514;
-  --color-amber-500: #FFAD18;
-  --color-amber-600: #E08E00;
-  --color-amber-700: #B36F05;
-  --color-amber-800: #8A5506;
-  --color-amber-900: #6A4906;
-  --color-amber-950: #3D2A08;
-
-  --color-yellow-50:  #FFF8E1;
-  --color-yellow-100: #FFEDB3;
-  --color-yellow-200: #FFE07F;
-  --color-yellow-300: #FED54A;
-  --color-yellow-400: #FEC514;
-  --color-yellow-500: #FFAD18;
-  --color-yellow-600: #E08E00;
-  --color-yellow-700: #B36F05;
-  --color-yellow-800: #8A5506;
-  --color-yellow-900: #6A4906;
-  --color-yellow-950: #3D2A08;
-
-  /* rose + pink → Elastic pink (#F04E98) */
-  --color-rose-50:  #FFF0F8;
-  --color-rose-100: #FDDDE9;
-  --color-rose-200: #FFC7DB;
-  --color-rose-300: #F99BC4;
-  --color-rose-400: #F472AE;
-  --color-rose-500: #F04E98;
-  --color-rose-600: #DD0A73;
-  --color-rose-700: #BC1E70;
-  --color-rose-800: #8C1556;
-  --color-rose-900: #5E2140;
-  --color-rose-950: #351725;
-
-  --color-pink-50:  #FFF0F8;
-  --color-pink-100: #FDDDE9;
-  --color-pink-200: #FFC7DB;
-  --color-pink-300: #F99BC4;
-  --color-pink-400: #F472AE;
-  --color-pink-500: #F04E98;
-  --color-pink-600: #DD0A73;
-  --color-pink-700: #BC1E70;
-  --color-pink-800: #8C1556;
-  --color-pink-900: #5E2140;
-  --color-pink-950: #351725;
-
-  /* violet + purple → cool blue-violet that sits between Elastic blue and pink */
-  --color-violet-50:  #F3F2FF;
-  --color-violet-100: #E6E4FF;
-  --color-violet-200: #CFCBFF;
-  --color-violet-300: #B3ACFF;
-  --color-violet-400: #9189FA;
-  --color-violet-500: #7468F0;
-  --color-violet-600: #5B4FD9;
-  --color-violet-700: #4A3FB5;
-  --color-violet-800: #3B3390;
-  --color-violet-900: #2F2A70;
-  --color-violet-950: #1C1945;
-
-  --color-purple-50:  #F3F2FF;
-  --color-purple-100: #E6E4FF;
-  --color-purple-200: #CFCBFF;
-  --color-purple-300: #B3ACFF;
-  --color-purple-400: #9189FA;
-  --color-purple-500: #7468F0;
-  --color-purple-600: #5B4FD9;
-  --color-purple-700: #4A3FB5;
-  --color-purple-800: #3B3390;
-  --color-purple-900: #2F2A70;
-  --color-purple-950: #1C1945;
+  /* violet + purple → cool blue-violet */
+  --color-violet-50:  #F3F2FF; --color-violet-100: #E6E4FF; --color-violet-200: #CFCBFF;
+  --color-violet-300: #A79EF7; --color-violet-400: #7468F0; --color-violet-500: #5B4FD9;
+  --color-violet-600: #4A3FB5; --color-violet-700: #3F3699; --color-violet-800: #342C7E;
+  --color-violet-900: #2A2466; --color-violet-950: #1C1945;
+  --color-purple-50:  #F3F2FF; --color-purple-100: #E6E4FF; --color-purple-200: #CFCBFF;
+  --color-purple-300: #A79EF7; --color-purple-400: #7468F0; --color-purple-500: #5B4FD9;
+  --color-purple-600: #4A3FB5; --color-purple-700: #3F3699; --color-purple-800: #342C7E;
+  --color-purple-900: #2A2466; --color-purple-950: #1C1945;
 
   /* red, orange, green, fuchsia, gray/zinc/neutral/stone: Tailwind defaults.
      Red stays the semantic danger colour, distinct from brand pink. */
@@ -217,14 +132,14 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     background-color: var(--color-slate-950);
   }
   body {
     margin: 0;
     min-height: 100svh;
     background-color: var(--color-slate-950);
-    color: var(--color-slate-100);
+    color: var(--color-slate-50);
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
@@ -233,26 +148,27 @@
   }
 
   ::selection {
-    background-color: color-mix(in srgb, var(--color-brand-blue) 55%, transparent);
-    color: #FFFFFF;
+    background-color: color-mix(in srgb, var(--color-brand-blue) 20%, transparent);
+    color: var(--color-slate-50);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-blue-400);
+    outline: 2px solid var(--color-blue-500);
     outline-offset: 2px;
   }
 
-  /* Scrollbars: thin navy rails, blue-grey thumb. */
+  /* Scrollbars: light rails, grey thumb. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-slate-700) transparent;
+    scrollbar-color: var(--color-slate-600) transparent;
   }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background-color: var(--color-slate-700);
+    background-color: var(--color-slate-600);
     border: 2px solid var(--color-slate-950);
+    border-radius: 6px;
   }
-  ::-webkit-scrollbar-thumb:hover { background-color: var(--color-slate-600); }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--color-slate-500); }
   ::-webkit-scrollbar-corner { background: transparent; }
 }

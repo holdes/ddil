@@ -10,9 +10,9 @@
 }
 
 /* Markdown styling for the Jina Research Paper Analyst answer */
-.prose-jina { color: #cbd5e1; font-size: 0.875rem; line-height: 1.65; }
+.prose-jina { color: #343741; font-size: 0.875rem; line-height: 1.65; }
 .prose-jina p { margin: 0 0 0.75rem; }
-.prose-jina h1, .prose-jina h2, .prose-jina h3 { color: #e2e8f0; font-weight: 600; margin: 1rem 0 0.5rem; }
+.prose-jina h1, .prose-jina h2, .prose-jina h3 { color: #1D1E24; font-weight: 600; margin: 1rem 0 0.5rem; }
 .prose-jina ul, .prose-jina ol { margin: 0 0 0.75rem; padding-left: 1.25rem; }
 .prose-jina li { margin: 0.2rem 0; }
 .prose-jina strong { color: #f1f5f9; }
