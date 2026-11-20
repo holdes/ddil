@@ -2,10 +2,11 @@
 # setup-index-local.sh — create the airgapped sec_10k_2026 index on the local
 # cluster and bulk-load the locally re-embedded NDJSON (from reembed-local.py).
 #
-# Differs from the bench index_finance.sh only in the vector dims/similarity:
-# the local index matches the kit's embedder (nomic-embed-text, 768-d) instead
-# of Bedrock Cohere v4 (1536-d). The ES|QL agent tools use BM25 MATCH and don't
-# care about dims; only the kNN search path (Chapter 03) does.
+# The vector dims match the kit's embedder: Jina Embeddings v5 Omni on the DGX
+# Spark at SEC_EMBED_DIMS (768 by default, demo/backend/app/config.py). The
+# committed corpus was 1536-d; it must be re-embedded on the kit first
+# (reembed-local.py). The ES|QL agent tools use BM25 MATCH and don't care about
+# dims; only the kNN search path (Chapter 03) does.
 #
 # Usage:
 #   ES_URL=http://192.168.1.20:9200 DIMS=768 bash setup-index-local.sh ./sec_10k_local.ndjson
@@ -13,8 +14,8 @@ set -euo pipefail
 
 ES="${ES_URL:-http://192.168.1.20:9200}"     # local GPU node (DGX Spark) by default
 INDEX="${INDEX:-sec_10k_2026}"
-DIMS="${DIMS:-768}"                          # nomic-embed-text
-SIM="${SIM:-cosine}"                         # nomic vectors aren't unit-norm → cosine
+DIMS="${DIMS:-768}"                          # must equal SEC_EMBED_DIMS (config.py); run-all.sh passes it
+SIM="${SIM:-cosine}"                         # Jina vectors are L2-normalized; cosine also covers the Ollama fallback
 SRC="${1:-./sec_10k_local.ndjson}"
 AUTH=()
 if [ -n "${ES_USER:-}" ] && [ -n "${ES_PASSWORD:-}" ]; then

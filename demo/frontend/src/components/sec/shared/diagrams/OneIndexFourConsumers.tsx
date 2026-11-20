@@ -14,7 +14,7 @@ interface SpokeProps {
 const SPOKES: SpokeProps[] = [
   { Icon: User,     label: "Analyst UI",       detail: "natural-language semantic search · sub-100ms", tone: "elastic" },
   { Icon: Code2,    label: "Developer API",    detail: "cURL · Python · Kibana Dev Tools",             tone: "nvidia" },
-  { Icon: Bot,      label: "Agent",            detail: "Elastic Agent Builder · Bedrock Opus",         tone: "amber" },
+  { Icon: Bot,      label: "Agent",            detail: "Elastic Agent Builder · Nemotron 3.5 Lightning", tone: "amber" },
   { Icon: Workflow, label: "Workflow",         detail: "scheduled / alert-triggered automation",       tone: "violet" },
 ];
 
@@ -33,7 +33,7 @@ export function OneIndexFourConsumers() {
         <div className="rounded-2xl border border-slate-600/60 bg-slate-900 px-5 py-4 text-center shadow-lg shadow-slate-950/40">
           <Database size={24} className="text-slate-200 mx-auto mb-1" />
           <div className="text-sm font-bold text-slate-100">sec_10k_2026</div>
-          <div className="text-[10px] text-slate-400 font-mono mt-0.5">93,541 chunks · 1536-d HNSW</div>
+          <div className="text-[10px] text-slate-400 font-mono mt-0.5">93,541 chunks · 768-d HNSW</div>
         </div>
       </div>
 

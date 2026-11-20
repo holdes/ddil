@@ -1,0 +1,180 @@
+{
+ "id": "domaine-cote-cachee",
+ "name": "Domaine de la Côte Cachée",
+ "region": "Walla Walla AVA, Washington",
+ "center": {
+  "lat": 46.015,
+  "lon": -118.38
+ },
+ "zoom": 16,
+ "blocks": [
+  {
+   "id": "BLK-A",
+   "name": "Les Pierres",
+   "variety": "Cabernet Sauvignon",
+   "acres": 4.2,
+   "elevation_m": 285,
+   "aspect": "South",
+   "soil_type": "Loess over basalt",
+   "story": "Star performer — well-drained, south-facing, consistently top quality.",
+   "polygon": [
+    {
+     "lat": 46.014,
+     "lon": -118.383
+    },
+    {
+     "lat": 46.014,
+     "lon": -118.381
+    },
+    {
+     "lat": 46.0155,
+     "lon": -118.381
+    },
+    {
+     "lat": 46.0155,
+     "lon": -118.383
+    }
+   ]
+  },
+  {
+   "id": "BLK-B",
+   "name": "Clos du Vent",
+   "variety": "Syrah",
+   "acres": 3.8,
+   "elevation_m": 310,
+   "aspect": "Southwest",
+   "soil_type": "Shallow rocky",
+   "story": "Wind-exposed ridge — drought-vulnerable but produces concentrated fruit.",
+   "polygon": [
+    {
+     "lat": 46.016,
+     "lon": -118.3835
+    },
+    {
+     "lat": 46.016,
+     "lon": -118.3818
+    },
+    {
+     "lat": 46.0173,
+     "lon": -118.3818
+    },
+    {
+     "lat": 46.0173,
+     "lon": -118.3835
+    }
+   ]
+  },
+  {
+   "id": "BLK-C",
+   "name": "La Rivière",
+   "variety": "Merlot",
+   "acres": 5.1,
+   "elevation_m": 245,
+   "aspect": "East",
+   "soil_type": "Alluvial clay",
+   "story": "Riverside block — rich clay soil, moisture-retentive. Performance declining since 2022.",
+   "polygon": [
+    {
+     "lat": 46.0125,
+     "lon": -118.38
+    },
+    {
+     "lat": 46.0125,
+     "lon": -118.3775
+    },
+    {
+     "lat": 46.0142,
+     "lon": -118.3775
+    },
+    {
+     "lat": 46.0142,
+     "lon": -118.38
+    }
+   ]
+  },
+  {
+   "id": "BLK-D",
+   "name": "Le Jardin",
+   "variety": "Chardonnay",
+   "acres": 3.5,
+   "elevation_m": 260,
+   "aspect": "Northeast",
+   "soil_type": "Sandy loam",
+   "story": "Protected garden block — good for whites but prone to disease in wet years.",
+   "polygon": [
+    {
+     "lat": 46.0145,
+     "lon": -118.377
+    },
+    {
+     "lat": 46.0145,
+     "lon": -118.3752
+    },
+    {
+     "lat": 46.0158,
+     "lon": -118.3752
+    },
+    {
+     "lat": 46.0158,
+     "lon": -118.377
+    }
+   ]
+  },
+  {
+   "id": "BLK-E",
+   "name": "Vieilles Vignes",
+   "variety": "Cabernet Franc",
+   "acres": 2.8,
+   "elevation_m": 295,
+   "aspect": "South",
+   "soil_type": "Volcanic, deep",
+   "story": "35-year-old vines — deep roots buffer against extremes. Remarkably consistent.",
+   "polygon": [
+    {
+     "lat": 46.0158,
+     "lon": -118.3805
+    },
+    {
+     "lat": 46.0158,
+     "lon": -118.379
+    },
+    {
+     "lat": 46.0168,
+     "lon": -118.379
+    },
+    {
+     "lat": 46.0168,
+     "lon": -118.3805
+    }
+   ]
+  },
+  {
+   "id": "BLK-F",
+   "name": "Le Plateau",
+   "variety": "Riesling",
+   "acres": 2.2,
+   "elevation_m": 320,
+   "aspect": "North",
+   "soil_type": "Limestone-rich, chalky",
+   "story": "Highest elevation — cool nights preserve acidity. Small but distinctive.",
+   "polygon": [
+    {
+     "lat": 46.0175,
+     "lon": -118.3798
+    },
+    {
+     "lat": 46.0175,
+     "lon": -118.3785
+    },
+    {
+     "lat": 46.0183,
+     "lon": -118.3785
+    },
+    {
+     "lat": 46.0183,
+     "lon": -118.3798
+    }
+   ]
+  }
+ ]
+}

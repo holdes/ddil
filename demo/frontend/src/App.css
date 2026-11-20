@@ -1,10 +1,11 @@
 @import "tailwindcss";
+@import "./theme.css"; /* Elastic brand theme layer (palette, fonts, corners) */
 
 /* SEC / NVIDIA deck theme tokens (ported from race-demo) — chapters reference
    these via arbitrary values like text-[var(--color-elastic)]. */
 @theme {
-  --color-elastic: #00bfb3;
-  --color-elastic-dark: #017d77;
+  --color-elastic: #02bcb7;
+  --color-elastic-dark: #0b7a7e;
   --color-nvidia: #76b900;
 }
 

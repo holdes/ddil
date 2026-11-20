@@ -1,0 +1,376 @@
+<!-- ============ PAGE 1: COVER ============ -->
+<div class="page cover">
+  <div class="top">
+    <div class="eyebrow">DDIL demo kit · SA enablement · 00</div>
+    <h1>SA training guide. <span class="hl">Present the kit honestly.</span></h1>
+    <p class="sub">This program takes a solutions architect from a first viewing of the DDIL kit to running it alone in front of a customer. It covers the purpose of the kit, the three adventures, a four-level learning path with sign-off checklists, and the live and staged elements of every screen.</p>
+    <div class="meta">
+      <span class="chip">Status as of 13 Nov 2026</span>
+      <span class="chip">Code basis: commit 5114c3a, branch sa-enablement</span>
+      <span class="chip">Single source of truth: FACTS.md</span>
+    </div>
+
+    <div class="card mt2">
+      <div class="ch">The one rule of this program</div>
+      <div class="cb">
+        <div class="tr"></div>
+        <p>Every number, model name and capability that an SA states in front of a customer must be true of the kit in the room. Several screens show figures that are hardcoded or simulated. This guide names each one and gives the sentence to use instead. An SA who follows the "What to say" column never has to retract a claim.</p>
+      </div>
+    </div>
+
+    <h3 class="mt2">How to read the status tags</h3>
+    <table class="t tight">
+      <tr><th style="width:92px">Tag</th><th>Meaning</th></tr>
+      <tr><td><span class="tag live">Live</span></td><td>Computed at run time from real Elasticsearch data or a real model call on the kit.</td></tr>
+      <tr><td><span class="tag staged">Staged</span></td><td>Hardcoded or simulated in the application code. The value does not change with the data.</td></tr>
+      <tr><td><span class="tag fb">Fallback</span></td><td>Live when the backend answers. When a call fails, the screen silently shows canned values with no error.</td></tr>
+      <tr><td><span class="tag doc">Doc-only</span></td><td>Appears in documentation or code comments only. No executed code produces it.</td></tr>
+      <tr><td><span class="tag wip">Not merged</span></td><td>Local work in progress. Not on the shared branch and not on the kit.</td></tr>
+    </table>
+  </div>
+  <div class="band">
+    <div>
+      <div class="k">The documentation set</div>
+      <div class="doc"><b>00</b> SA training guide<br><b>01</b> Architecture guide<br><b>02</b> Kit configuration runbook<br><b>03</b> Scenario runbook: Vineyard Intelligence<br><b>04</b> Scenario runbook: SEC Findings<br><b>05</b> Scenario runbook: Multimodal + Need-to-Know<br><b>06</b> Quick reference card</div>
+    </div>
+    <div>
+      <div class="k">Companion material</div>
+      <p>Practice environment: <span class="m" style="color:#fff">mock/index.html</span>, opens from disk with no backend.</p>
+      <p>Presentation deck: <span class="m" style="color:#fff">deck/</span></p>
+      <p>Fact base with code citations: <span class="m" style="color:#fff">FACTS.md</span></p>
+      <img src="../assets/logos/elastic-horizontal-white.svg" alt="Elastic" width="120" height="40">
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2: PURPOSE ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>Purpose of the kit</span></div>
+  <div class="eyebrow">Why the kit exists</div>
+  <h2>Search and generative AI <span class="hl">where the network is not.</span></h2>
+  <p class="lead">The DDIL kit runs Elasticsearch, embedding models and a 120-billion-parameter language model on two local machines. It answers questions over local data with no cloud service in the request path. That is the sovereign AI story: the data, the models and the answers stay on hardware the operator controls.</p>
+
+  <div class="cols2 mt">
+    <div class="card">
+      <div class="ch">DDIL, defined</div>
+      <div class="cb">
+        <p><b>Disconnected.</b> No route to the internet or a parent network.</p>
+        <p><b>Denied.</b> The network exists but the adversary or the policy blocks it.</p>
+        <p><b>Intermittent.</b> Links come and go. Work must continue between windows.</p>
+        <p><b>Limited bandwidth.</b> A link exists but cannot carry bulk data or model traffic.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch tl">What runs on the kit</div>
+      <div class="cb">
+        <ul>
+          <li>One Elasticsearch cluster, <code>ddil-vineyard</code>, with a GPU node on the DGX Spark and a CPU node on the Framework Desktop.</li>
+          <li>NVIDIA Nemotron 3.5 Lightning, an open-weight NeMo model, on Ollama on the DGX Spark.</li>
+          <li>Jina Embeddings v5 Omni (Elastic) for text and images, on the DGX Spark.</li>
+          <li>Kibana with Agent Builder, the demo backend and the demo frontend on the Framework Desktop.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="mt2">The hardware in the case</h3>
+  <table class="t">
+    <tr><th>Item</th><th>Address</th><th>Specification</th><th>Role</th></tr>
+    <tr><td class="k">DGX Spark</td><td><code>192.168.1.20</code></td><td>GB10 Blackwell, 128 GB unified memory, aarch64</td><td>ES GPU node with cuVS, Ollama, Jina embedding server</td></tr>
+    <tr><td class="k">Framework Desktop</td><td><code>192.168.1.10</code></td><td>Ryzen AI Max+ 395, 64 GB, x86_64</td><td>ES CPU node, Kibana, demo backend and frontend, kiosk display</td></tr>
+    <tr><td class="k">Gateway</td><td><code>192.168.1.1</code></td><td>UniFi Express 7</td><td>Routing, DHCP pool 192.168.1.100-199 (documented only)</td></tr>
+    <tr><td class="k">Switch</td><td>n/a</td><td>Switch Flex Mini, 5-port GbE</td><td>Connects the nodes on the kit LAN</td></tr>
+  </table>
+
+  <div class="warn card mt">
+    <div class="ch">Pre-show check before every show</div>
+    <div class="cb">
+      <p>Confirm the kit config points at Nemotron 3.5 Lightning and Jina v5 Omni, and that all nodes and Kibana run 9.5.6 with matched security settings. Runbook 02 shows how.</p>
+    </div>
+  </div>
+
+  <h3 class="mt2">What a customer should leave with</h3>
+  <ul>
+    <li>Elasticsearch, vector search, an LLM and an agent framework run on hardware that fits in a case and needs no external network at run time.</li>
+    <li>The same Elastic platform features used in the cloud (kNN and hybrid retrieval, inference endpoints, Agent Builder with ES|QL tools) work on the edge kit.</li>
+    <li>The SA was precise about what was measured on the kit and what was illustrative.</li>
+  </ul>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 3: ADVENTURES ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>The three adventures</span></div>
+  <div class="eyebrow">At a glance</div>
+  <h2>Three adventures. <span class="hl">One chooser screen.</span></h2>
+  <p>The frontend opens on an adventure chooser. Each card launches a self-contained adventure. The chooser also shows other cards, such as Edge Federation. Those are out of scope for this program and are not covered by these runbooks.</p>
+
+  <table class="t">
+    <tr><th style="width:118px">Adventure</th><th>What the audience sees</th><th>Elastic capability that is live</th><th>Main staged content</th></tr>
+    <tr><td class="k">Vineyard<br>Intelligence</td><td>Architecture screen, an indexing race, then an app for a fictional 6-block estate in Walla Walla: Dashboard, Vineyard map, AI Agronomist, Search, Crop Health, System.</td><td>ES queries and kNN on 8-dim soil vectors. A five-phase AI Agronomist pipeline that calls Nemotron 3.5 Lightning four times through Ollama.</td><td>The race (timed simulation), Crop Health, System, alerts, the Architecture stat strip. Search semantic and hybrid modes fall back to canned results.</td></tr>
+    <tr><td class="k">SEC Findings</td><td>An eight-chapter presenter deck over S&amp;P 500 10-K filings: the kit's two nodes, speed race, kit economics, semantic search, an agent, a workflow, a recap.</td><td>Semantic kNN search over <code>sec_10k_2026</code> (Chapter 03). A Kibana Agent Builder agent, <code>finance-analyst</code>, with three ES|QL tools (Chapter 04).</td><td>The kit hardware face-off text, the same race simulator, the presenter TCO figures, the workflow chapter.</td></tr>
+    <tr><td class="k">Multimodal +<br>Need-to-Know</td><td>Search by Image over a small set of synthetic shape images. Need-to-Know: four analyst personas query research papers and get answers scoped to their clearance.</td><td>Native ES kNN with <code>query_vector_builder</code> through an inference endpoint. Hybrid RRF (BM25 plus kNN) with a clearance filter. A grounded answer from Nemotron 3.5 Lightning.</td><td>The "509" corpus total. The security markings are a synthetic model. The clearance filter is applied by the application.</td></tr>
+  </table>
+
+  <h3 class="mt">Where Agent Builder appears</h3>
+  <p>Agent Builder runs in one place: SEC Findings, Chapter 04. The Vineyard chooser card reads "AI Agronomist · Elastic Agent Builder" and the Vineyard Architecture screen shows Agent Builder in its data flow. The AI Agronomist code never calls Kibana or Agent Builder. It is a Python pipeline in the demo backend that queries Elasticsearch and calls Ollama directly. Describe it that way.</p>
+
+  <h3>Suggested pairing by audience</h3>
+  <table class="t tight">
+    <tr><th style="width:170px">Audience interest</th><th>Lead with</th><th>Follow with</th></tr>
+    <tr><td>Edge AI, sovereign inference</td><td>Vineyard Intelligence (AI Agronomist)</td><td>Multimodal + Need-to-Know</td></tr>
+    <tr><td>Agentic AI on Elastic</td><td>SEC Findings, Chapters 03 and 04</td><td>Vineyard AI Agronomist as the in-app pipeline contrast</td></tr>
+    <tr><td>Need-to-know, classified handling</td><td>Multimodal + Need-to-Know</td><td>SEC Chapter 04 for the agent pattern</td></tr>
+    <tr><td>GPU vector indexing</td><td>Explain cuVS on the Architecture screen</td><td>Show the race only as a labeled simulation</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 4: LEARNING PATH ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>Learning path</span></div>
+  <div class="eyebrow">Learning path</div>
+  <h2>Four levels. <span class="hl">Sign-off at each one.</span></h2>
+  <p class="lead">An SA moves up one level at a time. A certified presenter signs off each level against the checklist on the next page. Level 3 and Level 4 require time on the physical kit.</p>
+
+  <div class="cols2">
+    <div class="card">
+      <div class="ch">Level 1 · Observe</div>
+      <div class="cb">
+        <div class="tr"></div>
+        <p><b>Goal.</b> Know the story, the hardware and the honesty rules.</p>
+        <ul>
+          <li>Read this guide and the Architecture guide (01).</li>
+          <li>Watch a certified presenter run all three adventures end to end, including a reset.</li>
+          <li>Study the live and staged tables on pages 6 to 8 until each "What to say" line is familiar.</li>
+          <li>Read the three scenario runbooks (03, 04, 05).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch tl">Level 2 · Rehearse in the mock</div>
+      <div class="cb">
+        <div class="tr"></div>
+        <p><b>Goal.</b> Run every click path and every line without the kit.</p>
+        <ul>
+          <li>Open <code>mock/index.html</code> from disk. It is plain HTML with no backend and runs scripted versions of all three adventures with a presenter coach.</li>
+          <li>Run each click path from runbooks 03 to 05 against the clock.</li>
+          <li>Practise the staged-element lines aloud until they sound natural.</li>
+          <li>Record one full rehearsal and review it with a peer.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch or">Level 3 · Run on the kit with a shadow</div>
+      <div class="cb">
+        <div class="tr"></div>
+        <p><b>Goal.</b> Operate the real kit with a certified SA present.</p>
+        <ul>
+          <li>Power on and bring up both nodes with runbook 02.</li>
+          <li>Run every pre-show health check and interpret each result.</li>
+          <li>Present each adventure once while the shadow observes.</li>
+          <li>Recover from at least one failure the shadow injects, such as a stopped Jina server or a cold model.</li>
+          <li>Reset between adventures and shut the kit down.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch pk">Level 4 · Solo</div>
+      <div class="cb">
+        <div class="tr"></div>
+        <p><b>Goal.</b> Run customer sessions alone.</p>
+        <ul>
+          <li>Run the kit for a customer session with no shadow.</li>
+          <li>Complete the pre-show checklist from the quick reference card (06) before every session.</li>
+          <li>Log any new failure, its symptom and the recovery used, and send it to the kit owner.</li>
+          <li>Re-certify after any merge that changes a screen, a model or a number listed in FACTS.md.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="mt2">Rules that apply at every level</h3>
+  <ul>
+    <li>Use FACTS.md for any figure that is not in these documents. If FACTS.md does not contain it, do not state it.</li>
+    <li>Treat any number on a screen tagged Staged as illustrative, and say so out loud before the audience reads it.</li>
+    <li>When a fallback might be on screen, check the backend directly before the session (runbook 02, health checks).</li>
+  </ul>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 5: SIGN-OFF ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>Sign-off checklists</span></div>
+  <div class="eyebrow">Sign-off</div>
+  <h2>What the certifier checks <span class="hl">at each level.</span></h2>
+  <p>The certifier ticks each item only after seeing the SA do it or explain it unprompted. Record the date, the kit, and the certifier's name on the sign-off sheet held by the kit owner.</p>
+
+  <div class="cols2 mt">
+    <div class="card">
+      <div class="ch">Level 1 · Observe</div>
+      <div class="cb">
+        <ul class="chk">
+          <li>Explains DDIL and the sovereign AI purpose of the kit in two minutes.</li>
+          <li>Names both nodes, their IP addresses and what each one runs.</li>
+          <li>States which adventure uses Agent Builder and which does not.</li>
+          <li>Explains that the indexing race is a timed simulation.</li>
+          <li>Explains that Need-to-Know uses an application-side filter and not native ES document level security.</li>
+          <li>Lists the screens that can silently show canned data.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch tl">Level 2 · Rehearse</div>
+      <div class="cb">
+        <ul class="chk">
+          <li>Completes each click path in the mock within its suggested time.</li>
+          <li>Delivers the staged-element line at each staged screen without notes.</li>
+          <li>Uses the exact suggested prompts from the runbooks.</li>
+          <li>Answers five likely questions from runbooks 03 to 05 accurately.</li>
+          <li>Describes the reset for each adventure.</li>
+          <li>Recorded rehearsal reviewed by a peer.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch or">Level 3 · Kit with shadow</div>
+      <div class="cb">
+        <ul class="chk">
+          <li>Brings up the Spark and the Framework in the documented order.</li>
+          <li>Runs the health checks and confirms both ES nodes, Ollama models, the Jina server, Kibana and the backend.</li>
+          <li>Confirms the backend is not serving fallback data.</li>
+          <li>Confirms 9.5.6 on every node and the config on Nemotron 3.5 Lightning and Jina v5 Omni.</li>
+          <li>Warms Nemotron 3.5 Lightning before the first audience question.</li>
+          <li>Recovers from an injected failure with the troubleshooting table.</li>
+          <li>Resets and shuts down cleanly. Never runs <code>docker compose down -v</code> by habit.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch pk">Level 4 · Solo</div>
+      <div class="cb">
+        <ul class="chk">
+          <li>Two shadowed customer sessions completed without certifier intervention.</li>
+          <li>One full session run solo with a post-session debrief.</li>
+          <li>Pre-show checklist completed and filed for each session.</li>
+          <li>Knows the known issues as of 13 Nov 2026 (runbook 02) and how each one shows on stage.</li>
+          <li>Commits to re-certify after changes to screens, models or figures.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <table class="t mt2 tight">
+    <tr><th style="width:110px">Level</th><th>SA name</th><th style="width:110px">Date</th><th>Kit</th><th>Certifier</th></tr>
+    <tr><td class="k">1 · Observe</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">2 · Rehearse</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">3 · Shadow</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="k">4 · Solo</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 6: LIVE/STAGED VINEYARD ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>Live and staged · Vineyard</span></div>
+  <div class="eyebrow or">What is live and what is staged · 1 of 3</div>
+  <h2>Vineyard Intelligence. <span class="hl">Screen by screen.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:92px">Screen</th><th style="width:62px">Status</th><th style="width:220px">What the code does</th><th>What to say</th></tr>
+    <tr><td class="k">Architecture</td><td><span class="tag staged">Staged</span></td><td>Static page. Stat strip "869K Documents Indexed", "12x GPU Index Speedup", "&lt;50 lbs". The data flow names Agent Builder.</td><td>Describe the two nodes, their roles and the network. Skip the stat strip. "The agronomist you will see runs as a pipeline in our app. Agent Builder appears in the SEC adventure."</td></tr>
+    <tr><td class="k">Race intro and indexing race</td><td><span class="tag staged">Staged</span></td><td>A timed simulation. No Elasticsearch indexing happens. GPU finishes in 15 s, CPU in 55 s, by script. Throughput, merge time, utilisation and recall (98.9 % and 98.7 %) are hardcoded or random noise. The screen says "12x"; the simulator's own math gives about 3.7x end to end and 7.1x on merge.</td><td>"This is a timed simulation of GPU-accelerated vector indexing with cuVS. It shows the shape of the result. The numbers are scripted, so I will not quote them as a measurement from this kit." Do not quote 12x, any v/s rate, or recall.</td></tr>
+    <tr><td class="k">Dashboard KPIs</td><td><span class="tag fb">Fallback</span></td><td>Live counts and averages from ES when the backend answers. If the call fails or returns no block summaries, the screen shows canned values (total 869,000) with no error.</td><td>Confirm live data in the pre-show check. If confirmed: "These figures come from the indices on the kit." If not confirmed, do not attribute them to the kit.</td></tr>
+    <tr><td class="k">Dashboard alerts</td><td><span class="tag staged">Staged</span></td><td>Four fixed alerts (BLK-C potassium depletion, BLK-C high moisture, BLK-D disease risk, BLK-B drought watch).</td><td>"These alerts are scripted to match the story in the synthetic data."</td></tr>
+    <tr><td class="k">Vineyard map</td><td><span class="tag fb">Fallback</span></td><td>Offline map tiles. Per-block summaries from ES. Any block whose call errors or has no moisture value shows canned values.</td><td>"The map tiles are served locally. Block readings come from the soil and NPK indices."</td></tr>
+    <tr><td class="k">AI Agronomist</td><td><span class="tag live">Live</span> <span class="tag fb">Fallback</span></td><td>Five phases in Python. Phase 0 reads the latest soil and NPK docs. Phase 1 runs kNN on the 8-dim <code>reading_vector</code>. Phases 1 to 4 each call Nemotron 3.5 Lightning through Ollama, one after another. Phases 0 and 1 fall back to mock data if ES fails. No Agent Builder call.</td><td>"Each step queries Elasticsearch on the kit and then calls Nemotron 3.5 Lightning on the DGX Spark. Nothing leaves the case." The screen says phases 2 to 4 run in parallel. They run in sequence; say "in sequence".</td></tr>
+    <tr><td class="k">Search</td><td><span class="tag staged">Staged</span></td><td>Semantic and Hybrid modes send a 768-dim query against an 8-dim field, fail, and show canned results for blocks outside the estate. The 12 ms embed latency is hardcoded. BM25 is likely to error (unverified).</td><td>Skip this screen in customer sessions on the current build.</td></tr>
+    <tr><td class="k">Crop Health</td><td><span class="tag staged">Staged</span></td><td>Every upload returns the same result: Black Rot, 0.942, 847 similar, blocks B3, B7, C2. No model runs.</td><td>Skip. If shown: "This screen is a design mock of an image-similarity workflow."</td></tr>
+    <tr><td class="k">System</td><td><span class="tag staged">Staged</span></td><td>Stale static figures: 615K+ vectors and an ES CPU node on the Spark at 9201. Wrong for this kit.</td><td>Skip. Use the Architecture guide (01) for system facts.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 7: LIVE/STAGED SEC ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>Live and staged · SEC Findings</span></div>
+  <div class="eyebrow or">What is live and what is staged · 2 of 3</div>
+  <h2>SEC Findings. <span class="hl">Chapter by chapter.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:92px">Chapter</th><th style="width:62px">Status</th><th style="width:220px">What the code does</th><th>What to say</th></tr>
+    <tr><td class="k">00 Setup</td><td><span class="tag staged">Staged</span></td><td>"The Hardware Face-Off": the kit's DGX Spark (GB10, es-gpu) against the Framework Desktop (Ryzen AI Max+ 395, es-cpu), one Elasticsearch 9.5.6 cluster. No prices.</td><td>"These are the two nodes in this case. One setting differs: <code>vectors.indexing.use_gpu</code>." Confirm 9.5.6 on both nodes before the session.</td></tr>
+    <tr><td class="k">01 Speed</td><td><span class="tag staged">Staged</span></td><td>Same race simulator as Vineyard, 841,536 docs. The subtitle says "live, real-time race". The headline row shows staged speedups and states "Cloud bill: none". The presenter panel cites 78 % and a scale projection.</td><td>"This is a timed simulation of the indexing race." Do not quote the speedup or TCO from this chapter.</td></tr>
+    <tr><td class="k">02 Side-by-Side</td><td><span class="tag staged">Staged</span></td><td>Chart of the simulated race. The kit economics panel shows the two race durations and three statements: inference on the kit, embeddings on the kit, nothing leaves the case. No dollar figures.</td><td>"Inference and embeddings run on the DGX Spark. There is no per-hour or per-token bill." Quote no TCO figure.</td></tr>
+    <tr><td class="k">Elastic segue</td><td><span class="tag staged">Staged</span></td><td>Canned slide. Says the corpus was embedded with Jina Embeddings v5 Omni (768-d) on the DGX Spark and loaded into "the GPU-built index from chapter 01".</td><td>"On the kit, the filings were embedded locally with Jina Embeddings v5 Omni at 768 dimensions."</td></tr>
+    <tr><td class="k">03 Interface</td><td><span class="tag live">Live</span></td><td>Semantic kNN on <code>sec_10k_2026</code> with optional sector filter. Hits, <code>took_ms</code> and sector counts are measured. "Show the call" names Jina Embeddings v5 Omni, 768-d. The "503 filings" placeholder is static text.</td><td>"This query was embedded on the DGX Spark and searched on the kit. The timing is real." On the code panel: "On the kit the vector is 768 dimensions from Jina Embeddings v5 Omni."</td></tr>
+    <tr><td class="k">04 Agentic</td><td><span class="tag live">Live</span></td><td>Real Agent Builder conversation through Kibana with agent <code>finance-analyst</code>, three ES|QL tools plus seven platform tools, and connector <code>finance-ollama-llm</code> to Nemotron 3.5 Lightning. The config card reads the model names from the backend; the Tradeoffs panel shows time, tokens and "Cloud spend: none".</td><td>"This is Elastic Agent Builder running on the kit. The model is NVIDIA Nemotron 3.5 Lightning on the DGX Spark."</td></tr>
+    <tr><td class="k">Workflows segue</td><td><span class="tag staged">Staged</span></td><td>Static YAML for "Daily 10-K AI-Risk Digest". The workflow is not provisioned. "Open in Kibana" and "Trigger now" return 404.</td><td>"This is an example workflow definition. It is not deployed on this kit." Do not click the links.</td></tr>
+    <tr><td class="k">05 The Stack</td><td><span class="tag doc">Doc-only</span></td><td>Recap cards: the kit's two nodes, GPU build against CPU build, search, the agent on Nemotron 3.5 Lightning, the workflow. No speedup multipliers. Links need internet.</td><td>"Everything you saw ran in this case." Do not click the links. Treat every speedup as unverified.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 8: LIVE/STAGED MULTIMODAL + FALLBACKS ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>Live and staged · Multimodal</span></div>
+  <div class="eyebrow or">What is live and what is staged · 3 of 3</div>
+  <h2>Multimodal + Need-to-Know. <span class="hl">Scene by scene.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:92px">Element</th><th style="width:62px">Status</th><th style="width:220px">What the code does</th><th>What to say</th></tr>
+    <tr><td class="k">Search by Image</td><td><span class="tag live">Live</span></td><td>Native ES kNN with <code>query_vector_builder</code>. ES calls the inference endpoint <code>jina-omni-text</code>, which calls the local Jina server. Corpus is a 10-document synthetic shapes set.</td><td>"Elasticsearch embeds the words through a local inference endpoint and finds matching images. The set is small and synthetic so the result is easy to judge."</td></tr>
+    <tr><td class="k">Model name</td><td><span class="tag staged">Staged</span></td><td>Config and UI say <code>jina-embeddings-v5-omni-small</code>.</td><td>"Jina Embeddings v5 Omni, served locally on the DGX Spark. Jina is part of Elastic."</td></tr>
+    <tr><td class="k">Clearance filter</td><td><span class="tag live">Live</span></td><td>The backend adds a filter for classification level, compartments (the analyst must hold all of a document's compartments) and NOFORN to every query, facet, figure and answer. No ES roles or native document level security are configured.</td><td>"The application applies the analyst's clearance as a query filter. Elasticsearch also supports document level security natively through roles; this demo does not configure it."</td></tr>
+    <tr><td class="k">Corpus meter</td><td><span class="tag live">Live</span> <span class="tag staged">Staged</span></td><td>The numerator (documents and chunks visible to the persona) is measured. The denominator "509" is hardcoded text.</td><td>"The analyst can see this many documents." Do not quote 509 as a count from the index.</td></tr>
+    <tr><td class="k">Markings</td><td><span class="tag staged">Staged</span></td><td>Deterministic synthetic markings from a hash of each paper's id: U 40 %, CUI 25 %, C 15 %, S 13 %, TS 7 %, plus compartments, NOFORN and ORCON rules.</td><td>"The papers are public research. The markings are synthetic and assigned by a fixed rule for the demo."</td></tr>
+    <tr><td class="k">Analyst answer</td><td><span class="tag live">Live</span></td><td>Hybrid RRF retrieval under the same filter, then Nemotron 3.5 Lightning answers from those passages only. No sources gives a canned "No documents in your accessible corpus match this question" reply.</td><td>"The model only sees passages this analyst is cleared for."</td></tr>
+  </table>
+
+  <h3 class="mt">Fallbacks that silently show canned data</h3>
+  <p>These screens never show an error when the backend fails. They show plausible numbers. Check the backend directly before every session with the commands in runbook 02.</p>
+  <table class="t tight">
+    <tr><th style="width:150px">Where</th><th>Canned content shown on failure</th></tr>
+    <tr><td class="k">Vineyard Dashboard</td><td>KPI and index counts summing to 869,000 when the dashboard call fails or returns no block summaries.</td></tr>
+    <tr><td class="k">Vineyard map</td><td>Per-block mock summaries for any block whose call fails or has no moisture value.</td></tr>
+    <tr><td class="k">Agronomist Phase 0</td><td>A mock BLK-C reading: moisture 46.2 %, potassium 50.</td></tr>
+    <tr><td class="k">Agronomist Phase 1</td><td>Mock historical matches from 2020 BLK-B and 2022 BLK-C.</td></tr>
+    <tr><td class="k">Vineyard Search</td><td>Mock results naming "Soil Station #17" in Block B3, a block that is not in the estate.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 9: PRESENTING HONESTLY ============ -->
+<div class="page">
+  <div class="rh"><span>00 · SA training guide</span><span>Presenting honestly</span></div>
+  <div class="eyebrow">Presenting honestly</div>
+  <h2>Say what is true <span class="hl">before the audience asks.</span></h2>
+  <p class="lead">Technical audiences find staged numbers. When the SA labels a simulation first, the live parts gain credibility. When the audience finds it first, the live parts lose it.</p>
+
+  <h3>Five habits</h3>
+  <ol>
+    <li><b>Label before the reveal.</b> Say "this is a timed simulation" before the race starts.</li>
+    <li><b>Point at the live proof.</b> In the live screens, point to the measured value: <code>took_ms</code> on SEC search, the visible-document count on Need-to-Know, the phase timeline in the AI Agronomist.</li>
+    <li><b>Name the model that is running.</b> NVIDIA Nemotron 3.5 Lightning on Ollama and Jina Embeddings v5 Omni on the local server, both on the DGX Spark. Ignore model names printed on canned panels.</li>
+    <li><b>Skip the dead screens.</b> Search, Crop Health and System add risk and no proof.</li>
+    <li><b>Never quote a speedup or TCO percentage from the kit screens.</b> Refer the customer to Elastic's published GPU indexing material and offer a follow-up.</li>
+  </ol>
+
+  <h3 class="mt">Figures that must not be quoted as measured</h3>
+  <table class="t tight">
+    <tr><th style="width:150px">On screen</th><th>Where it comes from</th><th style="width:200px">Use instead</th></tr>
+    <tr><td class="k">12x faster</td><td>Static UI text. The simulator itself yields about 3.7x and 7.1x.</td><td>"GPU indexing with cuVS"</td></tr>
+    <tr><td class="k">28,500 / 4,200 v/s</td><td>Simulator targets. Final values come out near 56,100 and 15,300.</td><td>No rate</td></tr>
+    <tr><td class="k">98.9 % recall</td><td>Hardcoded. Comment says "Will be computed post-race".</td><td>No recall figure</td></tr>
+    <tr><td class="k">869K, 841K</td><td>Fallback constants and docs. Live counts come from <code>_count</code>.</td><td>The live count, checked pre-show</td></tr>
+    <tr><td class="k">78 % TCO, scale projection</td><td>Presenter panel in SEC Chapter 01: a cited webinar figure and an enterprise cost model.</td><td>"An illustrative model"</td></tr>
+    <tr><td class="k">503 filings, 93,541 chunks</td><td>Static text and agent instructions.</td><td>Count the index pre-show</td></tr>
+    <tr><td class="k">509 papers</td><td>Hardcoded denominator. The kit ingests 198 papers and 9,636 text chunks. A local work-in-progress build says 208.</td><td>The persona's visible count</td></tr>
+    <tr><td class="k">"&lt;50 lbs", "&lt;1.2ms latency"</td><td>Static UI text.</td><td>Omit</td></tr>
+  </table>
+
+  <div class="card mt">
+    <div class="ch tl">If a customer asks "is this real?"</div>
+    <div class="cb">
+      <p>"The search, the embeddings, the agent and the model answers run live on this kit. The indexing race and the cost figures are illustrative and I labelled them that way. I can open the same index in Kibana and show you the documents behind any answer."</p>
+    </div>
+  </div>
+  <!--foot-->
+</div>

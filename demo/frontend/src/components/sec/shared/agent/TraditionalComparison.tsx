@@ -3,7 +3,7 @@ import { Users, FileSearch, Briefcase, Sparkles, Clock, DollarSign, Target, Aler
 import type { RoundMetadata } from "../../hooks/useAgentChat";
 
 /**
- * Grounds the "this run cost $X" claim by setting it against the alternatives
+ * Sets the kit agent's answer against the alternatives
  * an analyst would actually consider for the same job: read the filings
  * themselves, run keyword search over SEC EDGAR, or rent a vendor research
  * terminal. Numbers are illustrative but cited so the table doesn't look like
@@ -87,34 +87,23 @@ function quality(q: Row["quality"]) {
   return                          { Icon: AlertTriangle, color: "text-rose-300",  label: "incomplete" };
 }
 
-// Stable "typical" envelope for the Elastic agent on this corpus. We benchmarked
-// a representative spread of questions (single-company lookups, cross-company
-// comparisons, sector aggregations) on the finance-analyst agent + Sonnet 4.6:
-//   simple lookup  : ~$0.15  · ~30 sec   · 1 tool call
-//   comparison Q   : ~$0.60  · ~75 sec   · 3 tool calls
-//   complex multi-: ~$1.20  · ~120 sec  · 5 tool calls
-// We surface that as a band, then show the actual live measurement underneath.
-const TYPICAL = {
-  cost:  "$0.15 – $1.20",
-  time:  "30 – 120 sec",
-  costNote: "single Q&A → multi-company comparison",
-};
-
+// The Elastic agent runs on the airgapped kit: Nemotron 3.5 Lightning via
+// Ollama on the DGX Spark, query embeddings from Jina Embeddings v5 Omni on the
+// same box. There is no per-query bill, and no time band is claimed here: the
+// receipts row below shows the measured time of the run that just happened.
 export function TraditionalComparison({ meta, toolCallCount }: Props) {
   const thisRun = useMemo(() => {
     const sec  = meta.timeToLastTokenMs ? (meta.timeToLastTokenMs / 1000) : 0;
-    const cost = ((meta.inputTokens ?? 0) / 1_000_000) * 3.0
-               + ((meta.outputTokens ?? 0) / 1_000_000) * 15.0;
-    return { sec, cost };
+    return { sec };
   }, [meta]);
 
   const agentRow: Row = {
     Icon: Sparkles,
-    approach: "Elastic agent + Bedrock",
-    what: `Cohere v4 embed → kNN over 503 filings → Sonnet 4.6 synthesis with cited passages.`,
-    cost: TYPICAL.cost,
-    costNote: TYPICAL.costNote,
-    time: TYPICAL.time,
+    approach: "Elastic agent on the kit",
+    what: `Jina v5 Omni embed → search over 503 filings → Nemotron 3.5 Lightning synthesis with cited passages, all on the DGX Spark.`,
+    cost: "No per-query bill",
+    costNote: "runs inside the case",
+    time: thisRun.sec > 0 ? `${thisRun.sec.toFixed(0)} s (this run)` : "measured live",
     quality: "high",
     qualityNote: "semantic + multi-step + cited; can answer any new question against the corpus on demand",
     tone: "elastic",
@@ -189,11 +178,9 @@ export function TraditionalComparison({ meta, toolCallCount }: Props) {
       </div>
 
       {/* Receipts: this exact run, kept clearly separate from the "typical" claim */}
-      {thisRun.cost > 0 && (
+      {thisRun.sec > 0 && (
         <div className="mt-3 rounded-lg border border-slate-700/50 bg-slate-900/50 px-3 py-2 flex items-center gap-3 flex-wrap text-[11px]">
           <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400">Receipts · this exact run</span>
-          <span className="text-slate-500">·</span>
-          <span className="text-slate-200 font-mono">${thisRun.cost.toFixed(2)}</span>
           <span className="text-slate-500">·</span>
           <span className="text-slate-200 font-mono">{thisRun.sec.toFixed(0)}s</span>
           <span className="text-slate-500">·</span>
@@ -206,7 +193,7 @@ export function TraditionalComparison({ meta, toolCallCount }: Props) {
               <span className="text-slate-300 font-mono">{(meta.inputTokens/1000).toFixed(0)}k in / {(meta.outputTokens ?? 0).toLocaleString()} out</span>
             </>
           )}
-          <span className="text-slate-500 italic ml-auto">a single data point — bracket above is the typical band</span>
+          <span className="text-slate-500 italic ml-auto">a single data point, measured on the kit</span>
         </div>
       )}
 

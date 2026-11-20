@@ -16,17 +16,17 @@ interface RecapTier {
 
 const RECAP: RecapTier[] = [
   { number: "00", Icon: Cpu,      title: "Setup",        headline: "Two boxes, one knob",
-    detail: "g6.4xlarge L4 vs g6.8xlarge EPYC. Same ES 9.4.1. `vectors.indexing.use_gpu` is the only diff." },
-  { number: "01", Icon: Zap,      title: "Indexing race", headline: "GPU wins · big",
-    detail: "On 100K × 1536-d Rally vectors: 24× end-to-end (16.6× ingest + 106× force-merge). Recall comparable to CPU HNSW — same answer quality, faster build." },
+    detail: "DGX Spark (GB10) vs Framework Desktop (Ryzen AI Max+ 395). Same ES 9.5.6, one cluster. `vectors.indexing.use_gpu` is the only diff." },
+  { number: "01", Icon: Zap,      title: "Indexing race", headline: "GPU build vs CPU build",
+    detail: "GPU CAGRA graph build next to CPU HNSW on the same mapping, same Elasticsearch version. The CAGRA graph converts to HNSW, so search runs the same way on both." },
   { number: "02", Icon: Layers,   title: "Side-by-Side",  headline: "Throughput · workflow · architecture",
     detail: "Live charts + the cuVS CAGRA→HNSW pipeline; the JNI bridge that makes Elastic ↔ NVIDIA work." },
   { number: "—",  Icon: Sparkles, title: "Elastic",        headline: "From a faster index to a faster business",
     detail: "Pillars · 4-tier platform stack · same vectors fan out to 4 consumers · SEC-EDGAR data pipeline." },
   { number: "03", Icon: Search,   title: "Data Interface", headline: "One index, two audiences",
-    detail: "Analyst search vs developer API · cURL/Python/Dev Tools · sector chips · 70-100 ms kNN over 93K chunks." },
+    detail: "Analyst search vs developer API · cURL/Python/Dev Tools · sector chips · kNN over 93K chunks, query embedded by Jina v5 Omni on the kit." },
   { number: "04", Icon: Bot,      title: "Agentic Action", headline: "Reason · retrieve · synthesise",
-    detail: "finance-analyst agent on Sonnet 4.6 + custom finance.* tools — 26 → 3 LLM calls on cross-company comparisons." },
+    detail: "finance-analyst agent on NVIDIA Nemotron 3.5 Lightning via Ollama on the DGX Spark, plus custom finance.* ES|QL tools. Every call stays on the kit." },
   { number: "—",  Icon: Workflow, title: "Workflows",      headline: "Agents on autopilot",
     detail: "Daily 10-K AI-Risk Digest workflow calls the same agent on a schedule, writes back the digest. Two-way bridge." },
 ];
@@ -56,7 +56,7 @@ export function Chapter05_Conclusion() {
               <ul className="space-y-2.5 text-xs text-slate-300 leading-relaxed">
                 <FoundationBullet Icon={Clock}    head="Re-ingest weekly, maybe quarterly.">Your agent answers from filings the analyst already read last Monday.</FoundationBullet>
                 <FoundationBullet Icon={Layers}   head="Force-merge takes hours.">Index windows interrupt search — choose between fresh data and a responsive app.</FoundationBullet>
-                <FoundationBullet Icon={Database} head="12+ nodes to hit a 12-hr SLA.">$1.75M annual baseline at enterprise scale (the chapter-02 number).</FoundationBullet>
+                <FoundationBullet Icon={Database} head="More nodes to hit the SLA.">Graph builds compete with search for the same CPU cores.</FoundationBullet>
                 <FoundationBullet Icon={Cpu}      head="Adding a corpus = a capacity-planning exercise.">Every new data source is a quarter-long project.</FoundationBullet>
               </ul>
             </div>
@@ -69,8 +69,8 @@ export function Chapter05_Conclusion() {
               </div>
               <ul className="space-y-2.5 text-xs text-slate-300 leading-relaxed">
                 <FoundationBullet Icon={Clock}    head="Re-ingest in minutes." accent>Agents read filings the morning they drop. The chapter-04.5 daily digest is just one consequence.</FoundationBullet>
-                <FoundationBullet Icon={Layers}   head="Force-merge in seconds." accent><span className="font-mono text-[var(--color-elastic)]">50×</span> faster than CPU. Re-index without interrupting the day.</FoundationBullet>
-                <FoundationBullet Icon={Database} head="1.2 nodes per SLA." accent><span className="font-mono text-[var(--color-elastic)]">89%</span> lower TCO. The savings buys an LLM tier upgrade or 5× more inference.</FoundationBullet>
+                <FoundationBullet Icon={Layers}   head="Force-merge on the GPU." accent>Graph build and merge move to the DGX Spark. Re-index without interrupting the day.</FoundationBullet>
+                <FoundationBullet Icon={Database} head="All in one case." accent>Index, embeddings and the model share the kit. No cloud bill, nothing leaves the case.</FoundationBullet>
                 <FoundationBullet Icon={Zap}      head="Adding a corpus = a config change." accent>Russell 2000, FTSE, internal-research wiki — same pipeline, same speed.</FoundationBullet>
               </ul>
             </div>

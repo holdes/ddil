@@ -7,7 +7,6 @@ import { GpuFinishedPopup } from "../shared/GpuFinishedPopup";
 import { PresenterPanel } from "../shared/presenter/PresenterPanel";
 import { useRaceMetrics, type PathMetrics } from "../hooks/useRaceMetrics";
 import { formatNumber } from "../lib/utils";
-import { awsJobCost, computeTco, TCO_DEFAULTS, fmtUsd, fmtVectors } from "../lib/pricing";
 
 function ProgressBar({ percent, color }: { percent: number; color: "amber" | "emerald" }) {
   const bg = color === "amber" ? "bg-amber-500" : "bg-emerald-500";
@@ -151,7 +150,7 @@ export function Chapter01_Speed() {
             side="cpu"
             path={metrics.cpu}
             label="CPU · HNSW"
-            hw="g6.8xlarge · 32 vCPU EPYC · port 9201"
+            hw="Framework Desktop · Ryzen AI Max+ 395 · 192.168.1.10:9200"
             color="amber"
             accentIcon={<Cpu size={20} />}
           />
@@ -159,7 +158,7 @@ export function Chapter01_Speed() {
             side="gpu"
             path={metrics.gpu}
             label="GPU · cuVS CAGRA"
-            hw="g6.4xlarge · NVIDIA L4 · port 9200"
+            hw="DGX Spark · NVIDIA GB10 · 192.168.1.20:9200"
             color="emerald"
             accentIcon={<Zap size={20} />}
           />
@@ -183,28 +182,8 @@ export function Chapter01_Speed() {
               <Headline label="Ingest speedup"      value={`${metrics.ingestSpeedup.toFixed(1)}×`} />
               <Headline label="Force-merge speedup" value={`${metrics.forceMergeSpeedup.toFixed(1)}×`} />
               <Headline label="End-to-end"          value={`${metrics.speedup.toFixed(1)}×`} />
-              {(() => {
-                const aws = awsJobCost(
-                  metrics.gpu.ingestMs + metrics.gpu.forceMergeMs,
-                  metrics.cpu.ingestMs + metrics.cpu.forceMergeMs,
-                );
-                const tco = computeTco({ gpuVps: metrics.gpu.throughput, cpuVps: metrics.cpu.throughput });
-                return (
-                  <>
-                    <Headline
-                      label="AWS cost · this job"
-                      value={aws.gpuUsd > 0 ? `${fmtUsd(aws.gpuUsd)} vs ${fmtUsd(aws.cpuUsd)}` : "—"}
-                      small
-                    />
-                    <Headline
-                      label={`TCO ↓ · ${fmtVectors(TCO_DEFAULTS.totalVectors)} / ${TCO_DEFAULTS.slaHours}h SLA`}
-                      value={tco.savingsPct > 0 ? `${tco.savingsPct.toFixed(0)}%` : "—"}
-                      sub={tco.savingsUsd > 0 ? `${fmtUsd(tco.savingsUsd)} / yr` : undefined}
-                      accent
-                    />
-                  </>
-                );
-              })()}
+              <Headline label="Runs on" value="The kit" sub="both nodes inside the case" small />
+              <Headline label="Cloud bill · this job" value="None" sub="no per-hour or per-token billing" small accent />
               <Headline label="Recall (GPU / CPU)"  value={`${metrics.recallGpu.toFixed(1)}% / ${metrics.recallCpu.toFixed(1)}%`} small />
             </motion.div>
           )}

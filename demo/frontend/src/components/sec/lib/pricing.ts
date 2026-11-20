@@ -1,53 +1,11 @@
 /**
- * Two pricing models live here. They answer different questions; don't mix them.
+ * Enterprise TCO model only (mirrors "Cost Model for Elasticsearch GPUs.xlsx").
+ * Annual hardware + system SW + Elasticsearch SW + NVAIE, sized by the number
+ * of nodes needed to hit an indexing SLA. Used by the presenter ScaleProjection.
  *
- *  1. AWS on-demand hourly rates → "what did this demo box cost me right now?"
- *     Useful for showing $0.02 etc. NEVER call this TCO.
- *
- *  2. Enterprise TCO model (mirrors "Cost Model for Elasticsearch GPUs.xlsx")
- *     → annual hardware + system SW + Elasticsearch SW + NVAIE, sized by the
- *     number of nodes you need to hit an indexing SLA. This is what the deck's
- *     78% / spreadsheet's 89.4% comes from.
+ * The SEC demo runs on the airgapped DDIL kit: inference and embeddings run on
+ * the DGX Spark, so there is no per-hour or per-token cloud bill to price here.
  */
-
-/* ─────────────── AWS on-demand (us-east-2, May 2026) ─────────────── */
-// Bedrock model pricing kept here so TradeoffPanel can compute live $ per answer.
-// Update if rates shift. Sonnet/Opus rates as of May 2026.
-export const BEDROCK_PRICING = {
-  sonnet_4_6: { input: 3.0,  output: 15.0 },   // per million tokens
-  opus_4_6:   { input: 15.0, output: 75.0 },
-  haiku_4_5:  { input: 1.0,  output: 5.0 },
-} as const;
-export const HOURLY_USD = {
-  gpu: 1.323,   // g6.4xlarge (NVIDIA L4, 16 vCPU, 64 GB)
-  cpu: 2.014,   // g6.8xlarge (32 vCPU AMD EPYC, 128 GB)
-} as const;
-
-export const HARDWARE = {
-  gpu: { label: "g6.4xlarge", detail: "NVIDIA L4 · 16 vCPU · 64 GB", rate: HOURLY_USD.gpu },
-  cpu: { label: "g6.8xlarge", detail: "32 vCPU AMD EPYC · 128 GB",   rate: HOURLY_USD.cpu },
-} as const;
-
-export interface AwsJobCost {
-  gpuUsd: number;
-  cpuUsd: number;
-  ratio: number;
-  savingsPct: number;     // % less you pay for *this* job using GPU box vs CPU box
-}
-
-/** AWS per-second math for one indexing job. NOT a TCO claim. */
-export function awsJobCost(gpuTotalMs: number, cpuTotalMs: number): AwsJobCost {
-  if (!gpuTotalMs || !cpuTotalMs) return { gpuUsd: 0, cpuUsd: 0, ratio: 0, savingsPct: 0 };
-  const perSecGpu = HOURLY_USD.gpu / 3600;
-  const perSecCpu = HOURLY_USD.cpu / 3600;
-  const gpuUsd = (gpuTotalMs / 1000) * perSecGpu;
-  const cpuUsd = (cpuTotalMs / 1000) * perSecCpu;
-  return {
-    gpuUsd, cpuUsd,
-    ratio: cpuUsd / gpuUsd,
-    savingsPct: (1 - gpuUsd / cpuUsd) * 100,
-  };
-}
 
 /* ─────────────── Enterprise TCO model ─────────────── */
 /**

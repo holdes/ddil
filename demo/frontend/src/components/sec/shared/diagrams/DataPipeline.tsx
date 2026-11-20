@@ -16,8 +16,8 @@ const STEPS: Step[] = [
   { Icon: Download, label: "Fetch",  detail: "SEC EDGAR · 503 S&P 500 latest 10-K filings", tone: "muted"  },
   { Icon: FileText, label: "Parse",  detail: "HTML → plain text · headers + metadata extracted", tone: "muted" },
   { Icon: Scissors, label: "Chunk",  detail: "tiktoken cl100k_base · 750 tokens · 100-token overlap", tone: "amber" },
-  { Icon: Sparkles, label: "Embed",  detail: "Bedrock Cohere v4 · 1536-d float · batch of 48", tone: "nvidia" },
-  { Icon: Database, label: "Index",  detail: "Bulk to ES 9.4.1 · dense_vector · HNSW · dot_product", tone: "elastic" },
+  { Icon: Sparkles, label: "Embed",  detail: "Jina Embeddings v5 Omni · 768-d · on the DGX Spark", tone: "nvidia" },
+  { Icon: Database, label: "Index",  detail: "Bulk to ES 9.5.6 · dense_vector · HNSW · cosine", tone: "elastic" },
 ];
 
 const TONE: Record<Step["tone"], string> = {
@@ -52,9 +52,9 @@ export function DataPipeline() {
       <div className="mt-4 grid grid-cols-5 gap-3">
         <Stat label="Source"        value="SEC EDGAR" sub="public filings · zero cost" />
         <Stat label="Filings"       value="503"        sub="latest 10-K per S&P 500 company" />
-        <Stat label="Chunks indexed" value="93,541"    sub="text + 1536-d vector each" />
-        <Stat label="Embed model"   value="Cohere Embed v4" sub="us.cohere.embed-v4:0 · Bedrock" />
-        <Stat label="Index size"    value="759 MB"     sub="post force-merge · 1 shard" />
+        <Stat label="Chunks indexed" value="93,541"    sub="text + 768-d vector each" />
+        <Stat label="Embed model"   value="Jina v5 Omni" sub="jina-embeddings-v5-omni-small · :8081" />
+        <Stat label="Runs on"       value="The kit"    sub="embed + index inside the case · 1 shard" />
       </div>
     </div>
   );

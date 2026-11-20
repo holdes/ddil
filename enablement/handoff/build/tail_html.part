@@ -1,0 +1,3 @@
+</div>
+<div id="notes"></div><div id="hud"></div>
+<div id="sorter"><div class="sh"><h2>Slide sorter</h2><span class="hint">Drag to reorder · click a slide to open it · Hide skips it when presenting · G or Esc to close</span><button id="srReset">Reset to original</button><button id="srSave">Download this order</button><button class="pri" id="srDone">Done</button></div><div class="sg" id="srGrid"></div></div>

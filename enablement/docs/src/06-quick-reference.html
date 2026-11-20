@@ -1,0 +1,108 @@
+<!-- ============ PAGE 1 ============ -->
+<div class="page qref">
+  <div class="qhead">
+    <div>
+      <div class="eyebrow">DDIL demo kit · SA enablement · 06 · status 13 Nov 2026</div>
+      <h1>Quick reference card</h1>
+    </div>
+    <img src="../assets/logos/elastic-horizontal-white.svg" alt="Elastic" width="108" height="36">
+  </div>
+
+  <div class="cols2">
+    <div>
+      <h3 style="margin-top:0">URLs and ports</h3>
+      <table class="t tight sm">
+        <tr><th>Service</th><th>Address</th></tr>
+        <tr><td class="k">Demo app</td><td><code>http://192.168.1.10:3000</code></td></tr>
+        <tr><td class="k">Backend API</td><td><code>http://192.168.1.10:8000</code></td></tr>
+        <tr><td class="k">Kibana</td><td><code>http://192.168.1.10:5601</code></td></tr>
+        <tr><td class="k">es-cpu 9.5.6</td><td><code>192.168.1.10:9200</code> (transport 9300)</td></tr>
+        <tr><td class="k">es-gpu 9.5.6</td><td><code>192.168.1.20:9200</code> (transport 9300)</td></tr>
+        <tr><td class="k">Ollama</td><td><code>http://192.168.1.20:11434</code></td></tr>
+        <tr><td class="k">Jina server</td><td><code>http://192.168.1.20:8081/health</code></td></tr>
+        <tr><td class="k">Kiosk</td><td><code>192.168.1.10:3100</code> (mock health)</td></tr>
+        <tr><td class="k">Gateway</td><td><code>192.168.1.1</code></td></tr>
+      </table>
+      <p class="small">.ddil names: es, ollama, jina, spark = .20; kibana, framework = .10. Untested on the box.</p>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Pre-show checklist</h3>
+      <ul class="chk">
+        <li>Power on: network, Spark, then Framework.</li>
+        <li>Spark: <code>docker compose up -d</code> via <code>sg docker</code>; <code>ollama list</code> shows <code>nemotron-3.5-lightning</code>; Jina v5 Omni server started by hand.</li>
+        <li>Framework: <code>vm.max_map_count</code> 262144; <code>docker compose up -d</code> in <code>demo/</code>.</li>
+        <li><code>_cat/nodes</code> lists spark-gpu and framework-cpu.</li>
+        <li><code>_cat/indices</code>: record vineyard, <code>sec_10k_2026</code>, <code>jina-multimodal</code>, <code>pmc-unstructured</code> counts.</li>
+        <li><code>/api/vineyard/dashboard</code>: <code>block_summaries</code> not empty.</li>
+        <li>All nodes and Kibana on 9.5.6, security settings matched. Kit config points at Nemotron 3.5 Lightning and Jina v5 Omni.</li>
+        <li><code>/api/jina/analysts</code>: four personas.</li>
+        <li><code>:8081/health</code> answers.</li>
+        <li>Warm <code>nemotron-3.5-lightning</code> with one chat call.</li>
+        <li>One full click-through of each adventure, then reset.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Health commands</h3>
+  <pre class="code">curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cat/nodes?v&amp;h=name,version'
+curl -s http://192.168.1.20:11434/api/tags ; curl -s http://192.168.1.20:8081/health
+curl -s http://192.168.1.10:8000/api/finance/agent/state
+curl -s http://192.168.1.20:11434/api/chat -d '{"model":"nemotron-3.5-lightning","stream":false,"messages":[{"role":"user","content":"ready"}]}'</pre>
+
+  <h3>Reset between audiences</h3>
+  <table class="t tight sm">
+    <tr><th style="width:110px">Adventure</th><th>Reset</th></tr>
+    <tr><td class="k">Vineyard</td><td>Sidebar "Reset Demo". Race server state: Reset on the race screen or <code>curl -X POST http://192.168.1.10:8000/api/race/reset</code>.</td></tr>
+    <tr><td class="k">SEC Findings</td><td>Chapter 04 "Reset conversation"; Reset on Chapter 01 if it ran; Esc.</td></tr>
+    <tr><td class="k">Multimodal</td><td>"Exit to chooser" or Esc. Select Public User at the start of the next run.</td></tr>
+    <tr><td class="k">All</td><td>Reload the tab. Re-warm the model after idle time. Never <code>docker compose down -v</code>. Never Ollama <code>DELETE /api/delete</code>.</td></tr>
+  </table>
+
+  <h3>Shutdown, in reverse order</h3>
+  <ol>
+    <li>Framework: <code>cd ~/ddil/demo &amp;&amp; docker compose down</code>, then <code>sudo shutdown -h now</code>.</li>
+    <li>Spark: Ctrl-C the Jina server, <code>cd ~/ddil/docker &amp;&amp; sg docker -c "docker compose down"</code>, then <code>sudo shutdown -h now</code>.</li>
+    <li>Switch and gateway last.</li>
+  </ol>
+  <p class="small">Full procedures: runbook 02. Honest framing for every staged element: training guide 00, pages 6 to 9.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 2 ============ -->
+<div class="page qref">
+  <div class="rh"><span>06 · Quick reference card</span><span>Failures and live or staged</span></div>
+  <h3 style="margin-top:0">Top failures and fixes</h3>
+  <table class="t tight sm">
+    <tr><th style="width:200px">Symptom</th><th>Cause and fix</th></tr>
+    <tr><td>Only one ES node</td><td>Nodes not on the same version or security settings. Kit owner aligns both on 9.5.6 (runbook 02).</td></tr>
+    <tr><td>Backend log: 401 from ES</td><td>No <code>VINEYARD_ES_USER</code>/<code>VINEYARD_ES_PASSWORD</code> in the container. Add to compose <code>environment</code>; recreate backend.</td></tr>
+    <tr><td>SEC search 502 "Query embed failed"</td><td>Point the SEC embedder at Jina v5 Omni on <code>:8081</code> in the compose environment (runbook 02); recreate backend.</td></tr>
+    <tr><td>Dashboard total exactly 869,000</td><td>Silent fallback. Do not call it live. Check <code>/api/vineyard/dashboard</code>.</td></tr>
+    <tr><td>Agronomist: BLK-C 46.2 %, K 50 always</td><td>Phase 0 mock fallback. ES unreachable.</td></tr>
+    <tr><td>Agronomist stuck "running"</td><td>LLM call over 120 s. Reload, warm the model, rerun from the map.</td></tr>
+    <tr><td>Agronomist answers about wrong block</td><td>Typed questions carry no block. Use map "Investigate with AI".</td></tr>
+    <tr><td>SEC agent never finishes</td><td>No read timeout. "Reset conversation", reload, shorter example.</td></tr>
+    <tr><td>Search by Image error</td><td>Jina server down. <code>:8081/health</code>; restart by hand.</td></tr>
+    <tr><td>Figure strip or PDF 404</td><td>Jina media path variables do not match <code>/data/jina</code> layout.</td></tr>
+    <tr><td>Cross-host calls fail</td><td>.ddil names do not resolve. <code>getent hosts</code> in backend; use raw IPs.</td></tr>
+    <tr><td>Workflows or Ch05 links fail</td><td>Not provisioned, or needs internet. Do not click.</td></tr>
+  </table>
+
+  <h3>Live and staged, condensed</h3>
+  <table class="t tight sm">
+    <tr><th style="width:150px">Element</th><th style="width:80px">Status</th><th>Say</th></tr>
+    <tr><td class="k">Indexing race (both decks)</td><td><span class="tag staged">Staged</span></td><td>"A timed simulation. The numbers are scripted." No 12x, v/s or recall.</td></tr>
+    <tr><td class="k">Architecture stat strip, System</td><td><span class="tag staged">Staged</span></td><td>Skip. Describe nodes from the Architecture guide.</td></tr>
+    <tr><td class="k">Vineyard Dashboard, map</td><td><span class="tag fb">Fallback</span></td><td>"From the kit's indices" only if pre-show checks passed. Alerts are scripted.</td></tr>
+    <tr><td class="k">AI Agronomist</td><td><span class="tag live">Live</span></td><td>"Python pipeline, live ES queries, Nemotron 3.5 Lightning on the Spark." Not Agent Builder. Phases run in sequence.</td></tr>
+    <tr><td class="k">Vineyard Search, Crop Health</td><td><span class="tag staged">Staged</span></td><td>Skip. Canned results.</td></tr>
+    <tr><td class="k">SEC 00, 02, segues, 05</td><td><span class="tag staged">Staged</span></td><td>"The kit's two nodes; the race is a simulation; no cloud bill." No TCO percentage (the presenter panel shows 78 %).</td></tr>
+    <tr><td class="k">SEC 03 search</td><td><span class="tag live">Live</span></td><td>"Embedded on the Spark with Jina Embeddings v5 Omni, 768 dimensions." The code panel names the same model.</td></tr>
+    <tr><td class="k">SEC 04 agent</td><td><span class="tag live">Live</span></td><td>"Elastic Agent Builder with ES|QL tools and Nemotron 3.5 Lightning." The config card names the same model.</td></tr>
+    <tr><td class="k">SEC Workflows</td><td><span class="tag staged">Staged</span></td><td>"An example definition, not deployed here."</td></tr>
+    <tr><td class="k">Search by Image</td><td><span class="tag live">Live</span></td><td>"ES kNN through a local inference endpoint." Ten synthetic shapes.</td></tr>
+    <tr><td class="k">Need-to-Know filter</td><td><span class="tag live">Live</span></td><td>"Application-side clearance filter." Not native ES document level security.</td></tr>
+    <tr><td class="k">"509 docs", markings</td><td><span class="tag staged">Staged</span></td><td>Numerator is measured; 509 is static. The kit corpus is 198 papers. Markings are synthetic.</td></tr>
+  </table>
+  <!--foot-->
+</div>

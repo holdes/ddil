@@ -172,7 +172,7 @@ export function Chapter03_DataInterface() {
             </AnimatePresence>
             {!result && !loading && (
               <div className="text-center text-slate-500 italic py-12 text-sm">
-                Run a query against the SEC 10-K corpus. The query is embedded by the configured model, then a kNN runs over ~93K chunks in 70-100 ms.
+                Run a query against the SEC 10-K corpus. The query is embedded on the kit by Jina Embeddings v5 Omni, then a kNN runs over ~93K chunks. The took time is shown live.
               </div>
             )}
           </div>

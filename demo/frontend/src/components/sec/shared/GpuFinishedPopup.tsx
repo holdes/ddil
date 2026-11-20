@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, X, Zap, Clock, Gauge, GitMerge } from "lucide-react";
 import { formatNumber, formatMs } from "../lib/utils";
-import { awsJobCost, fmtUsd } from "../lib/pricing";
 import type { PathMetrics } from "../hooks/useRaceMetrics";
 
 interface Props {
@@ -20,7 +19,6 @@ export function GpuFinishedPopup({ open, gpu, cpu, onClose }: Props) {
   // Speedup estimate based on what we have so far (GPU done, CPU still running)
   const cpuProjectedMs = cpu.throughput > 0 ? ((cpu.totalDocs || cpu.docsIndexed) / cpu.throughput) * 1000 : 0;
   const projectedSpeedup = gpuTotal > 0 && cpuProjectedMs > 0 ? cpuProjectedMs / gpuTotal : 0;
-  const projectedCost = cpuProjectedMs > 0 ? awsJobCost(gpuTotal, cpuProjectedMs) : null;
 
   return (
     <AnimatePresence>
@@ -55,7 +53,7 @@ export function GpuFinishedPopup({ open, gpu, cpu, onClose }: Props) {
                       <Zap size={12} /> GPU finished
                     </div>
                     <div className="text-base text-slate-100 font-semibold mt-0.5">
-                      NVIDIA L4 · cuVS CAGRA built {formatNumber(gpu.docsIndexed)} vectors
+                      DGX Spark GB10 · cuVS CAGRA built {formatNumber(gpu.docsIndexed)} vectors
                     </div>
                   </div>
                 </div>
@@ -131,15 +129,8 @@ export function GpuFinishedPopup({ open, gpu, cpu, onClose }: Props) {
                 {projectedSpeedup > 0 && (
                   <div className="mt-4 grid grid-cols-3 gap-3 pt-4 border-t border-slate-700/60">
                     <Headline label="Projected speedup" value={`${projectedSpeedup.toFixed(1)}×`} accent />
-                    {projectedCost && (
-                      <>
-                        <Headline label="AWS cost · this job"
-                                  value={`${fmtUsd(projectedCost.gpuUsd)} vs ${fmtUsd(projectedCost.cpuUsd)}`}
-                                  small />
-                        <Headline label="Per-job AWS savings"
-                                  value={`${projectedCost.savingsPct.toFixed(0)}%`} />
-                      </>
-                    )}
+                    <Headline label="Built on" value="DGX Spark" small />
+                    <Headline label="Cloud bill · this job" value="None" small />
                   </div>
                 )}
               </div>

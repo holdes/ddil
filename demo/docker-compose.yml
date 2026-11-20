@@ -69,6 +69,12 @@ services:
       - VINEYARD_DGX_SPARK_HOST=spark.ddil
       - VINEYARD_OLLAMA_EMBED_URL=http://ollama.ddil:11434
       - VINEYARD_OLLAMA_LLM_URL=http://ollama.ddil:11434
+      # SEC Findings: query embeddings from Jina v5 Omni on the Spark (768-d),
+      # agent LLM reported as the Nemotron model the Kibana connector uses.
+      - VINEYARD_EMBED_BACKEND=jina
+      - VINEYARD_JINA_OMNI_URL=http://jina.ddil:8081
+      - VINEYARD_SEC_EMBED_DIMS=768
+      - VINEYARD_SEC_AGENT_LLM_MODEL=nemotron-3.5-lightning
       - VINEYARD_DATA_DIR=/data
     # Containers don't inherit the host's /etc/hosts, and these cross-host
     # services live on the Spark (not the compose network), so map the friendly

@@ -158,7 +158,7 @@ echo "==> dashboard"
 curl -sS "${H[@]}" -X POST "$KB/api/saved_objects/dashboard/sec-10k-overview?overwrite=true" -d '{
   "attributes": {
     "title": "SEC 10-K · Indexed corpus overview",
-    "description": "What the GPU + Cohere v4 pipeline indexed: 503 S&P 500 latest 10-K filings, chunked, embedded, ready for semantic search and agents.",
+    "description": "What the GPU + Jina v5 Omni pipeline indexed on the kit: 503 S&P 500 latest 10-K filings, chunked, embedded, ready for semantic search and agents.",
     "panelsJSON": "[{\"version\":\"9.4.1\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":0,\"w\":12,\"h\":8,\"i\":\"p1\"},\"panelIndex\":\"p1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"9.4.1\",\"type\":\"lens\",\"gridData\":{\"x\":12,\"y\":0,\"w\":12,\"h\":8,\"i\":\"p2\"},\"panelIndex\":\"p2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"9.4.1\",\"type\":\"lens\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":16,\"i\":\"p3\"},\"panelIndex\":\"p3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"9.4.1\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":8,\"w\":24,\"h\":24,\"i\":\"p4\"},\"panelIndex\":\"p4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
     "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
     "timeRestore": false,

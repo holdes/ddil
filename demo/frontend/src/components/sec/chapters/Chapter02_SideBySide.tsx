@@ -90,7 +90,7 @@ export function Chapter02_SideBySide() {
                   <p><span className="text-[var(--color-elastic)] font-semibold">Zero-code-change API</span> — set <code className="font-mono text-xs bg-slate-800 px-1.5 py-0.5 rounded">vectors.indexing.use_gpu: true</code> and ES routes graph-build to the GPU.</p>
                   <p><span className="text-[var(--color-elastic)] font-semibold">Plugin architecture</span> — JNI bridge connects ES/Lucene to a C++ backend that calls cuVS.</p>
                   <p><span className="text-[var(--color-elastic)] font-semibold">Interoperable</span> — CAGRA graphs convert to HNSW format so CPU search keeps working without changes.</p>
-                  <p className="text-xs text-slate-500 italic">Bundled in Elasticsearch 9.4 OSS.</p>
+                  <p className="text-xs text-slate-500 italic">Bundled in Elasticsearch 9.5.6 on the kit.</p>
                 </div>
               </div>
             </>
@@ -101,8 +101,6 @@ export function Chapter02_SideBySide() {
         <EconomicsPanel
           gpuTotalMs={gpuTotal}
           cpuTotalMs={cpuTotal}
-          gpuVps={metrics.gpu.throughput}
-          cpuVps={metrics.cpu.throughput}
         />
       </div>
     </ChapterShell>

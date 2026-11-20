@@ -1,0 +1,70 @@
+{
+ "_note": "Component map, confirm on your kit. x and y are percentages of each image box. Illustrations: about 1122 x 1402 px. Photos: cropped to the kit, 1000 px wide. front and front-packed are separate sets because their framing differs slightly. Edit here and run python3 setup/build.py.",
+ "front": [
+  {"id": "F1", "x": 20, "y": 6, "comp": ["frame"], "label": "Carry handles on top"},
+  {"id": "F2", "x": 34, "y": 26, "comp": ["kiosk"], "label": "Touchscreen panel, 2U"},
+  {"id": "F3", "x": 50, "y": 42, "comp": ["framework"], "label": "Blank panels covering the Framework Desktop"},
+  {"id": "F4", "x": 50, "y": 58, "comp": ["spark"], "label": "DGX Spark on its 10 in shelf"},
+  {"id": "F5", "x": 27.5, "y": 69, "comp": ["jetkvm"], "label": "JetKVM on the front face"},
+  {"id": "F6", "x": 57, "y": 68, "comp": ["ux7"], "label": "UniFi Express 7, white unit with cable"},
+  {"id": "F7", "x": 59.5, "y": 76.5, "comp": ["switch"], "label": "Switch Flex Mini, small white unit"},
+  {"id": "F8", "x": 29.5, "y": 86.5, "comp": ["pdu"], "label": "PDU master power switch"}
+ ],
+ "front-packed": [
+  {"id": "K1", "x": 22, "y": 7.5, "comp": ["frame"], "label": "Carry handles on top"},
+  {"id": "K2", "x": 34, "y": 26, "comp": ["kiosk"], "label": "Touchscreen, off in transport"},
+  {"id": "K3", "x": 32, "y": 38.5, "comp": ["frame"], "label": "Elastic sticker under the touchscreen"},
+  {"id": "K4", "x": 62, "y": 46, "comp": ["framework"], "label": "Blank panels covering the Framework Desktop"},
+  {"id": "K5", "x": 50, "y": 56, "comp": ["spark"], "label": "DGX Spark, NVIDIA logo on its face"},
+  {"id": "K6", "x": 27, "y": 63.5, "comp": ["jetkvm"], "label": "Empty JetKVM bay"},
+  {"id": "K7", "x": 24.5, "y": 71.5, "comp": ["jetkvm"], "label": "USB-C lead hanging from the bay"},
+  {"id": "K8", "x": 29.5, "y": 75, "comp": ["jetkvm"], "label": "USB-A lead hanging from the bay"},
+  {"id": "K9", "x": 36.5, "y": 67.5, "comp": ["jetkvm"], "label": "RJ45 Ethernet lead hanging from the bay"},
+  {"id": "K10", "x": 51, "y": 64.5, "comp": ["ux7"], "label": "UniFi Express 7"},
+  {"id": "K11", "x": 56.5, "y": 77, "comp": ["ux7"], "label": "UniFi USB-C power lead, unplugged and hanging"},
+  {"id": "K12", "x": 31, "y": 84.5, "comp": ["pdu"], "label": "PDU master power switch"}
+ ],
+ "front-photo": [
+  {"id": "FP1", "x": 6, "y": 3, "comp": ["frame"], "label": "Carry handles on top"},
+  {"id": "FP2", "x": 30, "y": 26, "comp": ["kiosk"], "label": "Touchscreen panel"},
+  {"id": "FP3", "x": 21.5, "y": 43, "comp": ["frame"], "label": "Elastic sticker under the touchscreen"},
+  {"id": "FP4", "x": 66, "y": 52, "comp": ["framework"], "label": "Blank panels covering the Framework Desktop"},
+  {"id": "FP5", "x": 47, "y": 64, "comp": ["spark"], "label": "DGX Spark, NVIDIA logo on its face"},
+  {"id": "FP6", "x": 20, "y": 74, "comp": ["jetkvm"], "label": "JetKVM bay with its three leads"},
+  {"id": "FP7", "x": 56.5, "y": 74.5, "comp": ["ux7"], "label": "UniFi Express 7"},
+  {"id": "FP8", "x": 59.5, "y": 82.5, "comp": ["switch"], "label": "Switch Flex Mini, blue status LED by its USB-C lead"},
+  {"id": "FP9", "x": 23, "y": 92.3, "comp": ["pdu"], "label": "PDU rocker switch, glows red when on"}
+ ],
+ "back": [
+  {"id": "B1", "x": 50, "y": 23.5, "comp": ["frame"], "label": "Top metal grate (vent panel)"},
+  {"id": "B2", "x": 26, "y": 54, "comp": ["framework"], "label": "Framework HDMI port, leftmost on the rear I/O plate"},
+  {"id": "B3", "x": 46, "y": 51.5, "comp": ["framework"], "label": "Framework USB Type-A ports"},
+  {"id": "B4", "x": 53.5, "y": 48, "comp": ["framework"], "label": "Framework Ethernet (RJ45) port"},
+  {"id": "B5", "x": 72, "y": 42, "comp": ["framework"], "label": "Framework PSU: IEC inlet and power button"},
+  {"id": "B6", "x": 45, "y": 60.5, "comp": ["spark"], "label": "DGX Spark rear ports and cables"},
+  {"id": "B7", "x": 50, "y": 75, "comp": ["frame"], "label": "Lower metal grates (vent panels)"},
+  {"id": "B8", "x": 40, "y": 94, "comp": ["pdu"], "label": "Bottom unit (PDU per the front view)"},
+  {"id": "B9", "x": 85, "y": 91, "comp": ["pdu"], "label": "Black mains cable exit, rear bottom right"}
+ ],
+ "back-photo": [
+  {"id": "BP1", "x": 50, "y": 18.6, "comp": ["frame"], "label": "Top metal grate"},
+  {"id": "BP2", "x": 22.5, "y": 52.8, "comp": ["framework"], "label": "Framework HDMI port, leftmost, labelled HDMI"},
+  {"id": "BP3", "x": 45, "y": 50, "comp": ["framework"], "label": "Framework USB-A ports"},
+  {"id": "BP4", "x": 53.3, "y": 47.8, "comp": ["framework"], "label": "Framework Ethernet (RJ45) port"},
+  {"id": "BP5", "x": 76.7, "y": 38.5, "comp": ["framework"], "label": "Framework PSU IEC inlet"},
+  {"id": "BP6", "x": 48, "y": 60, "comp": ["spark"], "label": "DGX Spark rear ports"},
+  {"id": "BP7", "x": 50, "y": 75.8, "comp": ["frame"], "label": "Lower metal grates"},
+  {"id": "BP8", "x": 91, "y": 93, "comp": ["pdu"], "label": "Black mains cable exit, rear bottom right"}
+ ],
+ "side": [
+  {"id": "S1", "x": 50, "y": 3.5, "comp": ["frame"], "label": "Handle (lift point)"},
+  {"id": "S2", "x": 45, "y": 26, "comp": ["kiosk"], "label": "Top shelf, behind the touchscreen"},
+  {"id": "S3", "x": 45, "y": 40, "comp": ["framework"], "label": "Finned unit: Framework Desktop"},
+  {"id": "S4", "x": 45, "y": 55.5, "comp": ["spark"], "label": "Metal-foam unit: DGX Spark"},
+  {"id": "S5", "x": 40, "y": 67.5, "comp": ["ux7", "switch"], "label": "Network gear shelf"},
+  {"id": "S6", "x": 40, "y": 85, "comp": ["pdu"], "label": "Bottom finned unit (PDU per the front view)"},
+  {"id": "S7", "x": 73, "y": 60, "comp": ["frame"], "label": "Cable run up the rear post"},
+  {"id": "S8", "x": 33, "y": 22, "comp": ["frame"], "label": "Glass side panel"},
+  {"id": "S9", "x": 84, "y": 45, "comp": ["frame"], "label": "Rear face with the grate (lift point)"}
+ ]
+}

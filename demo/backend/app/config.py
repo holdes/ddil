@@ -6,9 +6,8 @@ class Settings(BaseSettings):
     ES_MAIN_URL: str = "http://es-cpu:9200"            # Framework CPU node (compose-local)
     ES_GPU_URL: str = "http://es.ddil:9200"            # DGX Spark GPU node (friendly DNS → 192.168.1.20)
 
-    # Optional host/port overrides (used by the AWS bench .env). When the *_HOST
-    # form is supplied it wins over the *_URL default above — this is what lets a
-    # single code base point at the airgapped box OR the bench by swapping .env.
+    # Optional host/port overrides. When the *_HOST form is supplied it wins over
+    # the *_URL default above (e.g. raw kit IPs instead of .ddil names).
     ES_GPU_HOST: str | None = None
     ES_GPU_PORT: int = 9200
     ES_CPU_HOST: str | None = None
@@ -31,13 +30,21 @@ class Settings(BaseSettings):
     RACE_METRICS_INTERVAL_MS: int = 500
 
     # ── Finance / SEC demo (chapters 03 + 04) ─────────────────────────────────
-    # Which embedder produces query vectors for /api/finance/search:
-    #   "bedrock" → Cohere Embed v4 via AWS Bedrock (1536-d) — bench / connected
-    #   "ollama"  → local nomic-embed-text (768-d)           — airgapped
-    # The chosen backend MUST match the dims the SEC_INDEX was built with.
-    EMBED_BACKEND: str = "bedrock"
+    # Which embedder produces query vectors for /api/finance/search. Both run on
+    # the airgapped kit (DGX Spark):
+    #   "jina"   → Jina Embeddings v5 Omni via JINA_OMNI_URL /v1/embeddings (default)
+    #   "ollama" → OLLAMA_EMBED_URL /api/embed with EMBED_MODEL (fallback)
+    # The chosen backend MUST match the model and dims the SEC_INDEX was built
+    # with (demo/scripts/finance/reembed-local.py + setup-index-local.sh).
+    EMBED_BACKEND: str = "jina"
 
     SEC_INDEX: str = "sec_10k_2026"
+    # One dimension for the SEC index, the corpus re-embed and the query embed.
+    # 768 matches the kit's jina-omni-text ES inference endpoint.
+    SEC_EMBED_DIMS: int = 768
+    # Model the Kibana connector (provision-connector-local.sh) is set to; the
+    # finance-analyst agent answers through it. Reported by /api/finance/agent/state.
+    SEC_AGENT_LLM_MODEL: str = "nemotron-3.5-lightning"
 
     # Elasticsearch basic-auth (security on for the SEC index; None = no auth)
     ES_USER: str | None = None
@@ -51,12 +58,6 @@ class Settings(BaseSettings):
     AGENT_BUILDER_AGENT_ID: str = "finance-analyst"
     AGENT_BUILDER_CONNECTOR_ID: str | None = None
     ES_INFERENCE_LLM_ID: str | None = None
-
-    # AWS Bedrock (only used when EMBED_BACKEND == "bedrock")
-    AWS_PROFILE: str | None = None
-    AWS_REGION: str = "us-east-2"
-    BEDROCK_EMBED_MODEL: str = "us.cohere.embed-v4:0"
-    BEDROCK_LLM_MODEL: str = "us.anthropic.claude-sonnet-4-6"
 
     # ── Jina multimodal + DLS demo (adventure 3) ──────────────────────────────
     # Local Jina omni embedding server (OpenAI-compatible /v1/embeddings) on the
@@ -128,7 +129,7 @@ class Settings(BaseSettings):
     class Config:
         env_prefix = "VINEYARD_"
         env_file = ".env"
-        extra = "ignore"  # tolerate bench-only vars (DRIVER_*, RACE_*) not modeled here
+        extra = "ignore"  # tolerate vars not modeled here
 
 
 settings = Settings()

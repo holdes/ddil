@@ -1,6 +1,5 @@
-import { Cpu, Zap, Server, MemoryStick, HardDrive, DollarSign, Settings2, Network } from "lucide-react";
+import { Cpu, Zap, Server, MemoryStick, Bot, ShieldCheck, Settings2, Network } from "lucide-react";
 import { ChapterShell } from "../shared/ChapterShell";
-import { HARDWARE, fmtUsd } from "../lib/pricing";
 
 interface Spec {
   icon: React.ReactNode;
@@ -12,7 +11,7 @@ interface Spec {
 interface SideProps {
   tone: "cpu" | "gpu";
   badge: string;          // "CPU · BASELINE" | "GPU · ACCELERATED"
-  instance: string;       // "g6.8xlarge"
+  instance: string;       // "Framework Desktop" | "DGX Spark"
   tagline: string;
   specs: Spec[];
   esConfig: { setting: string; value: string }[];
@@ -54,7 +53,7 @@ function Side({ tone, badge, instance, tagline, specs, esConfig, port, hostIp }:
 
       <div className="mt-5 pt-4 border-t border-slate-700/50">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 mb-2">
-          <Settings2 size={12} /> Elasticsearch 9.4.2 config
+          <Settings2 size={12} /> Elasticsearch 9.5.6 config
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs font-mono">
           {esConfig.map((c, i) => (
@@ -74,55 +73,53 @@ export function Chapter00_Architecture() {
     <ChapterShell
       number="00"
       title="The Hardware Face-Off"
-      subtitle="Same workload, same Elasticsearch version, same dataset. Two AWS instances — one with a GPU, one without. This is what we're racing."
+      subtitle="Two nodes in one airgapped case, one Elasticsearch 9.5.6 cluster, the same index. One node has a GPU, one does not. This is what we're racing."
     >
       <div className="flex flex-col gap-4 h-full">
         <div className="grid grid-cols-2 gap-4 flex-1">
           <Side
             tone="cpu"
             badge="CPU · Baseline"
-            instance={HARDWARE.cpu.label}
-            tagline="No GPU — pure CPU HNSW graph build"
+            instance="Framework Desktop"
+            tagline="No GPU in the race: CPU HNSW graph build"
             hostIp="192.168.1.10"
-            port={9201}
+            port={9200}
             specs={[
-              { icon: <Server size={16} />,      label: "vCPU",    value: "32 vCPU",  detail: "AMD EPYC (4th gen Genoa)" },
-              { icon: <MemoryStick size={16} />, label: "Memory",  value: "128 GB",   detail: "DDR5 ECC" },
-              { icon: <Zap size={16} />,         label: "GPU",     value: "—",        detail: "CPU-only baseline" },
-              { icon: <HardDrive size={16} />,   label: "Storage", value: "2× 419 GB NVMe", detail: "instance-store SSD" },
-              { icon: <DollarSign size={16} />,  label: "Cost",    value: `${fmtUsd(HARDWARE.cpu.rate)}/hr`, detail: "us-east-2 on-demand" },
+              { icon: <Server size={16} />,      label: "CPU",    value: "AMD Ryzen AI Max+ 395", detail: "x86_64" },
+              { icon: <MemoryStick size={16} />, label: "Memory", value: "64 GB",                 detail: "system memory" },
+              { icon: <Zap size={16} />,         label: "GPU",    value: "not used for indexing", detail: "CPU-only baseline" },
+              { icon: <Bot size={16} />,         label: "Role",   value: "es-cpu · Kibana 9.5.6", detail: "Agent Builder · demo backend :8000 · frontend :3000" },
             ]}
             esConfig={[
+              { setting: "node.name",                value: "framework-cpu" },
+              { setting: "node.attr.accel",          value: "cpu" },
               { setting: "vectors.indexing.use_gpu", value: "false" },
               { setting: "index_options.type",       value: "hnsw" },
-              { setting: "dense_vector.dims",        value: "1536" },
-              { setting: "JVM heap (-Xms/-Xmx)",     value: "31g" },
-              { setting: "discovery.type",           value: "single-node" },
-              { setting: "path.data",                value: "/mnt/data" },
+              { setting: "dense_vector.dims",        value: "768" },
+              { setting: "JVM heap",                 value: "8g" },
             ]}
           />
 
           <Side
             tone="gpu"
             badge="GPU · Accelerated"
-            instance={HARDWARE.gpu.label}
-            tagline="NVIDIA L4 · cuVS CAGRA → HNSW conversion"
+            instance="NVIDIA DGX Spark"
+            tagline="GB10 Blackwell GPU · cuVS CAGRA → HNSW conversion"
             hostIp="192.168.1.20"
             port={9200}
             specs={[
-              { icon: <Server size={16} />,      label: "vCPU",    value: "16 vCPU",  detail: "AMD EPYC (4th gen)" },
-              { icon: <MemoryStick size={16} />, label: "Memory",  value: "64 GB",    detail: "DDR5 ECC" },
-              { icon: <Zap size={16} />,         label: "GPU",     value: "NVIDIA L4",detail: "24 GB GDDR6 · Ada Lovelace · CUDA 12.9" },
-              { icon: <HardDrive size={16} />,   label: "Storage", value: "559 GB NVMe", detail: "instance-store SSD (LVM-backed)" },
-              { icon: <DollarSign size={16} />,  label: "Cost",    value: `${fmtUsd(HARDWARE.gpu.rate)}/hr`, detail: "us-east-2 on-demand" },
+              { icon: <Server size={16} />,      label: "CPU",    value: "GB10 Arm CPU",           detail: "aarch64" },
+              { icon: <MemoryStick size={16} />, label: "Memory", value: "128 GB",                 detail: "unified CPU + GPU memory" },
+              { icon: <Zap size={16} />,         label: "GPU",    value: "NVIDIA GB10 Blackwell",  detail: "cuVS GPU vector indexing" },
+              { icon: <Bot size={16} />,         label: "Role",   value: "es-gpu · Ollama · Jina", detail: "Nemotron 3.5 Lightning :11434 · Jina Embeddings v5 Omni :8081" },
             ]}
             esConfig={[
+              { setting: "node.name",                value: "spark-gpu" },
+              { setting: "node.attr.accel",          value: "gpu" },
               { setting: "vectors.indexing.use_gpu", value: "true" },
               { setting: "index_options.type",       value: "hnsw" },
-              { setting: "dense_vector.dims",        value: "1536" },
-              { setting: "JVM heap (-Xms/-Xmx)",     value: "30g" },
-              { setting: "discovery.type",           value: "single-node" },
-              { setting: "path.data",                value: "/mnt/data" },
+              { setting: "dense_vector.dims",        value: "768" },
+              { setting: "JVM heap",                 value: "16g" },
             ]}
           />
         </div>
@@ -133,36 +130,34 @@ export function Chapter00_Architecture() {
             <Delta
               icon={<Server size={14} />}
               label="Hardware delta"
-              value="+ 1× NVIDIA L4 GPU"
-              detail="− 16 vCPU, − 64 GB RAM"
+              value="+ NVIDIA GB10 GPU"
+              detail="aarch64 Spark vs x86_64 Framework"
             />
             <Delta
-              icon={<DollarSign size={14} />}
-              label="Hourly cost delta"
-              value={`+ ${fmtUsd(HARDWARE.gpu.rate - HARDWARE.cpu.rate)}`}
-              detail={HARDWARE.gpu.rate < HARDWARE.cpu.rate
-                ? `GPU box is cheaper per hour (smaller CPU/RAM)`
-                : `GPU box costs ${fmtUsd(HARDWARE.gpu.rate - HARDWARE.cpu.rate)} more / hr`}
-              accent={HARDWARE.gpu.rate < HARDWARE.cpu.rate}
+              icon={<ShieldCheck size={14} />}
+              label="Where it runs"
+              value="Inside the case"
+              detail="No cloud account, no internet, no per-hour bill"
+              accent
             />
             <Delta
               icon={<Settings2 size={14} />}
               label="Config delta"
               value="vectors.indexing.use_gpu"
-              detail="true vs false — that's it"
+              detail="true vs false: that's it"
               accent
             />
             <Delta
               icon={<Network size={14} />}
               label="ES version"
-              value="9.4.1 · identical"
-              detail="cuVS GPU module is bundled OSS"
+              value="9.5.6 · identical"
+              detail="One cluster, two data nodes"
             />
             <Delta
-              icon={<Zap size={14} />}
+              icon={<Cpu size={14} />}
               label="What we're measuring"
               value="Ingest + force-merge"
-              detail="Identical Rally OpenAI corpus (2.6M × 1536-d)"
+              detail="Same documents, same mapping, both nodes"
             />
           </div>
         </div>

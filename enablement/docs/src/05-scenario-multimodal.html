@@ -1,0 +1,175 @@
+<!-- ============ PAGE 1: COVER ============ -->
+<div class="page cover">
+  <div class="top">
+    <div class="eyebrow">DDIL demo kit · Scenario runbook · 05</div>
+    <h1>Multimodal + Need-to-Know. <span class="hl">Same question, different clearance.</span></h1>
+    <p class="sub">Presenter runbook for Search by Image and Need-to-Know, with a note on scenes not yet merged.</p>
+    <div class="meta">
+      <span class="chip">Suggested length 10 to 15 minutes</span>
+      <span class="chip">Status as of 13 Nov 2026</span>
+      <span class="chip">Code basis: commit 5114c3a</span>
+    </div>
+
+    <div class="cols2 mt2">
+      <div class="card">
+        <div class="ch">Audience and outcome</div>
+        <div class="cb">
+          <div class="tr"></div>
+          <p><b>For</b> intelligence and defense audiences, and any team that handles documents under need-to-know rules.</p>
+          <p><b>They leave knowing</b> that one local embedding model handles text and images, that hybrid retrieval and a grounded LLM answer can be scoped to each analyst's clearance, and how this demo enforces that scope.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch tl">The story in three sentences</div>
+        <div class="cb">
+          <div class="tr"></div>
+          <p>Search by Image shows that one local embedding model places words and pictures in the same vector space.</p>
+          <p>In Need-to-Know, every research document carries a classification, compartments and caveats, and every query carries the analyst's clearance.</p>
+          <p>The same question returns different documents, figures and answers depending on who asks.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="mt2">Two scenes on the shared branch</h3>
+    <table class="t tight">
+      <tr><th style="width:120px">Scene</th><th>Index and vectors</th><th>Retrieval</th><th style="width:60px">Status</th></tr>
+      <tr><td class="k">Search by Image</td><td><code>jina-multimodal</code>: <code>image_vector</code> and <code>caption_vector</code>, 768 each</td><td>One kNN, k=6, with <code>query_vector_builder</code> on endpoint <code>jina-omni-text</code></td><td><span class="tag live">Live</span></td></tr>
+      <tr><td class="k">Need-to-Know</td><td><code>pmc-unstructured</code>: <code>embedding</code> 1024, <code>bbq_hnsw</code>, clearance fields</td><td>RRF of BM25 and kNN under the clearance filter, then a grounded answer from Nemotron 3.5 Lightning</td><td><span class="tag live">Live</span></td></tr>
+    </table>
+  </div>
+  <div class="band">
+    <div>
+      <div class="k">Say this first</div>
+      <p>"The papers are public research. The security markings are synthetic and assigned by a fixed rule. The application applies each analyst's clearance as a filter on every query."</p>
+    </div>
+    <div>
+      <div class="k">Do not say</div>
+      <p>"Native document level security." This demo does not configure Elasticsearch roles. Do not quote "509 papers" as an index count.</p>
+      <img src="../assets/logos/elastic-horizontal-white.svg" alt="Elastic" width="120" height="40">
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2: PERSONAS, RULES, PREREQS ============ -->
+<div class="page">
+  <div class="rh"><span>05 · Multimodal + Need-to-Know</span><span>Personas and pre-show checks</span></div>
+  <div class="eyebrow">The four analysts</div>
+  <h2>Four clearances, <span class="hl">one corpus.</span></h2>
+  <table class="t">
+    <tr><th style="width:90px">Card</th><th style="width:60px">Clearance</th><th>Compartments</th><th style="width:76px">NOFORN-cleared</th><th>Label on card</th></tr>
+    <tr><td class="k">Public User</td><td>U</td><td>none</td><td>no</td><td>U · no compartments · foreign</td></tr>
+    <tr><td class="k">Analyst A</td><td>S</td><td>SI</td><td>yes</td><td>SECRET · SI · US</td></tr>
+    <tr><td class="k">Analyst B</td><td>TS</td><td>SCI, HCS, SI</td><td>yes</td><td>TS/SCI · HCS · SI · US</td></tr>
+    <tr><td class="k">Senior Analyst</td><td>TS</td><td>SCI, HCS, TK, SI</td><td>yes</td><td>TS/SCI · HCS · TK · SI · US</td></tr>
+  </table>
+  <p>The backend defaults to Public User. The filter applies three rules to every search, facet, figure and answer: the document's classification must be at or below the analyst's level (U, CUI, C, S, TS); the analyst must hold <b>all</b> of the document's compartments; and NOFORN documents are excluded unless the analyst is NOFORN-cleared.</p>
+
+  <div class="eyebrow mt2">Before the audience arrives</div>
+  <h3>Pre-show checks (after runbook 02, pages 6 and 7)</h3>
+  <table class="t">
+    <tr><th style="width:30px">#</th><th>Check</th><th style="width:220px">Pass condition</th></tr>
+    <tr><td class="k">1</td><td><code>curl -s http://192.168.1.20:8081/health</code></td><td>Jina server answers. It does not start on boot.</td></tr>
+    <tr><td class="k">2</td><td><code>_inference/text_embedding/jina-omni-text</code> on the cluster</td><td>Endpoint exists.</td></tr>
+    <tr><td class="k">3</td><td><code>_cat/indices/jina-multimodal,pmc-unstructured?v</code></td><td>Both exist with documents. Record the counts.</td></tr>
+    <tr><td class="k">4</td><td><code>GET http://192.168.1.10:8000/api/jina/analysts</code></td><td>Four personas returned.</td></tr>
+    <tr><td class="k">5</td><td>Warm Nemotron 3.5 Lightning (runbook 02, page 6)</td><td>Reply returns.</td></tr>
+    <tr><td class="k">6</td><td>In the browser: "a red square" in Search by Image; one Need-to-Know question as Public User, then as Senior Analyst</td><td>Images return. Visible-document count is higher for Senior Analyst. Figures load in the strip.</td></tr>
+  </table>
+  <p class="small">If the figure strip or PDF links return 404, the media path variables do not match where the files sit under <code>/data/jina</code> (runbook 02, troubleshooting).</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 3: CLICK PATH ============ -->
+<div class="page">
+  <div class="rh"><span>05 · Multimodal + Need-to-Know</span><span>Click path</span></div>
+  <div class="eyebrow">Timed click path</div>
+  <h2>Words to pictures, <span class="hl">then clearance to answers.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:44px">Time</th><th style="width:72px">Screen</th><th style="width:116px">Action</th><th>What to say</th><th style="width:96px">Proof point</th><th style="width:56px">Status</th></tr>
+    <tr><td class="k">0:00</td><td>Chooser</td><td>Click the Multimodal card (named "Multimodal Intelligence" in the project notes; confirm the label on the kit).</td><td>"This adventure is about who is allowed to see what, and about images as well as text."</td><td>None</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">0:30</td><td>Search by Image</td><td>Click "a red square". Then "something blue and round".</td><td>"Elasticsearch embeds the words through a local inference endpoint and finds matching images. The set is ten synthetic shapes, so you can judge the result at a glance."</td><td>Matching images, top 6</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">2:00</td><td>Search by Image</td><td>Toggle Image vectors and Caption vectors. Run "horizontal stripes".</td><td>"Image vectors come from the pictures. Caption vectors come from text written about them. Both live in the same space."</td><td>Results differ by space</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">3:30</td><td>Need-to-Know</td><td>Open the scene. Select Public User. Point at the corpus banner and the classification facets.</td><td>Say the "Say this first" line from the cover. "This analyst can see this many documents."</td><td>Visible-document count (measured)</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">4:30</td><td>Need-to-Know</td><td>Ask "Summarize findings on CRISPR off-target effects".</td><td>"Search and the answer start together. Retrieval is hybrid, keyword plus vector, and the model sees only passages this analyst is cleared for."</td><td>Hits, figure strip, answer with sources</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">7:00</td><td>Need-to-Know</td><td>Select Analyst A, ask the same question. Then Analyst B. Then Senior Analyst.</td><td>"Same question. The visible corpus grows with each clearance, and so do the sources behind the answer."</td><td>Count and facets change per persona</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">10:00</td><td>Need-to-Know</td><td>Point at a figure in the strip.</td><td>"Figures are filtered by the same rule as the text."</td><td>Figure strip changes per persona</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">11:00</td><td>Need-to-Know</td><td>Explain enforcement in one sentence.</td><td>"In this demo the application adds the clearance filter to each query. Elasticsearch also supports document level security natively through roles; this demo does not configure it."</td><td>None</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">close</td><td>Any</td><td>"Exit to chooser" or Esc.</td><td>"Embeddings, search and answers all ran on the kit."</td><td>Returns to the chooser</td><td><span class="tag live">Live</span></td></tr>
+  </table>
+  <p class="small">The corpus banner reads "N / 509 docs". The numerator is measured for the persona. The 509 is hardcoded text. The kit ingests 198 papers (9,636 text chunks and 2,218 figure references) from <code>hires_chunks.jsonl</code> and <code>hires_images.jsonl</code>; 509 is the size of the older JATS ingestion path. The embedding model is Jina Embeddings v5 Omni, <code>jina-embeddings-v5-omni-small</code>.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 4: PROMPTS AND QUESTIONS ============ -->
+<div class="page">
+  <div class="rh"><span>05 · Multimodal + Need-to-Know</span><span>Prompts and questions</span></div>
+  <div class="eyebrow">Suggested prompts, quoted from the UI</div>
+  <h2>Sample queries <span class="hl">built into each scene.</span></h2>
+  <div class="cols2">
+    <div>
+      <h3 style="margin-top:0">Search by Image</h3>
+      <ul>
+        <li class="q">a red square</li>
+        <li class="q">something blue and round</li>
+        <li class="q">green triangle</li>
+        <li class="q">horizontal stripes</li>
+        <li class="q">a yellow star</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Need-to-Know</h3>
+      <ul>
+        <li class="q">What methods are used for single-cell RNA sequencing?</li>
+        <li class="q">Summarize findings on CRISPR off-target effects</li>
+        <li class="q">Which imaging techniques detect early-stage tumors?</li>
+        <li class="q">What is known about gut microbiome and immunity?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="eyebrow mt">Likely questions</div>
+  <table class="t sm">
+    <tr><th style="width:170px">Question</th><th>Accurate answer</th></tr>
+    <tr><td class="k">Is this Elasticsearch document level security?</td><td>No. The application builds a filter from the analyst's clearance and adds it to every query, facet, figure lookup and answer retrieval. No Elasticsearch roles are configured. Elasticsearch supports document level security natively through roles, and a production design would enforce access there.</td></tr>
+    <tr><td class="k">Could a user bypass it?</td><td>In this demo, yes: anyone with Elasticsearch credentials sees every document, and the demo frontend has no login. That is why production would enforce access in Elasticsearch roles.</td></tr>
+    <tr><td class="k">Is this classified data?</td><td>No. The documents are public research papers. The markings are synthetic and assigned deterministically from each paper's id: about 40 % U, 25 % CUI, 15 % C, 13 % S, 7 % TS, with compartments only on S and TS.</td></tr>
+    <tr><td class="k">How are compartments enforced?</td><td>The analyst must hold every compartment on the document. The query uses a <code>terms_set</code> match with the document's compartment count as the minimum. NOFORN documents are excluded unless the analyst is NOFORN-cleared.</td></tr>
+    <tr><td class="k">Does the model see restricted text?</td><td>No. Retrieval runs under the filter before the model is called, and only the top passages (up to 1,200 characters each) reach it. Its instructions forbid outside knowledge. With no cleared sources it returns a fixed "no documents" reply.</td></tr>
+    <tr><td class="k">Which embedding model?</td><td>Jina Embeddings v5 Omni, served locally on the DGX Spark. Jina is part of Elastic. Search by Image uses 768-dimension vectors through an Elasticsearch inference endpoint. Need-to-Know uses 1024-dimension vectors in a <code>bbq_hnsw</code> index.</td></tr>
+    <tr><td class="k">How many documents?</td><td>Quote the index counts recorded in the pre-show check. The setup guide states 9,636 text chunks and 198 image records; that is documentation, not a live count.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 5: RECOVERY, RESET, COMING NEXT ============ -->
+<div class="page">
+  <div class="rh"><span>05 · Multimodal + Need-to-Know</span><span>Recovery, reset and what is next</span></div>
+  <div class="eyebrow or">Failure recovery per step</div>
+  <h2>What breaks, <span class="hl">and what to do on stage.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:96px">Step</th><th style="width:180px">Symptom</th><th>Recovery on stage</th></tr>
+    <tr><td class="k">Search by Image</td><td>Error or no results</td><td>The Jina server or the inference endpoint is down. Move to Need-to-Know if <code>/health</code> answers; otherwise restart the server after the session.</td></tr>
+    <tr><td class="k">Need-to-Know</td><td>Search errors for every persona</td><td>Backend cannot reach ES (runbook 02, K1, K2) or the Jina server. Explain the clearance model from the persona cards and offer a rerun.</td></tr>
+    <tr><td class="k">Need-to-Know</td><td>Answer panel spins for a long time</td><td>The model call has a 120 s timeout. Continue narrating the hits and figures, which arrive independently.</td></tr>
+    <tr><td class="k">Need-to-Know</td><td>"No documents in your accessible corpus match this question"</td><td>This is the correct canned reply when the persona has no cleared sources. Use it as a proof point, then switch to a higher clearance.</td></tr>
+    <tr><td class="k">Need-to-Know</td><td>Figure strip or PDF links 404</td><td>Media path mismatch. Skip figures; the text results remain valid.</td></tr>
+    <tr><td class="k">Need-to-Know</td><td>Results look weak for a question</td><td>Queries are embedded as passages in this build. Use the built-in sample queries.</td></tr>
+  </table>
+
+  <h3 class="mt">Reset</h3>
+  <p>Press "Exit to chooser" or Esc. At the start of the next run, select Public User before the first question. Reload the browser tab between audiences.</p>
+
+  <div class="card mt">
+    <div class="ch" style="background:#FFF9E0">Coming next · <span class="tag wip" style="margin-left:4px">Not merged</span></div>
+    <div class="cb">
+      <p>A local work-in-progress build of this adventure exists on a development machine. It is behind the shared branch, is not on the kit, and must not be demonstrated or promised as shipped.</p>
+      <ul>
+        <li><b>New scenes.</b> "Vector Search" (retrieval by meaning) and "AI Analyst" (grounded answers) replace the current navigation. Search by Image is dropped from navigation.</li>
+        <li><b>New shell.</b> A header with a shared "Signed in as" persona bar, a shared corpus meter and a light theme in Elastic Blue. The meter's default total is 208 papers, which conflicts with 509 elsewhere.</li>
+        <li><b>New backend options.</b> API-key auth, an option to embed through an in-cluster inference endpoint, and an option to answer through a cloud-hosted model endpoint, to run the adventure against Elastic Cloud. That cloud option does not apply to a disconnected kit.</li>
+        <li><b>Merge risk.</b> The work-in-progress config still uses raw IP defaults and will conflict with the .ddil change.</li>
+      </ul>
+    </div>
+  </div>
+  <!--foot-->
+</div>

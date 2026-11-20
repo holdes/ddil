@@ -2,8 +2,10 @@
 # run-all.sh — end-to-end airgapped SEC data + provisioning, run ON THE BOX.
 #
 # Prereqs (see SEC-AIRGAP-SETUP.md):
-#   • Local ES (GPU node) + Kibana up; Ollama with nomic-embed-text + gpt-oss:120b pulled
-#   • The bench corpus text copied to the box: sec_10k_bulk.ndjson (or any NDJSON with `text`)
+#   • Local ES (GPU node) + Kibana up
+#   • Jina Embeddings v5 Omni server on the Spark (:8081)
+#   • Ollama on the Spark with nemotron-3.5-lightning pulled (Agent Builder LLM)
+#   • The corpus text on the box: sec_10k_bulk.ndjson (or any NDJSON with `text`)
 #
 # Usage:
 #   EP="<elastic-password>" SRC=/data/sec/sec_10k_bulk.ndjson bash run-all.sh
@@ -13,16 +15,19 @@ cd "$(dirname "$0")"
 SRC="${SRC:?set SRC to the source NDJSON (with a text field) copied onto the box}"
 EP="${EP:?set EP to the elastic user password (used for Kibana + ES if security on)}"
 OUT="${OUT:-./sec_10k_local.ndjson}"
-OLLAMA="${OLLAMA:-http://192.168.1.20:11434}"
-EMBED_MODEL="${EMBED_MODEL:-nomic-embed-text}"
+JINA="${JINA:-http://192.168.1.20:8081}"
+EMBED_MODEL="${EMBED_MODEL:-jina-embeddings-v5-omni-small}"
+# One dimension for re-embed, index and query: read SEC_EMBED_DIMS from the backend config.
+CFG_DIMS="$(grep -E '^[[:space:]]*SEC_EMBED_DIMS:' ../../backend/app/config.py | grep -oE '[0-9]+' | head -1)"
+export DIMS="${DIMS:-${CFG_DIMS:-768}}"
 export ES_URL="${ES_URL:-http://192.168.1.20:9200}"
 export KB="${KB:-http://192.168.1.10:5601}"
 
-echo "── 1/5  re-embed corpus locally ($EMBED_MODEL via $OLLAMA) ─────────────"
-python3 reembed-local.py --src "$SRC" --out "$OUT" --ollama "$OLLAMA" --model "$EMBED_MODEL"
+echo "── 1/5  re-embed corpus on the kit ($EMBED_MODEL via $JINA, ${DIMS}-d) ──"
+python3 reembed-local.py --src "$SRC" --out "$OUT" --backend jina --jina "$JINA" --model "$EMBED_MODEL" --dims "$DIMS"
 
 echo "── 2/5  create + bulk-load the local sec_10k_2026 index ───────────────"
-DIMS="${DIMS:-768}" bash setup-index-local.sh "$OUT"
+bash setup-index-local.sh "$OUT"
 
 echo "── 3/5  create local Ollama LLM connector in Kibana ───────────────────"
 EP="$EP" bash provision-connector-local.sh

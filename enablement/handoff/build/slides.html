@@ -1,0 +1,301 @@
+<!-- 1 cover -->
+<section class="slide" data-fx="cover" data-foot="DDIL demo kit · handoff · status 13 Nov 2026"
+ data-notes="This is the ten-minute handoff for whoever takes the kit next. It covers six things: what is in the case, how to get it running, what each of the three demos shows and the one point to land, what is live and what is staged, how to practise before you touch the kit, and what is still open. The rule behind all of it: every number you say in front of a customer must be true of the kit in the room. Everything on these slides comes from FACTS.md, the setup guide, the runbooks and the practice mock. Nothing here is new.">
+  <div class="z" style="width:600px">
+    <div class="eyebrow in1">DDIL demo kit · handoff</div>
+    <h1 class="in2" style="font-size:52px;letter-spacing:-2px;margin-top:26px">Take the kit. Run the demos. <span class="b">Say only what is true.</span></h1>
+    <div class="sub in3" style="font-size:18px;margin-top:18px;max-width:540px">What is in the case, how to bring it up, what each demo shows, what is live and what is staged, and what is still open.</div>
+    <div class="in4" style="margin-top:28px;display:flex;flex-wrap:wrap;gap:8px;max-width:540px">
+      <span class="tagc">Vineyard Intelligence</span><span class="tagc">SEC Findings</span><span class="tagc">Multimodal and need-to-know</span>
+    </div>
+    <div class="in4" style="margin-top:26px;font:500 12px/1.7 var(--mono);color:var(--grey)">For the SA taking the kit · 10 minutes<br>Source of truth: enablement/FACTS.md</div>
+  </div>
+  <div class="fig in3" style="left:742px;top:36px;width:480px"><img src="{{IMG:kit-front.webp}}" alt="Front of the DDIL kit, set up"></div>
+</section>
+
+<!-- 2 the kit, front -->
+<section class="slide soft" data-fx="front" data-foot="The kit · front"
+ data-notes="This is the front of the kit, set up, drawn from the kit itself. It is a 10 inch mini rack that travels face down in a Pelican Air 1615 case. Top to bottom: the carry handles, the touchscreen in a 2U mount, blank panels that hide the Framework Desktop, the DGX Spark with its metal-foam face, the JetKVM bay on the left of the network row with the UniFi Express 7 beside it, the Switch Flex Mini below, and the PDU master switch at the bottom. Two computers do the work: the Spark at .20 and the Framework at .10. The touchscreen is a kiosk, not the demo screen; the demos run on the presenter iPad or laptop. Marker positions come from setup/src/hotspots.json; if one looks off on your kit, fix it there and rebuild both the setup guide and this deck.">
+  <div class="fig" data-set="front" data-mk="F1=1,F2=2,F3=3,F4=4,F5=5,F6=6,F7=7,F8=8" style="left:64px;top:52px;width:460px"><img src="{{IMG:kit-front.webp}}" alt="Front of the DDIL kit with numbered components"></div>
+  <div class="z" style="position:absolute;left:600px;right:72px;top:56px">
+    <div class="eyebrow in1">The kit · front</div>
+    <h1 class="in2 h2" style="margin-top:14px">Two computers, a network and a touchscreen <span class="b">in a 10 in rack.</span></h1>
+  </div>
+  <div class="leg tight" style="left:600px;right:72px;top:206px">
+    <div class="lr lat"><span class="n">1</span><div><div class="h">Carry handles</div><div class="x">Lift by the handle and the rear grate. Never by the touchscreen or a cable.</div></div></div>
+    <div class="lr lat"><span class="n">2</span><div><div class="h">Touchscreen kiosk<small>2U · 1280x400 · :3100</small></div><div class="x">HDMI and USB-A to the Framework. Shows status and branding, not the demos.</div></div></div>
+    <div class="lr lat"><span class="n">3</span><div><div class="h">Framework Desktop<small>192.168.1.10 · x86_64</small></div><div class="x">Behind blank panels. CPU Elasticsearch node, Kibana, demo app, kiosk.</div></div></div>
+    <div class="lr lat"><span class="n">4</span><div><div class="h">DGX Spark<small>192.168.1.20 · aarch64 · GB10</small></div><div class="x">GPU Elasticsearch node, Ollama with Nemotron 3.5 Lightning, Jina Embeddings v5 Omni server.</div></div></div>
+    <div class="lr lat"><span class="n">5</span><div><div class="h">JetKVM<small>remote console</small></div><div class="x">Travels out of its bay. Ethernet, HDMI and USB-C power.</div></div></div>
+    <div class="lr lat"><span class="n">6</span><div><div class="h">UniFi Express 7<small>192.168.1.1 · Wi-Fi DDIL</small></div><div class="x">Gateway, DHCP and Wi-Fi. Its USB-C power lead is unplugged for transport.</div></div></div>
+    <div class="lr lat"><span class="n">7</span><div><div class="h">Switch Flex Mini<small>5-port GbE</small></div><div class="x">Wires the UniFi, the Framework and the Spark together.</div></div></div>
+    <div class="lr lat"><span class="n">8</span><div><div class="h">PDU master switch</div><div class="x">One rocker powers everything. It glows red when on.</div></div></div>
+  </div>
+</section>
+
+<!-- 3 back and side -->
+<section class="slide" data-fx="backside" data-foot="The kit · back and side"
+ data-notes="Back view on the left, side view in the middle. The back is where you cable: the Framework rear I/O plate carries the HDMI port, leftmost and labelled, two USB-A ports for the touchscreen, and the RJ45 port. The Framework power supply inlet sits on the right of the same plate. The DGX Spark ports are on the row below, already cabled. The black mains cable leaves at the bottom right. The side view shows the stack through the glass panel: the finned Framework on top, the metal-foam Spark under it, the network shelf, then the PDU. Keep the front and rear grates clear for airflow. The rear unit and the bottom side unit are read as the PDU from the front view; the setup guide marks that as inferred.">
+  <div class="z">
+    <div class="eyebrow in1">The kit · back and side</div>
+    <h1 class="in2 h2">All the cabling is at the back. <span class="b">The glass side shows the stack.</span></h1>
+  </div>
+  <div class="fig" data-set="back" data-mk="B2=1,B3=2,B4=3,B5=4,B6=5,B9=6" style="left:64px;top:170px;width:372px"><img src="{{IMG:kit-back.webp}}" alt="Back of the kit"><div class="cap">Back</div></div>
+  <div class="fig" data-set="side" data-mk="S1=b:7,S3=b:8,S4=b:9,S5=b:10,S6=b:11,S8=b:12" style="left:452px;top:170px;width:372px"><img src="{{IMG:kit-side.webp}}" alt="Side of the kit"><div class="cap">Side</div></div>
+  <div class="leg tight" style="left:862px;right:72px;top:176px">
+    <div class="lr lat"><span class="n">1</span><div><div class="h">Framework HDMI<small>leftmost</small></div><div class="x">Touchscreen picture.</div></div></div>
+    <div class="lr lat"><span class="n">2</span><div><div class="h">Framework USB-A</div><div class="x">Touchscreen touch input.</div></div></div>
+    <div class="lr lat"><span class="n">3</span><div><div class="h">Framework RJ45</div><div class="x">The Ethernet cable from step 5.</div></div></div>
+    <div class="lr lat"><span class="n">4</span><div><div class="h">Framework PSU<small>IEC inlet, power button</small></div></div></div>
+    <div class="lr lat"><span class="n">5</span><div><div class="h">DGX Spark rear ports<small>cabled inside</small></div></div></div>
+    <div class="lr lat"><span class="n">6</span><div><div class="h">Mains cable exit<small>to the wall</small></div></div></div>
+    <div class="lr lat"><span class="n bl">7</span><div><div class="h">Handle<small>lift point, with the rear grate</small></div></div></div>
+    <div class="lr lat"><span class="n bl">8</span><div><div class="h">Framework<small>finned unit</small></div></div></div>
+    <div class="lr lat"><span class="n bl">9</span><div><div class="h">DGX Spark<small>metal-foam unit</small></div></div></div>
+    <div class="lr lat"><span class="n bl">10</span><div><div class="h">Network gear shelf</div></div></div>
+    <div class="lr lat"><span class="n bl">11</span><div><div class="h">PDU<small>bottom unit</small></div></div></div>
+    <div class="lr lat"><span class="n bl">12</span><div><div class="h">Glass side panel</div><div class="x">Check for loose cables before packing.</div></div></div>
+  </div>
+</section>
+
+<!-- 4 out of the case -->
+<section class="slide soft" data-fx="unpack" data-foot="Out of the case · seven steps"
+ data-notes="Left is the kit as it comes out of the case; right is the kit ready to run. The markers carry step numbers. One: lift it out by the handle and the rear grate, stand it upright, touchscreen facing you. Two: plug the long PDU cable into the wall with master power still off. Three: the JetKVM travels loose; its three leads hang in the empty bay. Seat it with Ethernet, HDMI and USB-C power. Then plug the white USB-C lead back into the UniFi Express 7. Four and five happen at the back: touchscreen HDMI and USB-A into the Framework, Ethernet into the Framework RJ45. Six: master power on at the PDU. Seven: join the Wi-Fi network DDIL from the presenter device. The passphrase is with the kit lead and is not in any file. Pack-down is the reverse, but shut both computers down before you switch the PDU off, Framework first, then the Spark. Never add -v to docker compose down; it deletes volumes.">
+  <div class="z">
+    <div class="eyebrow in1">Out of the case</div>
+    <h1 class="in2 h2">Packed to powered on <span class="b">in seven steps.</span></h1>
+  </div>
+  <div class="fig" data-set="front-packed" data-mk="K1=1,K12=2,K6=3a,K11=3c" style="left:64px;top:160px;width:336px"><img src="{{IMG:kit-front-packed.webp}}" alt="Kit front, packed for transport"><div class="cap">Packed: JetKVM out, UniFi lead loose</div></div>
+  <div class="fig" data-set="front" data-mk="F5=3b,F6=3c,F2=4,F8=6" style="left:412px;top:160px;width:336px"><img src="{{IMG:kit-front.webp}}" alt="Kit front, set up"><div class="cap">Set up</div></div>
+  <div class="leg tight" style="left:784px;right:72px;top:166px">
+    <div class="lr lat"><span class="n">1</span><div><div class="h">Lift out, stand upright</div><div class="x">Handle on top, metal grate on the back. Touchscreen faces you.</div></div></div>
+    <div class="lr lat"><span class="n">2</span><div><div class="h">PDU cable to the wall</div><div class="x">Master power stays off. Cable exits rear bottom right.</div></div></div>
+    <div class="lr lat"><span class="n">3a</span><div><div class="h">Find the JetKVM leads</div><div class="x">USB-C, USB-A and RJ45 hang in the empty bay.</div></div></div>
+    <div class="lr lat"><span class="n">3b</span><div><div class="h">Seat the JetKVM</div><div class="x">Ethernet, HDMI and USB-C power, then into its bay.</div></div></div>
+    <div class="lr lat"><span class="n">3c</span><div><div class="h">UniFi power lead back in</div><div class="x">White USB-C lead into the UniFi Express 7.</div></div></div>
+    <div class="lr lat"><span class="n">4</span><div><div class="h">Touchscreen to the Framework</div><div class="x">HDMI (rear, leftmost) and USB-A.</div></div></div>
+    <div class="lr lat"><span class="n">5</span><div><div class="h">Ethernet to the Framework</div><div class="x">Rear RJ45. Other end: confirm on kit.</div></div></div>
+    <div class="lr lat"><span class="n">6</span><div><div class="h">Master power on</div><div class="x">The PDU rocker glows red.</div></div></div>
+    <div class="lr lat"><span class="n">7</span><div><div class="h">Join Wi-Fi DDIL</div><div class="x">Passphrase from the kit lead. Not in any file.</div></div></div>
+  </div>
+  <div class="box w lat" style="left:784px;right:72px;top:604px;padding:8px 12px;font-size:12px"><b>Pack-down</b> is the reverse. Shut down the Framework, then the Spark, before the PDU goes off. Never <code>docker compose down -v</code>.</div>
+</section>
+
+<!-- 5 power-on -->
+<section class="slide" data-fx="power" data-foot="Power-on · what you should see"
+ data-notes="Photo of the kit taken 13 Nov 2026. After master power: the PDU rocker glows red. The JetKVM shows its standard screen; the IP appears once Ethernet has a link, and USB and HDMI read Disconnected until the Framework is up. The UniFi Express 7 display reads Plug in Cable, Ethernet Disconnected. That is expected: the kit has no WAN uplink, and the kit network still runs. The switch shows a blue status LED. The touchscreen launches the kiosk: Boot Diagnostics, a scrolling probe log for six services, then about two seconds after kit ready it moves to Idle, a branding page with a QR code and a hardware diagnostics page. Warning: the kiosk health is mocked. MOCK is true in health.ts, so every probe is simulated with a random delay and a five percent random FAIL. A green board proves nothing, and a pink FAIL is noise. Use the runbook 02 checks for real status. The Jina embedding server does not start on boot; start it by hand on the Spark.">
+  <div class="fig ph" data-set="front-photo" data-mk="FP9=1,FP6=2,FP7=3,FP8=4,FP2=5" style="left:64px;top:56px;width:362px"><img src="{{IMG:photo-front.webp}}" alt="Photo of the kit front"></div>
+  <div class="shotc" style="left:64px;top:630px;width:380px">Kit photo, 13 Nov 2026. JetKVM out of its bay (2).</div>
+  <div class="z" style="position:absolute;left:478px;right:72px;top:56px">
+    <div class="eyebrow in1">Power-on</div>
+    <h1 class="in2 h2" style="margin-top:14px">What you should see <span class="b">after master power.</span></h1>
+  </div>
+  <div class="leg" style="left:478px;width:470px;top:180px">
+    <div class="lr lat"><span class="n">1</span><div><div class="h">PDU rocker glows red</div><div class="x">Everything on the PDU powers up together.</div></div></div>
+    <div class="lr lat"><span class="n">2</span><div><div class="h">JetKVM standard screen</div><div class="x">IP appears once Ethernet links. USB and HDMI read Disconnected until the Framework is up.</div></div></div>
+    <div class="lr lat"><span class="n">3</span><div><div class="h">UniFi reads "Plug in Cable"</div><div class="x">Expected. No WAN uplink in DDIL operation; the kit network still runs.</div></div></div>
+    <div class="lr lat"><span class="n">4</span><div><div class="h">Switch blue status LED</div><div class="x">Next to its USB-C power lead.</div></div></div>
+    <div class="lr lat"><span class="n">5</span><div><div class="h">Touchscreen: Boot Diagnostics, then Idle</div><div class="x">Probe log for six services, then the branding page with a QR code and a diagnostics page.</div></div></div>
+  </div>
+  <div class="refs lat" style="left:972px;top:186px;flex-direction:column;align-items:flex-start">
+    <figure><img src="{{IMG:ref-jetkvm.webp}}" style="width:236px" alt="JetKVM screen"><figcaption>JetKVM. IP and MAC blurred.</figcaption></figure>
+    <figure><img src="{{IMG:ref-ux7.webp}}" style="width:80px" alt="UniFi Express 7 display"><figcaption>UniFi with no WAN. Expected.</figcaption></figure>
+  </div>
+  <div class="box w lat" style="left:478px;right:72px;top:560px"><span class="k">The kiosk health is mocked</span><code>MOCK = true</code> in <code>demo/kiosk/src/lib/health.ts</code>. A green board does not prove the services are up; a random FAIL is noise. Use the runbook 02 checks. The Jina server needs a manual start after every boot.</div>
+</section>
+
+<!-- 6 what runs where -->
+<section class="slide soft" data-fx="where" data-foot="What runs where"
+ data-notes="Flat view of the services, by machine. The DGX Spark at .20 is aarch64: the GPU Elasticsearch node built from 9.5.6 plus the cuVS jar, Ollama under systemd with NVIDIA Nemotron 3.5 Lightning, and the Jina Embeddings v5 Omni server on 8081, which you start by hand. The Framework at .10 is x86_64: the CPU Elasticsearch node, Kibana with Agent Builder on 5601, the FastAPI backend on 8000, the frontend on 3000 and the kiosk on 3100. Both Elasticsearch nodes form one cluster, ddil-vineyard. The presenter device joins Wi-Fi DDIL and opens 192.168.1.10 port 3000. Two checks before a show. All nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. And the .ddil names exist in config but are untested on the box; use raw IPs when in doubt.">
+  <div class="z">
+    <div class="eyebrow in1">What runs where</div>
+    <h1 class="in2 h2">One cluster across two machines. <span class="b">Every model on the box.</span></h1>
+  </div>
+  <div class="mc lat" style="left:72px;width:524px;top:170px">
+    <div class="mh"><b>DGX Spark</b><span>192.168.1.20</span><em>aarch64 · GB10 · 128 GB</em></div>
+    <div class="sv"><span class="k">es-gpu</span><span class="d">Elasticsearch 9.5.6 + cuVS, GPU vector indexing on, security on</span><span class="p">:9200</span></div>
+    <div class="sv"><span class="k">Ollama</span><span class="d">NVIDIA Nemotron 3.5 Lightning, native under systemd</span><span class="p">:11434</span></div>
+    <div class="sv warn"><span class="k">Jina server</span><span class="d">Jina Embeddings v5 Omni, text and images. Start by hand after boot</span><span class="p">:8081</span></div>
+  </div>
+  <div class="mc lat" style="left:620px;width:588px;top:170px">
+    <div class="mh"><b>Framework Desktop</b><span>192.168.1.10</span><em>x86_64 · Ryzen AI Max+ 395 · 64 GB</em></div>
+    <div class="sv"><span class="k">es-cpu</span><span class="d">Elasticsearch 9.5.6, security on</span><span class="p">:9200</span></div>
+    <div class="sv"><span class="k">Kibana</span><span class="d">9.5.6, Agent Builder for SEC Findings</span><span class="p">:5601</span></div>
+    <div class="sv"><span class="k">backend</span><span class="d">FastAPI, calls ES, Ollama and Jina</span><span class="p">:8000</span></div>
+    <div class="sv"><span class="k">frontend</span><span class="d">The demo app and its chooser</span><span class="p">:3000</span></div>
+    <div class="sv warn"><span class="k">kiosk</span><span class="d">Touchscreen app, mock health by default</span><span class="p">:3100</span></div>
+  </div>
+  <div class="wire" style="left:333px;top:340px;width:2px;height:144px"></div>
+  <div class="wire" style="left:913px;top:400px;width:2px;height:84px"></div>
+  <div class="wire" style="left:333px;top:483px;width:582px;height:2px"></div>
+  <div class="wire" style="left:489px;top:483px;width:2px;height:22px"></div>
+  <div class="nb lat" style="left:72px;width:268px;top:505px"><div class="k">Gateway</div><div class="h">UniFi Express 7<span>.1</span></div><div class="x">DHCP .100-199, Wi-Fi DDIL. No WAN.</div></div>
+  <div class="nb lat" style="left:356px;width:268px;top:505px"><div class="k">Switch</div><div class="h">Switch Flex Mini</div><div class="x">5-port GbE. Wires the three boxes.</div></div>
+  <div class="nb lat" style="left:640px;width:268px;top:505px"><div class="k">Console</div><div class="h">JetKVM</div><div class="x">Remote keyboard, video and mouse.</div></div>
+  <div class="nb lat" style="left:924px;width:284px;top:505px;border-color:var(--blue)"><div class="k">Presenter device</div><div class="h">iPad or laptop</div><div class="x">Joins DDIL, opens <b>192.168.1.10:3000</b></div></div>
+  <div class="box w lat" style="left:72px;right:72px;top:606px;padding:9px 14px;font-size:12.5px"><b>Pre-show check:</b> all nodes and Kibana on 9.5.6, security settings matched; kit config points at Nemotron 3.5 Lightning and Jina v5 Omni. The <code>.ddil</code> names are untested on the box; use raw IPs.</div>
+</section>
+
+<!-- 7 three demos at a glance -->
+<section class="slide" data-fx="glance" data-foot="The three demos at a glance"
+ data-notes="Every demo starts from the chooser on the presenter device at 192.168.1.10 port 3000. The chooser also shows an Edge Federation card; that one is out of scope. Practice targets come from the mock: Vineyard about nine and a quarter minutes, SEC nine and three quarters, Multimodal eight and a quarter. The scenario runbooks allow longer sessions if the audience engages. One point to land for each. Vineyard: an agronomist pipeline queries Elasticsearch on the kit and reasons with Nemotron 3.5 Lightning on the Spark, with no network. SEC: an Elastic Agent Builder agent with ES|QL tools answers comparative questions over 10-K filings and cites its sources, on the kit. Multimodal: Jina Embeddings v5 Omni embeds words and pictures on the kit, and the same question returns different documents and answers depending on who asks. Screens marked practice mock come from the mock; the kit frontend looks the same with live data behind it.">
+  <div class="z" style="width:820px">
+    <div class="eyebrow in1">What we showcase</div>
+    <h1 class="in2 h2">Three demos. <span class="b">One point to land in each.</span></h1>
+  </div>
+  <div class="shot lat" style="left:1018px;top:40px;width:190px"><img src="{{IMG:app-01-chooser.webp}}" alt="Kit chooser"></div>
+  <div class="shotc lat" style="left:770px;top:86px;width:236px;text-align:right;line-height:1.5">Every demo starts at the kit chooser on <b>:3000</b>. Its Edge Federation card is out of scope.</div>
+  <div class="dg lat" style="left:72px"><div class="shot"><img src="{{IMG:app-13-vineyard-dashboard.webp}}" alt="Vineyard dashboard"></div>
+    <div class="nm">Vineyard Intelligence</div>
+    <div class="tt"><span class="t">Practice 9:15</span><span>Runbook 03 · 12-18 min</span></div>
+    <div class="ld">An agronomist pipeline queries Elasticsearch on the kit and reasons with Nemotron 3.5 Lightning on the Spark. No network.</div>
+    <div class="dgc"><b>Live core</b>Map, then Investigate with AI on Block C: five phases.</div></div>
+  <div class="dg lat" style="left:460px"><div class="shot"><img src="{{IMG:mock-17-sec-agent-done.webp}}" alt="SEC agent chapter"></div>
+    <div class="nm">SEC Findings</div>
+    <div class="tt"><span class="t">Practice 9:45</span><span>Runbook 04 · 15-20 min</span></div>
+    <div class="ld">An Elastic Agent Builder agent with ES|QL tools compares 10-K filings and cites them, on the kit.</div>
+    <div class="dgc"><b>Live core</b>Chapter 03 semantic search, chapter 04 agent.</div></div>
+  <div class="dg lat" style="left:848px"><div class="shot"><img src="{{IMG:mock-24-jina-vector-senior.webp}}" alt="Need-to-know vector search"></div>
+    <div class="nm">Multimodal and need-to-know</div>
+    <div class="tt"><span class="t">Practice 8:15</span><span>Runbook 05 · 10-15 min</span></div>
+    <div class="ld">Jina Embeddings v5 Omni embeds words and pictures on the kit. The same question returns different answers by clearance.</div>
+    <div class="dgc"><b>Live core</b>Same question as each of four analysts.</div></div>
+  <div class="shotc" style="left:72px;top:636px">Screens: Vineyard from the kit frontend; SEC and Multimodal from the practice mock.</div>
+</section>
+
+<!-- 8 vineyard -->
+<section class="slide soft" data-fx="vin" data-foot="Demo 1 · Vineyard Intelligence"
+ data-notes="Vineyard. Domaine de la Cote Cachee is a fictional estate in the Walla Walla AVA with six blocks and eight years of synthetic data from one causal model. Block C, La Riviere, has declined since a drainage failure in mid-2022 that pulled potassium from 210 toward a 50 mg/kg floor. The agronomist finds that story. Before the race starts, say it is a timed simulation: indexer.py sleeps, never calls Elasticsearch, and ends at 15 seconds for GPU and 55 for CPU because those are constants. Never quote a speedup, a vectors-per-second figure or recall from it. Dashboard and map are live only if the pre-show checks passed; otherwise they silently show fallback numbers, and a total of exactly 869,000 is the tell. The alerts are scripted. Start the investigation from the map so the block id is passed; typed questions carry no block. The five phases are a Python pipeline in the backend with four sequential Nemotron 3.5 Lightning calls through Ollama. It is not Agent Builder, whatever the chooser card says, and the phases run in sequence even though the stream says in parallel. Budget one and a half to three minutes per question. Skip Search, Crop Health and System: they are canned.">
+  <div class="z">
+    <div class="eyebrow in1">Demo 1 · Vineyard Intelligence</div>
+    <h1 class="in2 h2">The agronomist in the case. <span class="b">Search first, then reason.</span></h1>
+  </div>
+  <div class="shot lat" style="left:72px;top:172px;width:576px"><img src="{{IMG:mock-08-vineyard-agent-done.webp}}" alt="AI Agronomist five phases"></div>
+  <div class="shotc" style="left:72px;top:540px">Practice mock: AI Agronomist on BLK-C after phases 00 to 03.</div>
+  <div class="beats" style="left:680px;right:72px;top:172px">
+    <div class="bt lat"><span class="tm">0:00</span><div><div class="h">Chooser, Architecture</div><div class="x">Describe the two nodes. Skip the stat strip.</div></div><span class="bd st">Staged</span></div>
+    <div class="bt lat"><span class="tm">2:00</span><div><div class="h">Race intro and race</div><div class="x">"A timed simulation. The numbers are scripted, so I will not quote them."</div></div><span class="bd st">Staged</span></div>
+    <div class="bt lat"><span class="tm">4:00</span><div><div class="h">Dashboard, then the map</div><div class="x">Live only if pre-show checks passed. Alerts are scripted. Select BLK-C.</div></div><span class="bd fb">Fallback</span></div>
+    <div class="bt lat"><span class="tm">7:00</span><div><div class="h">Investigate with AI from the map</div><div class="x">Passes the block. Phase 0 reads sensors; phase 1 is kNN on 8-dim soil vectors.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">8:30</span><div><div class="h">Risk, recommendation, action plan</div><div class="x">Three more Nemotron calls, in sequence. Real inference time; let it run.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">end</span><div><div class="h">Search, Crop Health, System</div><div class="x">Skip. Canned results. Sidebar Reset Demo between audiences.</div></div><span class="bd sk">Skip</span></div>
+  </div>
+  <div class="say" style="left:72px;right:72px;top:572px">
+    <div class="ok lat"><b class="k">Say</b>"A Python pipeline in our app: live Elasticsearch queries on the kit, then Nemotron 3.5 Lightning on the DGX Spark."</div>
+    <div class="no lat"><b class="k">Never say</b>Any race speedup (12x and the rest), "Agent Builder" for the agronomist, or "in parallel" for the phases.</div>
+  </div>
+</section>
+
+<!-- 9 SEC -->
+<section class="slide" data-fx="sec" data-foot="Demo 2 · SEC Findings"
+ data-notes="SEC Findings is an eight-chapter presenter deck inside the app. Chapters 03 and 04 carry the proof; move through 00 to 02 briskly and label them illustrative. Chapter 00 shows the kit's two nodes, the DGX Spark GPU node and the Framework CPU node, on one Elasticsearch 9.5.6 cluster. Chapter 01 is the same staged race simulator as Vineyard. Chapter 02 shows kit economics with no prices: inference and embeddings run on the Spark, there is no per-hour or per-token bill, and nothing leaves the case. The presenter panel cites 78 percent TCO from a webinar; quote no TCO figure. Chapter 03 is live: the query is embedded on the Spark with Jina Embeddings v5 Omni at 768 dimensions and searched with kNN; took_ms is real. The code panel names Jina v5 Omni. The 503 filings and 93,541 chunks are labels; count the filings with ES|QL before the show if you want a number. Chapter 04 is live: Elastic Agent Builder, agent finance-analyst with three custom ES|QL tools plus platform tools, through a local connector to Nemotron 3.5 Lightning on the Spark. The config card names the same model and embedder. The chat has no read timeout, so a hung model hangs the screen: Reset conversation and use a shorter example. The Workflows chapter links 404, and chapter 05 links need the internet. Pre-show: confirm the SEC index was re-embedded with Jina v5 Omni at 768 dimensions on the kit and the Jina server answers on port 8081, or chapter 03 fails.">
+  <div class="z">
+    <div class="eyebrow in1">Demo 2 · SEC Findings</div>
+    <h1 class="in2 h2">An Elastic agent on the edge. <span class="b">Every claim cites a filing.</span></h1>
+  </div>
+  <div class="shot lat" style="left:72px;top:172px;width:576px"><img src="{{IMG:mock-15-sec-interface.webp}}" alt="SEC chapter 03 interface"></div>
+  <div class="shotc" style="left:72px;top:540px">Practice mock: chapter 03, analyst search and the developer's request.</div>
+  <div class="beats" style="left:680px;right:72px;top:172px">
+    <div class="bt lat"><span class="tm">0:30</span><div><div class="h">00 Setup</div><div class="x">"Two nodes in this case, one cluster. One setting differs." One sentence.</div></div><span class="bd st">Staged</span></div>
+    <div class="bt lat"><span class="tm">1:30</span><div><div class="h">01 Speed, 02 Side-by-side</div><div class="x">Same race simulator. Kit economics: no cloud bill, nothing leaves the case.</div></div><span class="bd st">Staged</span></div>
+    <div class="bt lat"><span class="tm">6:00</span><div><div class="h">03 Interface: semantic search</div><div class="x">Embedded on the Spark, Jina v5 Omni, 768 dims. took_ms is real.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">9:00</span><div><div class="h">04 Agentic: finance-analyst</div><div class="x">Agent Builder picks ES|QL tools, runs them, cites ticker and accession.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">14:00</span><div><div class="h">Workflows, 05 The Stack</div><div class="x">"An example definition, not deployed here." Do not click the links.</div></div><span class="bd st">Staged</span></div>
+  </div>
+  <div class="say" style="left:72px;right:72px;top:572px">
+    <div class="ok lat"><b class="k">Say</b>"Elastic Agent Builder with ES|QL tools and Nemotron 3.5 Lightning, all running on this kit."</div>
+    <div class="no lat"><b class="k">Never say</b>A TCO percentage (the presenter panel shows 78 %), a speedup multiplier, or 503 filings as a count.</div>
+  </div>
+</section>
+
+<!-- 10 multimodal -->
+<section class="slide soft" data-fx="mm" data-foot="Demo 3 · Multimodal and need-to-know"
+ data-notes="Open with the line from the runbook: the papers are public research, the security markings are synthetic and assigned by a fixed rule, and the application applies each analyst's clearance as a filter on every query. Search by Image: Elasticsearch embeds the words through a local inference endpoint and runs kNN over ten synthetic shapes; toggle image vectors and caption vectors. Need-to-Know: start as Public User, ask one question, then switch to Analyst A, Analyst B and the Senior Analyst with the same question. The visible corpus grows with clearance; on the kit the counts are 85, 163, 187 and 198 papers. The real corpus is 198 papers, 9,636 text chunks and about 2,218 figure references; the 509 on screen is a stale label from an older ingest path, so read the numerator and say of 198. The answer is one Nemotron 3.5 Lightning call grounded only in passages the analyst may see. Enforcement is application-side; it is not Elasticsearch document level security, which a production design would use through roles. The embedding model is Jina Embeddings v5 Omni, jina-embeddings-v5-omni-small, on the Spark. The committed kit names the scenes Search by Image and Need-to-Know; the mock uses the newer names Vector Search and AI Analyst.">
+  <div class="z">
+    <div class="eyebrow in1">Demo 3 · Multimodal and need-to-know</div>
+    <h1 class="in2 h2">Same question, different clearance. <span class="b">Different answer.</span></h1>
+  </div>
+  <div class="shot lat" style="left:72px;top:172px;width:283px"><img src="{{IMG:mock-19-jina-image.webp}}" alt="Search by Image"></div>
+  <div class="shot lat" style="left:365px;top:172px;width:283px"><img src="{{IMG:mock-26-jina-analyst-analystA.webp}}" alt="Analyst answer as Analyst A"></div>
+  <div class="shotc" style="left:72px;top:356px;width:576px">Practice mock: Search by Image, and an answer scoped to Analyst A.</div>
+  <div class="box lat" style="left:72px;width:576px;top:392px;padding:10px 14px"><span class="k">The real numbers</span>Kit corpus: <b>198 papers</b>, 9,636 text chunks, about 2,218 figure references. Visible per analyst on the kit: Public 85 · Analyst A 163 · Analyst B 187 · Senior 198. The "509" in the app is a stale label; the numerator is measured.</div>
+  <div class="beats" style="left:680px;right:72px;top:172px">
+    <div class="bt lat"><span class="tm">0:30</span><div><div class="h">Search by Image</div><div class="x">"a red square". ES embeds the words through a local endpoint; kNN over ten shapes.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">2:00</span><div><div class="h">Image vectors vs caption vectors</div><div class="x">Toggle and rerun. Both live in one space.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">3:30</span><div><div class="h">Public User asks a question</div><div class="x">Hybrid BM25 plus kNN under the clearance filter, then a grounded answer.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">7:00</span><div><div class="h">Analyst A, B, then Senior</div><div class="x">Same question. Count, facets, figures and sources change.</div></div><span class="bd lv">Live</span></div>
+    <div class="bt lat"><span class="tm">11:00</span><div><div class="h">How access is enforced</div><div class="x">The application adds the filter to every query. Markings are synthetic.</div></div><span class="bd st">Staged</span></div>
+  </div>
+  <div class="say" style="left:72px;right:72px;top:572px">
+    <div class="ok lat"><b class="k">Say</b>"An application-side clearance filter on every query, facet, figure and answer. In production, Elasticsearch document level security on roles."</div>
+    <div class="no lat"><b class="k">Never say</b>"Native document level security", "509 papers", or that the markings are real classifications.</div>
+  </div>
+</section>
+
+<!-- 11 practise first, and where everything lives -->
+<section class="slide" data-fx="practise" data-foot="Practise first · where everything lives"
+ data-notes="Practise on the mock before you touch the kit. It opens from disk with no backend, follows the kit's click path, labels and prompts, and has a presenter coach for every step: what to say, the proof point, a live or staged badge with the honest phrasing, likely questions and what to do if the step fails. The top bar times each step against the targets. The drill selector injects the three real failures: an LLM timeout, a search fallback and Elasticsearch down, so you rehearse recovery too. Keys: arrows step, Esc back to the chooser, R reset, C coach, 0 to 5 jump SEC chapters. For an iPad, serve the folder from a laptop; Safari will not run scripts from the Files app. Hand other SAs mock/dist/ddil-mock.zip, which carries the media. On the right is where each piece lives, all under enablement/.">
+  <div class="z">
+    <div class="eyebrow in1">Practise first</div>
+    <h1 class="in2 h2">Rehearse on the mock. <span class="b">Then touch the kit.</span></h1>
+  </div>
+  <div class="shot lat" style="left:72px;top:172px;width:560px"><img src="{{IMG:mock-05-vineyard-dashboard-coach.webp}}" alt="Practice mock with the presenter coach"></div>
+  <div class="shotc" style="left:72px;top:530px;width:560px">mock/index.html with the Presenter Coach open. No kit, no backend, no network.</div>
+  <div class="leg tight" style="left:72px;width:560px;top:556px">
+    <div class="lr lat"><span class="n bl">C</span><div><div class="h">Coach</div><div class="x">Say this, proof point, live or staged phrasing, likely questions, recovery.</div></div></div>
+    <div class="lr lat"><span class="n bl">D</span><div><div class="h">Drills</div><div class="x">LLM timeout · search fallback · ES down. Keys: arrows, <span class="kx">Esc</span><span class="kx">R</span><span class="kx">C</span><span class="kx">0-5</span></div></div></div>
+  </div>
+  <div class="z lat" style="position:absolute;left:672px;right:72px;top:172px;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);padding-bottom:8px">Where everything lives · enablement/</div>
+  <div class="leg" style="left:672px;right:72px;top:200px">
+    <div class="mp lat"><span class="k">setup/index.html</span><span class="d">Physical setup: seven steps, indicator timeline, pack-down, hotspots. Single file: <code>setup/ddil-setup-guide.html</code>; PDF in <code>setup/pdf/</code>.</span></div>
+    <div class="mp lat"><span class="k">mock/index.html</span><span class="d">Practice mock with coach and drills. Hand out <code>mock/dist/ddil-mock.zip</code>.</span></div>
+    <div class="mp lat"><span class="k">docs/pdf/00 to 06</span><span class="d">Training guide, architecture, kit runbook (02), three scenario runbooks, quick reference card (06).</span></div>
+    <div class="mp lat"><span class="k">deck/ddil-deck.html</span><span class="d">The customer-facing talk track with speaker notes.</span></div>
+    <div class="mp lat"><span class="k">FACTS.md</span><span class="d">Source of truth. Every number cites code and is tagged measured, staged or doc-only.</span></div>
+    <div class="mp lat"><span class="k">handoff/</span><span class="d">This deck. Share file: <code>ddil-handoff-share.html</code>.</span></div>
+  </div>
+  <div class="box lat" style="left:672px;right:72px;top:506px;padding:10px 14px"><span class="k">Practice targets</span>Vineyard <b>9:15</b> · SEC <b>9:45</b> · Multimodal <b>8:15</b>. The step timer turns pink when you run over.</div>
+</section>
+
+<!-- 12 before you go -->
+<section class="slide soft" data-fx="before" data-foot="Before you go · checklist and open items"
+ data-notes="Left: the pre-show checklist from the quick reference card. Run it every time, and allow fifteen minutes per demo for the scenario checks on top. Middle: what is still open on the kit itself. The showcase configuration is the big one: all nodes and Kibana on 9.5.6 with security settings matched, and the models set to Nemotron 3.5 Lightning and Jina v5 Omni, per runbook 02. The backend container also gets no Elasticsearch credentials, so with security on every query 401s and Vineyard silently shows fallback numbers. The kiosk is mocked until someone flips MOCK to false. The Wi-Fi passphrase lives with the kit lead and stays out of every file, including this one. Right: nine blanks the setup guide marks confirm on kit, because no source records them. Fill them in on the kit the first time you run it, in the setup guide, and send them back so the guide can be updated.">
+  <div class="z">
+    <div class="eyebrow in1">Before you go</div>
+    <h1 class="in2 h2">Check it every time. <span class="b">Know what is still open.</span></h1>
+  </div>
+  <div class="ckc lat" style="left:72px;width:356px">
+    <div class="ch"><i></i>Pre-show checklist</div>
+    <div class="ci"><span>Power on; network, Spark, then Framework.</span></div>
+    <div class="ci"><span>Spark: <code>docker compose up -d</code>; <code>ollama list</code> shows <code>nemotron-3.5-lightning</code>.</span></div>
+    <div class="ci"><span>Start Jina v5 Omni by hand; <code>:8081/health</code> answers.</span></div>
+    <div class="ci"><span>Framework: <code>vm.max_map_count</code> 262144; compose up in <code>demo/</code>.</span></div>
+    <div class="ci"><span><code>_cat/nodes</code> lists spark-gpu and framework-cpu.</span></div>
+    <div class="ci"><span><code>/api/vineyard/dashboard</code>: block_summaries set.</span></div>
+    <div class="ci"><span>All on <b>9.5.6</b>, security matched; config on <b>Nemotron 3.5 Lightning</b> and <b>Jina v5 Omni</b>.</span></div>
+    <div class="ci"><span><code>/api/jina/analysts</code>: four personas.</span></div>
+    <div class="ci"><span>Warm Nemotron 3.5 Lightning with one chat call.</span></div>
+    <div class="ci"><span>One full click-through of each demo, then reset.</span></div>
+  </div>
+  <div class="ckc o lat" style="left:460px;width:356px">
+    <div class="ch"><i></i>Open on the kit · kit owner</div>
+    <div class="ci"><span><b>Showcase config.</b> Elastic 9.5.6 on all nodes and Kibana, security matched; Nemotron 3.5 Lightning and Jina v5 Omni. Runbook 02.</span></div>
+    <div class="ci"><span><b>No ES credentials in the backend container.</b> Every query 401s; Vineyard silently falls back.</span></div>
+        <div class="ci"><span><b>Kiosk MOCK = true.</b> Health tiles are simulated until flipped.</span></div>
+    <div class="ci"><span><b>.ddil names</b> untested on the box.</span></div>
+    <div class="ci"><span><b>Wi-Fi passphrase</b> stays with the kit lead. Never in a file.</span></div>
+  </div>
+  <div class="ckc p lat" style="left:848px;width:360px">
+    <div class="ch"><i></i>Nine "confirm on kit" blanks</div>
+    <div class="ci"><span>Framework Ethernet: other end</span></div>
+    <div class="ci"><span>JetKVM: which lead carries HDMI; what the USB-A lead connects to</span></div>
+    <div class="ci"><span>How to start a node that does not start</span></div>
+    <div class="ci"><span>Wi-Fi passphrase (kit lead only)</span></div>
+    <div class="ci"><span>Switch port link light colour</span></div>
+    <div class="ci"><span>DGX Spark power indicator</span></div>
+    <div class="ci"><span>Framework power indicator</span></div>
+    <div class="ci"><span>Minutes from master power to kiosk Idle</span></div>
+    <div class="ci"><span>Sign that a node has finished shutting down</span></div>
+  </div>
+  <div class="box lat" style="left:72px;right:72px;top:578px;padding:10px 16px"><span class="k">Where the detail is</span>Health commands and fixes: <code>docs/pdf/02-kit-configuration-runbook.pdf</code> and <code>docs/pdf/06-quick-reference.pdf</code>. Fill the blanks in <code>setup/index.html</code>; they save in your browser. Send them back so the guide can be updated.</div>
+</section>

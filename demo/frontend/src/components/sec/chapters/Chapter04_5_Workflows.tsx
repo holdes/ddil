@@ -116,8 +116,8 @@ export function Chapter04_5_Workflows() {
               <Tile n="03" title="Downstream action" body="Console step logs the result. Replace with slack / email / elasticsearch.request to write the digest where teams already live." />
               <Tile
                 n="04"
-                title="Why daily is affordable"
-                body="Fresh agent answers depend on a fresh index. Re-ingesting the corpus every morning is only realistic because chapter-01's GPU indexing made it ~89% cheaper than a CPU baseline."
+                title="Why daily is practical"
+                body="Fresh agent answers depend on a fresh index. Chapter 01's GPU graph build on the DGX Spark makes a morning re-ingest practical on the kit itself, with no cloud bill attached."
                 accent
               />
             </div>

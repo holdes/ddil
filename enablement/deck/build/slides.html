@@ -1,0 +1,300 @@
+<!-- 1 cover -->
+<section class="slide" data-fx="cover" data-foot="DDIL demo kit · SA enablement"
+ data-notes="Open with the object, not the slides. This is one case with two computers, a small network and a touchscreen on the front of the rack. Everything the three demos need runs inside it: Elasticsearch, Kibana and Agent Builder, the models and the apps. No call leaves the case while a demo runs. The talk track for the next forty minutes: what DDIL means, what the kit is, how a question moves through it, the three adventures, and what is live versus staged. Be exact about that last part; technical buyers will check.">
+  <div class="z" style="width:470px">
+    <div class="eyebrow in1">DDIL demo kit · SA enablement</div>
+    <h1 class="in2" style="font-size:50px;letter-spacing:-2px;margin-top:26px">Sovereign AI in one case. <span class="b">No cloud required.</span></h1>
+    <div class="sub in3" style="font-size:18px;margin-top:16px;max-width:440px">Search, vector retrieval, agents and NVIDIA Nemotron on two machines that work when the link is gone.</div>
+    <div class="in4" style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
+      <span class="tagc" style="width:max-content">Vineyard Intelligence</span><span class="tagc" style="width:max-content">SEC Findings</span><span class="tagc" style="width:max-content">Multimodal and need-to-know</span>
+    </div>
+  </div>
+  <figure class="z kitfig lat" id="cvfig" style="position:absolute;left:640px;width:470px;top:60px;height:610px">
+    <img src="img/kit-front.webp" alt="Front of the DDIL kit: touchscreen, blank panels over the Framework, the DGX Spark, network shelf and PDU">
+    <figcaption>Illustration of the kit front, from the setup guide</figcaption>
+  </figure>
+</section>
+
+<!-- 2 the DDIL problem -->
+<section class="slide soft" data-fx="ddil" data-foot="The DDIL problem"
+ data-notes="DDIL is the condition most forward users plan for: disconnected, denied, intermittent, limited. Walk the four lanes. Disconnected means no link at all. Denied means someone is taking the link away from you. Intermittent means it comes and goes. Limited means it exists but is thin. The point for the buyer: an AI capability that needs a round trip to a cloud API fails in all four. The kit is designed to need none of them. There are no measured link numbers on this slide on purpose; the lanes are a picture of the condition, not data.">
+  <div class="z">
+    <div class="eyebrow in1">The DDIL problem</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">The link fails four ways. <span class="b">The mission keeps going.</span></h1>
+  </div>
+  <div class="z" id="dl" style="position:absolute;left:72px;right:72px;top:190px"></div>
+  <div class="z ac-cap lat" id="dcap" style="position:absolute;left:72px;right:72px;top:612px;font-size:13px;color:var(--char)">An AI service that needs a round trip to a cloud API fails in all four lanes. Everything the kit uses to answer a question sits inside the case.</div>
+</section>
+
+<!-- 3 what sovereign AI at the edge requires -->
+<section class="slide" data-fx="needs" data-foot="What sovereign AI at the edge requires"
+ data-notes="Six requirements, each paired with what the kit uses today. Models: NVIDIA Nemotron 3.5 Lightning in Ollama on the Spark, and Jina Embeddings v5 Omni on port 8081 for text and images in one vector space. Jina is part of Elastic. Data and retrieval: one Elasticsearch cluster across both machines. Agents: Kibana Agent Builder with a connector that points at the local Ollama endpoint. Access: the need-to-know demo applies clearance rules in the backend; it is an application-side filter, not Elasticsearch document-level security, so do not sell it as DLS. Names: the .ddil names were added in the latest commit and have not been verified on the box yet.">
+  <div class="z">
+    <div class="eyebrow in1">Requirements</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Sovereign means every piece <span class="b">is inside the case.</span></h1>
+  </div>
+  <div class="z ac-grid ac-g3" id="nd" style="position:absolute;left:72px;right:72px;top:196px;gap:16px"></div>
+  <div class="z lat" id="ncut" style="position:absolute;left:72px;right:72px;top:590px;display:flex;align-items:center;gap:16px">
+    <span class="sqk" style="background:var(--ink)">Outbound</span><span style="font:600 15px var(--sans);color:var(--ink)">Nothing in the request path needs the internet.</span><span style="font:500 12px var(--mono);color:var(--grey)">Pre-show: confirm the kit config points at Nemotron 3.5 Lightning and Jina v5 Omni.</span>
+  </div>
+</section>
+
+<!-- 4 the kit -->
+<section class="slide soft" data-fx="kit" data-foot="The kit"
+ data-notes="Build the kit piece by piece. The DGX Spark at .20 is the GPU node: GB10 Blackwell, 128 GB unified memory, aarch64. It runs the GPU Elasticsearch node, Ollama and the Jina embedding server. The Framework Desktop at .10 is x86_64 with a Ryzen AI Max+ 395 and 64 GB. It runs the CPU Elasticsearch node, Kibana, the backend and the frontend. A UniFi Express 7 is the gateway at .1, with a Switch Flex Mini for the wired ports. The touchscreen runs a separate kiosk app on port 3100; by default it shows mock health, so flip the MOCK flag before you point at it. Case weight and the touchscreen model are not in the fact base; do not quote them.">
+  <div class="z">
+    <div class="eyebrow in1">The kit</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Two computers, one network, <span class="b">one case.</span></h1>
+  </div>
+  <figure class="z kitfig" id="kfig" style="position:absolute;left:96px;width:392px;top:150px;height:490px"><img src="img/kit-front.webp" alt="Front of the DDIL kit"><div id="kmk"></div></figure>
+  <div class="z" id="klg" style="position:absolute;left:560px;right:72px;top:160px"></div>
+  <div class="z" id="kitc" style="position:absolute;left:560px;right:72px;top:530px;height:110px"></div>
+</section>
+
+<!-- 5 architecture -->
+<section class="slide" data-fx="arch" data-foot="Architecture"
+ data-notes="One Elasticsearch cluster, ddil-vineyard, spans an aarch64 node and an x86_64 node. The GPU node is built from the Elasticsearch 9.5.6 image plus the aarch64 cuVS jar, with GPU vector indexing on. The CPU node and Kibana run stock 9.5.6. Inference stays on the Spark: Nemotron 3.5 Lightning in Ollama and Jina Embeddings v5 Omni on port 8081. Kibana and the apps run on the Framework. Pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni.">
+  <div class="z">
+    <div class="eyebrow in1">Architecture</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">One cluster across two architectures. <span class="b">Inference on the box.</span></h1>
+  </div>
+  <div class="z" id="arx" style="position:absolute;left:72px;right:72px;top:160px;height:388px"></div>
+  <div class="z" id="archc" style="position:absolute;left:72px;right:72px;top:560px;height:100px"></div>
+</section>
+
+<!-- 6 three demos at a glance -->
+<section class="slide soft" data-fx="demos" data-foot="The three demos at a glance"
+ data-notes="Thirty seconds on the three demos before you run them. Every demo starts from the chooser on the kit frontend at port 3000. Run them in this order. Vineyard first: an agronomist pipeline reads sensor data in Elasticsearch on the kit and reasons with Nemotron 3.5 Lightning on the Spark; practice target nine and a quarter minutes. SEC second: semantic search over 10-K filings, then an Elastic Agent Builder agent with ES|QL tools that compares filings and cites them; nine and three quarters. Multimodal last: Jina Embeddings v5 Omni puts words and pictures in one vector space, and the same question returns different documents and answers depending on who asks; eight and a quarter. Practice targets come from the mock. The race in Vineyard is staged, and the need-to-know filter is application side; say both out loud.">
+  <div class="z">
+    <div class="eyebrow in1">The three demos</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Three demos. <span class="b">One case.</span></h1>
+  </div>
+  <div class="z" id="dmo" style="position:absolute;left:72px;right:72px;top:168px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+    <div class="dmc lat" id="dm0"><div class="win"><div class="wb"><i></i><i></i><i></i><span>01 · Vineyard Intelligence</span></div><img src="img/shot-vineyard.webp" alt="Vineyard Intelligence screen"></div>
+      <div class="tt"><span class="t">Practice 9:15</span><span>Race is staged</span></div><div class="ld">An agronomist reads eight years of estate data and plans the fix for Block C.</div>
+      <div class="kv"><b>Pattern</b><span>Sensor analytics plus a five-phase agent pipeline</span></div><div class="kv"><b>Models</b><span>Nemotron 3.5 Lightning</span></div></div>
+    <div class="dmc lat" id="dm1"><div class="win"><div class="wb"><i></i><i></i><i></i><span>02 · SEC Findings</span></div><img src="img/shot-sec.webp" alt="SEC Findings screen"></div>
+      <div class="tt"><span class="t">Practice 9:45</span><span>Chapters 03 and 04 live</span></div><div class="ld">Ask 10-K filings in plain words, then let an agent count and compare them.</div>
+      <div class="kv"><b>Pattern</b><span>Semantic search plus an Agent Builder agent over filings</span></div><div class="kv"><b>Models</b><span>Nemotron 3.5 Lightning · Jina Embeddings v5 Omni</span></div></div>
+    <div class="dmc lat" id="dm2"><div class="win"><div class="wb"><i></i><i></i><i></i><span>03 · Multimodal Intelligence</span></div><img src="img/shot-mm.webp" alt="Multimodal Intelligence screen"></div>
+      <div class="tt"><span class="t">Practice 8:15</span><span>Filter is application side</span></div><div class="ld">Type words, get pictures. Four analysts ask one question and see four answers.</div>
+      <div class="kv"><b>Pattern</b><span>Text and image search with Jina v5 Omni plus need-to-know filtering</span></div><div class="kv"><b>Models</b><span>Jina Embeddings v5 Omni · Nemotron 3.5 Lightning</span></div></div>
+  </div>
+  <div class="z ac-cap lat" id="dmcap" style="position:absolute;left:72px;right:72px;top:640px;font-size:11px">Every demo starts at the kit chooser on :3000. Practice targets from the mock. Screens are kit frontend captures.</div>
+</section>
+
+<!-- 7 divider: vineyard -->
+<section class="slide" data-fx="vdiv" data-foot="Adventure 1 · Vineyard Intelligence"
+ data-notes="First adventure. A fictional estate in the Walla Walla AVA with six blocks and eight years of synthetic sensor data from one causal model. The story the data tells: Block C, La Rivière, has a drainage failure that starts in June 2022 and drags its potassium down. The agronomist is supposed to find it.">
+  <div class="z" style="width:420px">
+    <div class="eyebrow in1">Adventure 1</div>
+    <div class="in2" style="font:500 120px/1 var(--sans);letter-spacing:-6px;color:var(--blue);margin-top:26px">01</div>
+    <h1 class="in2" style="font-size:44px;letter-spacing:-1.6px;margin-top:10px">Vineyard <span class="b">Intelligence.</span></h1>
+    <div class="sub in3" style="font-size:17px;max-width:400px">Six blocks, five indices, an agronomist that reads them, and a staged GPU race.</div>
+  </div>
+  <div class="z win lat" id="dvvin" style="position:absolute;left:520px;right:72px;top:150px">
+    <div class="wb"><i></i><i></i><i></i><span>Kit frontend · Vineyard dashboard</span><b>:3000</b></div>
+    <img src="img/shot-vineyard.webp" alt="Vineyard Intelligence dashboard: KPI tiles and six block status cards" style="display:block;width:100%">
+  </div>
+  <div class="z ac-cap lat" id="dcvin" style="position:absolute;left:520px;right:72px;top:578px;font-size:11px">Screenshot of the kit frontend with no Elasticsearch behind it. The tiles show UI fallback values and the alerts are staged in the UI.</div>
+</section>
+
+<!-- 8 estate and sensor data -->
+<section class="slide soft" data-fx="estate" data-foot="Vineyard · estate and sensor data"
+ data-notes="Left, the map screen in schematic form: six blocks colored by health. Block C is the critical one. The alerts on the dashboard are hardcoded in the UI, so they show even if Elasticsearch is down. Right, the five indices. The counts are the values the UI falls back to; when Elasticsearch answers, the dashboard reads the live count. Two cautions: the imagery index is not loaded by the bulk script, and its mapping is 768 dimensions even though the UI says 2048. If the backend has no Elasticsearch credentials, the dashboard silently shows these fallback numbers.">
+  <div class="z">
+    <div class="eyebrow in1">Vineyard · estate and sensor data</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Eight years of one estate, <span class="b">indexed on the box.</span></h1>
+  </div>
+  <div class="z win lat" id="emap" style="position:absolute;left:72px;width:560px;top:176px;height:420px">
+    <div class="wb"><i></i><i></i><i></i><span>Vineyard map · health mode</span><b>Domaine de la Côte Cachée</b></div>
+    <svg id="emsvg" viewBox="0 0 560 384" style="display:block;width:560px;height:384px"></svg>
+  </div>
+  <div class="z" id="eix" style="position:absolute;left:672px;right:72px;top:182px"></div>
+  <div class="z ac-cap lat" id="ecap" style="position:absolute;left:672px;right:72px;top:584px;font-size:11px">Counts are the UI fallback values in code. The live dashboard reads _count when Elasticsearch answers. Bar length is log scale.</div>
+</section>
+
+<!-- 9 agronomist pipeline -->
+<section class="slide" data-fx="agro" data-foot="Vineyard · the AI agronomist"
+ data-notes="The agronomist streams five phases over server-sent events. Phase 0 reads the latest soil and NPK documents for the block from Elasticsearch, no model. Phase 1 builds an 8-dimension query vector and runs kNN for similar history, then asks the model. Phases 2 to 4 are three more model calls: risk, recommendation, action plan. They run one after another, even though the stream text says parallel. Each call has a 120 second timeout, so a cold model can stall the screen. Typed questions send no block id, so start from the map or the dashboard Investigate buttons to ground the answer on the block you mean. The pipeline is Python plus Ollama; it does not call Agent Builder, whatever the chooser card says.">
+  <div class="z">
+    <div class="eyebrow in1">Vineyard · the AI agronomist</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Five phases, streamed live. <span class="b">Search first, then reason.</span></h1>
+  </div>
+  <div class="z win lat" id="aw" style="position:absolute;left:72px;width:600px;top:172px;height:460px">
+    <div class="wb"><i></i><i></i><i></i><span>AI Agronomist</span><b>POST /api/chat/agent/stream</b></div>
+    <div style="padding:16px 18px">
+      <div class="q1" id="aq"><span class="qk">BLK-C</span><span id="aqt"></span></div>
+      <div id="aph" style="margin-top:14px"></div>
+      <div class="sse" id="asse"></div>
+    </div>
+  </div>
+  <div class="z" id="ar" style="position:absolute;left:704px;right:72px;top:176px"></div>
+</section>
+
+<!-- 10 the race: staged -->
+<section class="slide soft" data-fx="race" data-foot="Vineyard · the indexing race (staged)"
+ data-notes="Say this out loud: the race on the kit is a staged simulation. It never touches Elasticsearch. The durations are constants in indexer.py, 15 seconds for the GPU lane and 55 for the CPU lane over 841,536 documents, and the throughput shown during the run is a target times a ramp times noise. Recall is hardcoded. So use it to explain the idea, GPU-built HNSW with cuVS on the Spark node, and do not quote any speedup from it. The 12x, 24x and 50x figures elsewhere in the UI are not measurements of this kit. The GPU node configuration itself is real: the cuVS jar is in the image and GPU vector indexing is on. A real comparison needs a measured run.">
+  <div class="z">
+    <div class="eyebrow in1">Vineyard · the indexing race</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px;margin-top:22px">The race explains GPU indexing. <span class="b">It does not measure it.</span></h1>
+  </div>
+  <div class="z stamp lat" id="rst" style="position:absolute;right:72px;top:64px">Illustrative · staged visualization · not a measurement</div>
+  <div class="z win lat" id="rw" style="position:absolute;left:72px;width:620px;top:196px;height:410px">
+    <div class="wb"><i></i><i></i><i></i><span>Indexing race</span><b>simulated by indexer.py</b></div>
+    <div style="padding:18px 22px" id="rl"></div>
+  </div>
+  <div class="z" id="rr" style="position:absolute;left:724px;right:72px;top:196px"></div>
+</section>
+
+<!-- 11 divider: SEC -->
+<section class="slide" data-fx="sdiv" data-foot="Adventure 2 · SEC Findings"
+ data-notes="Second adventure. Annual 10-K filings embedded on the kit with Jina Embeddings v5 Omni, one index, and an Agent Builder agent that answers analyst questions with ES|QL tools and a local model.">
+  <div class="z" style="width:420px">
+    <div class="eyebrow in1">Adventure 2</div>
+    <div class="in2" style="font:500 120px/1 var(--sans);letter-spacing:-6px;color:var(--blue);margin-top:26px">02</div>
+    <h1 class="in2" style="font-size:44px;letter-spacing:-1.6px;margin-top:10px">SEC <span class="b">Findings.</span></h1>
+    <div class="sub in3" style="font-size:17px;max-width:400px">Semantic search over 10-K filings, then an agent that plans its own queries.</div>
+  </div>
+  <div class="z win lat" id="dvsec" style="position:absolute;left:520px;right:72px;top:160px">
+    <div class="wb"><i></i><i></i><i></i><span>Kit frontend · SEC chapter 03</span><b>:3000</b></div>
+    <img src="img/shot-sec.webp" alt="SEC Findings chapter 03 data interface with the semantic search box" style="display:block;width:100%">
+  </div>
+  <div class="z ac-cap lat" id="dcsec" style="position:absolute;left:520px;right:72px;top:559px;font-size:11px">Screenshot of chapter 03 before a query. The 503 filings in the search box is UI text, not a live count.</div>
+</section>
+
+<!-- 12 SEC corpus and semantic search -->
+<section class="slide soft" data-fx="secs" data-foot="SEC Findings · semantic search"
+ data-notes="Chapter 03 of the SEC deck is live. The query is embedded, then a kNN search runs on the emb field with k of 8, with an optional sector filter from a live terms aggregation. The latency, hit count and dimensions on screen are measured from the real query. The 503 filings and 93,541 chunks figures are text in the UI and the agent prompt, not live counts. The local index is 768-d, embedded with Jina Embeddings v5 Omni on the Spark. Before the show, confirm the index was re-embedded on the kit with Jina Embeddings v5 Omni at 768 dimensions and that the backend reports embed_backend jina. The show-the-call panel names Jina v5 Omni. The earlier chapters race the kit's own two nodes: the race is staged, and the kit economics panel carries no prices because there is no cloud bill.">
+  <div class="z">
+    <div class="eyebrow in1">SEC Findings · semantic retrieval</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Ask in plain words. <span class="b">Show the query behind it.</span></h1>
+  </div>
+  <div class="z win lat" id="sw" style="position:absolute;left:72px;width:620px;top:176px;height:430px">
+    <div class="wb"><i></i><i></i><i></i><span>Chapter 03 · Interface</span><b>POST /api/finance/search</b></div>
+    <div style="padding:16px 18px">
+      <div class="sbx"><span class="sic">&#9906;</span><span id="sq"></span><i class="cur"></i></div>
+      <div id="schips" style="margin-top:12px;display:flex;gap:8px"></div>
+      <div id="sres" style="margin-top:14px"></div>
+      <div id="smeta" class="lat" style="margin-top:10px;display:flex;gap:10px"></div>
+    </div>
+  </div>
+  <div class="z lat" id="scode" style="position:absolute;left:720px;right:72px;top:176px"></div>
+</section>
+
+<!-- 13 SEC agentic RAG -->
+<section class="slide" data-fx="seca" data-foot="SEC Findings · Agent Builder"
+ data-notes="Chapter 04 is live. The backend streams from Kibana's Agent Builder converse API. The agent is finance-analyst, provisioned by script with three custom ES|QL tools plus seven platform tools, and a connector named finance-ollama-llm that points at Nemotron 3.5 Lightning on the Spark. Semantic RAG on the previous slide retrieves passages for one query. Here the agent plans: it picks a tool, writes the ES|QL parameters, reads results and decides whether it needs another call, up to six. Caveat: the chat has no read timeout, so a hung model hangs the screen. The workflow chapter after this one links to a workflow nobody provisions.">
+  <div class="z">
+    <div class="eyebrow in1">SEC Findings · agentic retrieval</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">The agent picks the tool. <span class="b">ES|QL does the counting.</span></h1>
+  </div>
+  <div class="z card lat" id="acfg" style="position:absolute;left:72px;width:340px;top:176px">
+    <div class="ch">Agent · finance-analyst <b>Agent Builder</b></div>
+    <div style="padding:12px 16px" id="acl"></div>
+  </div>
+  <div class="z win lat" id="aconv" style="position:absolute;left:436px;right:72px;top:176px;height:430px">
+    <div class="wb"><i></i><i></i><i></i><span>Chapter 04 · Agentic</span><b>/api/agent_builder/converse/async</b></div>
+    <div style="padding:14px 18px" id="atl"></div>
+  </div>
+</section>
+
+<!-- 14 divider: multimodal -->
+<section class="slide" data-fx="mdiv" data-foot="Adventure 3 · Multimodal and need-to-know"
+ data-notes="Third adventure. One embedding model for text and pictures, served on the Spark, and a research corpus where four personas see four different slices of the same index.">
+  <div class="z" style="width:420px">
+    <div class="eyebrow in1">Adventure 3</div>
+    <div class="in2" style="font:500 120px/1 var(--sans);letter-spacing:-6px;color:var(--blue);margin-top:26px">03</div>
+    <h1 class="in2" style="font-size:44px;letter-spacing:-1.6px;margin-top:10px">Multimodal and <span class="b">need-to-know.</span></h1>
+    <div class="sub in3" style="font-size:17px;max-width:400px">Type words, get pictures. Ask a question, get only what your clearance allows.</div>
+  </div>
+  <div class="z win lat" id="dvmm" style="position:absolute;left:520px;right:72px;top:180px">
+    <div class="wb"><i></i><i></i><i></i><span>Kit frontend · Need-to-know</span><b>:3000</b></div>
+    <img src="img/shot-mm.webp" alt="Need-to-know scene: research corpus header and the analyst question box" style="display:block;width:100%">
+  </div>
+  <div class="z ac-cap lat" id="dcmm" style="position:absolute;left:520px;right:72px;top:502px;font-size:11px">Screenshot of the need-to-know scene. The 509 papers on screen is hardcoded text. The kit corpus is 198 papers and 9,636 text chunks.</div>
+</section>
+
+<!-- 15 text to image -->
+<section class="slide soft" data-fx="mms" data-foot="Multimodal · search by image"
+ data-notes="Search by Image runs over a small synthetic shapes track of ten documents. The index stores two 768-d vectors per document: image_vector, embedded by the Jina server when the data is ingested, and caption_vector, embedded inside Elasticsearch by the jina-embed-caption ingest pipeline through the jina-omni-text inference endpoint. At query time Elasticsearch embeds the words itself with query_vector_builder and runs kNN with k of 6. The toggle switches which vector space you search. The tiles on this slide are a mock of the screen. The model is Jina Embeddings v5 Omni, jina-embeddings-v5-omni-small, served on the Spark at port 8081. The newer local build drops this scene from navigation; the committed build has it.">
+  <div class="z">
+    <div class="eyebrow in1">Multimodal · search by image</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Type words. <span class="b">Get pictures.</span></h1>
+  </div>
+  <div class="z win lat" id="mw" style="position:absolute;left:72px;width:640px;top:176px;height:420px">
+    <div class="wb"><i></i><i></i><i></i><span>Search by Image</span><b>GET /api/jina/multimodal/search</b></div>
+    <div style="padding:16px 18px">
+      <div style="display:flex;gap:12px;align-items:center"><div class="sbx" style="flex:1"><span class="sic">&#9906;</span><span id="mq"></span><i class="cur"></i></div><div class="ac-sw" id="msw" style="width:230px"><em id="mswe"></em><span>Image vectors</span><span>Caption vectors</span></div></div>
+      <div id="mgrid" style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
+    </div>
+  </div>
+  <div class="z" id="mr" style="position:absolute;left:744px;right:72px;top:176px"></div>
+  <div class="z ac-cap lat" id="mcap" style="position:absolute;left:72px;top:604px;font-size:11px">Mock of the screen. Result order is illustrative.</div>
+</section>
+
+<!-- 16 need to know -->
+<section class="slide" data-fx="ntk" data-foot="Multimodal · need-to-know"
+ data-notes="Four personas, one index. The backend adds three filter clauses to every query: the document's classification must be at or below the analyst's clearance, the analyst must hold every compartment on the document, and NOFORN documents are excluded unless the analyst is NOFORN-cleared. The same filter applies to the facets, the hits, the figure strip and the passages handed to the model, so the generated answer cannot cite what the analyst cannot see. The grid here is illustrative, drawn with the same marking mix the ingest script uses. Be precise: this is an application-side query filter. There are no Elasticsearch roles or document-level security behind it, so anyone with Elasticsearch credentials sees everything. The 509 total on the screen is hardcoded text; the accessible count above it is measured. The kit corpus is 198 papers and 9,636 text chunks.">
+  <div class="z">
+    <div class="eyebrow in1">Multimodal · need-to-know</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">One index, four analysts. <span class="b">Each sees a different corpus.</span></h1>
+  </div>
+  <div class="z" id="np" style="position:absolute;left:72px;width:300px;top:176px"></div>
+  <div class="z" id="ngw" style="position:absolute;left:396px;width:470px;top:176px">
+    <div class="ac-k" id="nlab" style="margin-bottom:8px">Signed in as</div>
+    <div id="ng" style="display:grid;grid-template-columns:repeat(12,1fr);gap:5px"></div>
+    <div id="nleg" style="margin-top:10px;display:flex;gap:12px;font:500 11px var(--mono);color:var(--grey)"></div>
+  </div>
+  <div class="z" id="nr" style="position:absolute;left:892px;right:72px;top:176px"></div>
+  <div class="z bal lat" id="nwarn" style="position:absolute;left:72px;right:72px;top:500px;margin:0;padding:10px 16px;box-shadow:none"><div class="k">Application-side filter</div><div class="x" style="font-size:12.5px;margin-top:4px;color:var(--char)">The backend writes the filter into every query (jina_dls.py). There is no Elasticsearch role or document-level security behind it. Grid is illustrative, drawn with the ingest marking mix: U 40 · CUI 25 · C 15 · S 13 · TS 7 %.</div></div>
+</section>
+
+<!-- 17 what runs where -->
+<section class="slide soft" data-fx="where" data-foot="What runs where"
+ data-notes="Every service in the request path, by host and port. All of it is on the kit LAN. The models are NVIDIA Nemotron 3.5 Lightning in Ollama and Jina Embeddings v5 Omni on port 8081, both on the Spark. SEC query embedding defaults to Jina v5 Omni; the backend config carries no cloud model settings. Because the backend container never reads the .env file, set the model and embedder settings in the compose environment, not in .env. The newer local build adds an option to run the multimodal adventure against Elastic Cloud; that is not the kit configuration.">
+  <div class="z">
+    <div class="eyebrow in1">What runs where</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Every model, index and app <span class="b">on the kit network.</span></h1>
+  </div>
+  <div class="z" id="wh" style="position:absolute;left:72px;right:72px;top:178px;display:grid;grid-template-columns:1fr 1fr 300px;gap:18px"></div>
+</section>
+
+<!-- 18 deployment and operations -->
+<section class="slide" data-fx="ops" data-foot="Deployment and operations"
+ data-notes="Three stages. Bring-up: compose on each host, Ollama with Nemotron 3.5 Lightning pulled, the Jina v5 Omni server started by hand in its conda environment, and the .ddil names resolving. Before going dark: the backend and frontend images run pip and npm install at build time, so build them while you still have a network, and stage the data that is not in git. On stage: know the reset paths and the two checks that matter most. One, the backend container gets no Elasticsearch credentials, so every call returns 401 and the vineyard screens quietly show fallback numbers. Two, run the pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. Do not run the troubleshooting guide's model unload step; it deletes the model from disk.">
+  <div class="z">
+    <div class="eyebrow in1">Deployment and operations</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Stage it connected. <span class="b">Run it dark.</span></h1>
+  </div>
+  <div class="z" id="op" style="position:absolute;left:72px;right:72px;top:176px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px"></div>
+</section>
+
+<!-- 19 close -->
+<section class="slide" data-fx="close" data-foot="Recap"
+ data-notes="Close on the case. One cluster across two architectures, the models on the box, three adventures that each show a different retrieval pattern: sensor analytics with an agent pipeline, semantic and agentic RAG over filings, and multimodal search with a need-to-know filter. Then hand over the appendix: what is live and what is staged, so nobody on the team over-claims.">
+  <div class="z" style="width:480px">
+    <div class="eyebrow in1">Recap</div>
+    <h1 class="in2" style="font-size:42px;letter-spacing:-1.6px;margin-top:20px">Bring the context <span class="b">to where the mission is.</span></h1>
+    <div class="in3" style="margin-top:22px">
+      <div class="rtr"><b>Search</b><span>One cluster on aarch64 and x86_64</span></div>
+      <div class="rtr"><b>Models</b><span>Nemotron 3.5 Lightning and Jina Embeddings v5 Omni on the Spark</span></div>
+      <div class="rtr"><b>Agents</b><span>Agent Builder with a local connector</span></div>
+      <div class="rtr"><b>Access</b><span>Clearance-scoped retrieval and answers</span></div>
+    </div>
+  </div>
+  <figure class="z kitfig lat" id="clfig" style="position:absolute;left:720px;width:440px;top:90px;height:560px">
+    <img class="kit-rot" src="img/kit-rotate.webp" alt="Illustration of the DDIL kit turning to show its front, side, back and other side">
+    <figcaption>The kit · front, side, back, side (illustration)</figcaption>
+  </figure>
+</section>
+
+<!-- 20 appendix: demo status -->
+<section class="slide soft" data-fx="status" data-foot="Appendix · demo status"
+ data-notes="Use this before every show. Live means the value comes from a real Elasticsearch query or a real model call when the stack is healthy. Staged means it is hardcoded or simulated in code. Everything live on this page depends on the checks at the bottom being done first; with them unfixed, the vineyard screens fall back to staged numbers without telling you.">
+  <div class="z">
+    <div class="eyebrow in1">Appendix · demo status</div>
+    <h1 class="in2" style="font-size:34px;letter-spacing:-1.2px">What is live, <span class="b">what is staged.</span></h1>
+  </div>
+  <div class="z" id="stt" style="position:absolute;left:72px;right:72px;top:150px"></div>
+</section>

@@ -1,0 +1,2234 @@
+{
+ "note": "Practice subset of the kit's pmc-unstructured corpus (PubMed Central Open Access). Only CC BY / CC0 papers are included; each remains under its stated licence. Markings are FICTIONAL, assigned by demo/scripts/jina/markings.py exactly as on the kit.",
+ "kit_corpus": {
+  "papers": 198,
+  "chunks": 9636,
+  "figures": 2218
+ },
+ "subset": {
+  "papers": 100,
+  "chunks": 4894,
+  "figures": 442,
+  "pdf_mb": 240.3,
+  "dropped_junk_chunks": 435,
+  "qualifying": 148,
+  "journals": 54
+ },
+ "papers": [
+  {
+   "pmcid": "PMC10500001",
+   "title": "Dual hypoxia-responsive supramolecular complex for cancer target therapy",
+   "journal": "Nature Communications",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 2.92,
+   "figures": 8,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500001/"
+  },
+  {
+   "pmcid": "PMC10500002",
+   "title": "Interplay of valley polarized dark trion and dark exciton-polaron in monolayer WSe2",
+   "journal": "Nature Communications",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 1.86,
+   "figures": 4,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500002/"
+  },
+  {
+   "pmcid": "PMC10500003",
+   "title": "Clinicopathological characteristics and its association with digestive system tumors of 1111 patients with Schistosomiasis japonica",
+   "journal": "Scientific Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 1.57,
+   "figures": 3,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500003/"
+  },
+  {
+   "pmcid": "PMC10500006",
+   "title": "Proline concentrations in seedlings of woody plants change with drought stress duration and are mediated by seed characteristics: a meta-analysis",
+   "journal": "Scientific Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 1.32,
+   "figures": 5,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500006/"
+  },
+  {
+   "pmcid": "PMC10500007",
+   "title": "De novo design of highly selective miniprotein inhibitors of integrins αvβ6 and αvβ8",
+   "journal": "Nature Communications",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 4.75,
+   "figures": 5,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500007/"
+  },
+  {
+   "pmcid": "PMC10500008",
+   "title": "Identification and characterization of Phaseolus vulgaris endornavirus 1, 2 and 3 in common bean cultivars of East Africa",
+   "journal": "Virus Genes",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Paper",
+   "pdf_mb": 1.4,
+   "figures": 4,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500008/"
+  },
+  {
+   "pmcid": "PMC10500011",
+   "title": "Integrative multi-omics reveals two biologically distinct groups of pilocytic astrocytoma",
+   "journal": "Acta Neuropathologica",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Paper",
+   "pdf_mb": 5.76,
+   "figures": 4,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500011/"
+  },
+  {
+   "pmcid": "PMC10500012",
+   "title": "Effect of various types of milk on salivary pH among children: a pilot randomized controlled crossover trial",
+   "journal": "BDJ Open",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 0.7,
+   "figures": 2,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500012/"
+  },
+  {
+   "pmcid": "PMC10500014",
+   "title": "Major vault protein (MVP) suppresses aging- and estrogen deficiency-related bone loss through Fas-mediated apoptosis in osteoclasts",
+   "journal": "Cell Death & Disease",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 6.73,
+   "figures": 6,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "SI",
+     "TK"
+    ],
+    "compartments_count": 2,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500014/"
+  },
+  {
+   "pmcid": "PMC10500016",
+   "title": "Development of alkali activated paver blocks for medium traffic conditions using industrial wastes and prediction of compressive strength using random forest algorithm",
+   "journal": "Scientific Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 1.62,
+   "figures": 8,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500016/"
+  },
+  {
+   "pmcid": "PMC10500018",
+   "title": "Block-pulse integrodifference equations",
+   "journal": "Journal of Mathematical Biology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 2.58,
+   "figures": 8,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500018/"
+  },
+  {
+   "pmcid": "PMC10500019",
+   "title": "The minimal SUF system is not required for Fe–S cluster biogenesis in the methanogenic archaeon Methanosarcina acetivorans",
+   "journal": "Scientific Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 1.94,
+   "figures": 8,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "HCS"
+    ],
+    "compartments_count": 1,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500019/"
+  },
+  {
+   "pmcid": "PMC10500023",
+   "title": "Radiation-dependent demyelination in normal appearing white matter in glioma patients, determined using quantitative magnetic resonance imaging",
+   "journal": "Physics and Imaging in Radiation Oncology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Research Article",
+   "pdf_mb": 1.96,
+   "figures": 5,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "SCI"
+    ],
+    "compartments_count": 1,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500023/"
+  },
+  {
+   "pmcid": "PMC10500027",
+   "title": "Surface guidance compared with ultrasound-based monitoring and diaphragm position in cone-beam computed tomography during abdominal stereotactic radiotherapy in breath-hold",
+   "journal": "Physics and Imaging in Radiation Oncology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Research Article",
+   "pdf_mb": 1.71,
+   "figures": 5,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500027/"
+  },
+  {
+   "pmcid": "PMC10500028",
+   "title": "A historical perspective of biomedical explainable AI research",
+   "journal": "Patterns",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Perspective",
+   "pdf_mb": 2.54,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500028/"
+  },
+  {
+   "pmcid": "PMC10500029",
+   "title": "S3-CIMA: Supervised spatial single-cell image analysis for identifying disease-associated cell-type compositions in tissue",
+   "journal": "Patterns",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 13.24,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500029/"
+  },
+  {
+   "pmcid": "PMC10500042",
+   "title": "Unusual Case of Acute Coronary Syndrome Due to Compression of the Left Main Coronary Artery From a Contained Aortic Root Perforation",
+   "journal": "Cureus",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Cardiac/Thoracic/Vascular Surgery",
+   "pdf_mb": 0.87,
+   "figures": 6,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "HCS",
+     "SI"
+    ],
+    "compartments_count": 2,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500042/"
+  },
+  {
+   "pmcid": "PMC10500048",
+   "title": "Kaposiform hemangioendothelioma complicated by Kasabach–Merritt phenomenon in an infant girl",
+   "journal": "Clinical Case Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Infectious Diseases",
+   "pdf_mb": 0.95,
+   "figures": 4,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "SCI",
+     "SI"
+    ],
+    "compartments_count": 2,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500048/"
+  },
+  {
+   "pmcid": "PMC10500050",
+   "title": "Colon perforation due to collagenous colitis: A case report",
+   "journal": "Clinical Case Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Acute Medicine",
+   "pdf_mb": 1.79,
+   "figures": 3,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500050/"
+  },
+  {
+   "pmcid": "PMC10500053",
+   "title": "Coping with the COVID‐19 pandemic by strengthening immunity as a nonpharmaceutical intervention: A major public health challenge",
+   "journal": "Health Science Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Narrative Review",
+   "pdf_mb": 3.3,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500053/"
+  },
+  {
+   "pmcid": "PMC10500054",
+   "title": "Pelvic spine reduction affects diet but not gill raker morphology in two polymorphic brook stickleback (Culaea inconstans) populations",
+   "journal": "Ecology and Evolution",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Evolutionary Ecology",
+   "pdf_mb": 0.6,
+   "figures": 4,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500054/"
+  },
+  {
+   "pmcid": "PMC10500055",
+   "title": "New species based on the biological species concept within the complex of Lariophagus distinguendus (Hymenoptera, Chalcidoidea, Pteromalidae), a parasitoid of household pests",
+   "journal": "Ecology and Evolution",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Behavioural Ecology",
+   "pdf_mb": 6.2,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500055/"
+  },
+  {
+   "pmcid": "PMC10500056",
+   "title": "RB loss sensitizes cells to replication-associated DNA damage after PARP inhibition by trapping",
+   "journal": "Life Science Alliance",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research Article",
+   "pdf_mb": 2.38,
+   "figures": 6,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500056/"
+  },
+  {
+   "pmcid": "PMC10500057",
+   "title": "The impact of EMA recommendations on the real-life use of Janus kinases inhibitors for rheumatoid arthritis: the Expanded Risk Score in RA as a tool to quantify the risk of cardiovascular events",
+   "journal": "Frontiers in Immunology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Immunology",
+   "pdf_mb": 1.23,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500057/"
+  },
+  {
+   "pmcid": "PMC10500059",
+   "title": "Allosteric activation of RhlB by RNase E induces partial duplex opening in substrate RNA",
+   "journal": "Frontiers in Molecular Biosciences",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Molecular Biosciences",
+   "pdf_mb": 2.56,
+   "figures": 5,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500059/"
+  },
+  {
+   "pmcid": "PMC10500060",
+   "title": "Disconnectome associated with progressive white matter hyperintensities in aging: a virtual lesion study",
+   "journal": "Frontiers in Aging Neuroscience",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Neuroscience",
+   "pdf_mb": 8.12,
+   "figures": 7,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500060/"
+  },
+  {
+   "pmcid": "PMC10500062",
+   "title": "Noninvasive drug adherence monitoring of antipsychotic patients via finger sweat testing",
+   "journal": "Frontiers in Chemistry",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Chemistry",
+   "pdf_mb": 1.46,
+   "figures": 4,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500062/"
+  },
+  {
+   "pmcid": "PMC10500063",
+   "title": "Metagenomic next-generation sequencing assistance in identifying non-tuberculous mycobacterial infections",
+   "journal": "Frontiers in Cellular and Infection Microbiology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Cellular and Infection Microbiology",
+   "pdf_mb": 1.74,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500063/"
+  },
+  {
+   "pmcid": "PMC10500064",
+   "title": "Renal K+ retention in physiological circumstances: focus on adaptation of the distal nephron and cross-talk with Na+ transport systems",
+   "journal": "Frontiers in Physiology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Physiology",
+   "pdf_mb": 1.1,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500064/"
+  },
+  {
+   "pmcid": "PMC10500065",
+   "title": "International biathlon season during the COVID-19 pandemic was based on frequent on-site PCR-testing protocol with rapid result management",
+   "journal": "Frontiers in Sports and Active Living",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Sports and Active Living",
+   "pdf_mb": 2.16,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500065/"
+  },
+  {
+   "pmcid": "PMC10500066",
+   "title": "Association of anemia and platelet activation with necrotizing enterocolitis with or without sepsis among low birth weight neonates: a case–control study",
+   "journal": "Frontiers in Pediatrics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Pediatrics",
+   "pdf_mb": 1.26,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500066/"
+  },
+  {
+   "pmcid": "PMC10500067",
+   "title": "On the reliability of motor evoked potentials in hand muscles of healthy adults: a systematic review",
+   "journal": "Frontiers in Human Neuroscience",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Neuroscience",
+   "pdf_mb": 2.56,
+   "figures": 2,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500067/"
+  },
+  {
+   "pmcid": "PMC10500068",
+   "title": "Associations between cognition, anxiety, depression, and residual dizziness in elderly people with BPPV",
+   "journal": "Frontiers in Aging Neuroscience",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Neuroscience",
+   "pdf_mb": 1.19,
+   "figures": 4,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "SCI",
+     "HCS"
+    ],
+    "compartments_count": 2,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500068/"
+  },
+  {
+   "pmcid": "PMC10500069",
+   "title": "EEG-based investigation of effects of mindfulness meditation training on state and trait by deep learning and traditional machine learning",
+   "journal": "Frontiers in Human Neuroscience",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Neuroscience",
+   "pdf_mb": 4.71,
+   "figures": 5,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500069/"
+  },
+  {
+   "pmcid": "PMC10500070",
+   "title": "Effects of massage therapy on preterm infants and their mothers: a systematic review and meta-analysis of randomized controlled trials",
+   "journal": "Frontiers in Pediatrics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Pediatrics",
+   "pdf_mb": 5.92,
+   "figures": 5,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500070/"
+  },
+  {
+   "pmcid": "PMC10500073",
+   "title": "TCM “medicine and food homology” in the management of post-COVID disorders",
+   "journal": "Frontiers in Immunology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Immunology",
+   "pdf_mb": 1.33,
+   "figures": 4,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500073/"
+  },
+  {
+   "pmcid": "PMC10500074",
+   "title": "Assessment of cold exposure-induced metabolic changes in mice using untargeted metabolomics",
+   "journal": "Frontiers in Molecular Biosciences",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Molecular Biosciences",
+   "pdf_mb": 3.43,
+   "figures": 6,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "SCI",
+     "HCS"
+    ],
+    "compartments_count": 2,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500074/"
+  },
+  {
+   "pmcid": "PMC10500075",
+   "title": "The hypoxia-inducible factor 1 pathway plays a critical role in the development of breast muscle myopathies in broiler chickens: a comprehensive review",
+   "journal": "Frontiers in Physiology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Physiology",
+   "pdf_mb": 2.06,
+   "figures": 6,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500075/"
+  },
+  {
+   "pmcid": "PMC10500076",
+   "title": "NeuroBridge: a prototype platform for discovery of the long-tail neuroimaging data",
+   "journal": "Frontiers in Neuroinformatics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Neuroscience",
+   "pdf_mb": 7.36,
+   "figures": 7,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500076/"
+  },
+  {
+   "pmcid": "PMC10500077",
+   "title": "A Subacute Presentation of Isolated Tuberculous Septic Hip Arthritis",
+   "journal": "Cureus",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Internal Medicine",
+   "pdf_mb": 0.43,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500077/"
+  },
+  {
+   "pmcid": "PMC10500079",
+   "title": "Clinical relevance of salivary pepsin detection in diagnosing gastroesophageal reflux disease subtypes",
+   "journal": "Gastroenterology Report",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Article",
+   "pdf_mb": 0.51,
+   "figures": 5,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500079/"
+  },
+  {
+   "pmcid": "PMC10500080",
+   "title": "FunTaxIS-lite: a simple and light solution to investigate protein functions in all living organisms",
+   "journal": "Bioinformatics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Applications Note",
+   "pdf_mb": 1.14,
+   "figures": 1,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500080/"
+  },
+  {
+   "pmcid": "PMC10500081",
+   "title": "Towards precise PICO extraction from abstracts of randomized controlled trials using a section-specific learning approach",
+   "journal": "Bioinformatics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Paper",
+   "pdf_mb": 1.03,
+   "figures": 1,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500081/"
+  },
+  {
+   "pmcid": "PMC10500082",
+   "title": "Reducing cost in DNA-based data storage by sequence analysis-aided soft information decoding of variable-length reads",
+   "journal": "Bioinformatics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Paper",
+   "pdf_mb": 0.73,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500082/"
+  },
+  {
+   "pmcid": "PMC10500086",
+   "title": "Experimental and histological evaluation of different clamp technique for pulmonary artery",
+   "journal": "Interdisciplinary Cardiovascular and Thoracic Surgery",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Thoracic Oncology",
+   "pdf_mb": 1.78,
+   "figures": 8,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500086/"
+  },
+  {
+   "pmcid": "PMC10500091",
+   "title": "diseaseGPS: auxiliary diagnostic system for genetic disorders based on genotype and phenotype",
+   "journal": "Bioinformatics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Applications Note",
+   "pdf_mb": 1.49,
+   "figures": 1,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500091/"
+  },
+  {
+   "pmcid": "PMC10500105",
+   "title": "The potential advantages and workflow challenges of long axial field of view PET/CT",
+   "journal": "Journal of Medical Radiation Sciences",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Review Article",
+   "pdf_mb": 0.68,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500105/"
+  },
+  {
+   "pmcid": "PMC10500108",
+   "title": "‘Having the mask on didn't worry me until … they clamped my head down so I wouldn't move’: A qualitative study exploring anxiety in patients with head and neck cancer during radiation therapy",
+   "journal": "Journal of Medical Radiation Sciences",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Article",
+   "pdf_mb": 0.19,
+   "figures": 1,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "SCI",
+     "HCS"
+    ],
+    "compartments_count": 2,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500108/"
+  },
+  {
+   "pmcid": "PMC10500111",
+   "title": "The impact of preadmission/prediagnosis use of GLP‐1 receptor agonists on COVID‐19 mortality in patients with diabetes: A systematic review and meta‐analysis",
+   "journal": "Health Science Reports",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Cardiology",
+   "pdf_mb": 0.88,
+   "figures": 2,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500111/"
+  },
+  {
+   "pmcid": "PMC10500123",
+   "title": "Transcriptomic analysis reveals upregulated host metabolisms and downregulated immune responses or cell death induced by acute African swine fever virus infection",
+   "journal": "Frontiers in Veterinary Science",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Veterinary Science",
+   "pdf_mb": 3.1,
+   "figures": 7,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500123/"
+  },
+  {
+   "pmcid": "PMC10500124",
+   "title": "Altered static and dynamic intrinsic brain activity in unilateral sudden sensorineural hearing loss",
+   "journal": "Frontiers in Neuroscience",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Neuroscience",
+   "pdf_mb": 1.26,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500124/"
+  },
+  {
+   "pmcid": "PMC10500125",
+   "title": "Exploring the potential relationship between frozen shoulder and Dupuytren’s disease through bioinformatics analysis and machine learning",
+   "journal": "Frontiers in Immunology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Immunology",
+   "pdf_mb": 4.36,
+   "figures": 8,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500125/"
+  },
+  {
+   "pmcid": "PMC10500126",
+   "title": "Calcitonin gene-related peptide protects from soluble fms-like tyrosine kinase-1-induced vascular dysfunction in a preeclampsia mouse model",
+   "journal": "Frontiers in Physiology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Physiology",
+   "pdf_mb": 1.77,
+   "figures": 5,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500126/"
+  },
+  {
+   "pmcid": "PMC10500127",
+   "title": "Beyond rhythm – a framework for understanding the frequency spectrum of neural activity",
+   "journal": "Frontiers in Systems Neuroscience",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Neuroscience",
+   "pdf_mb": 2.43,
+   "figures": 4,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "SCI"
+    ],
+    "compartments_count": 1,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500127/"
+  },
+  {
+   "pmcid": "PMC10500129",
+   "title": "Antismoking agents do not contribute synergistically to semaglutide’s ability to reduce alcohol intake in rats",
+   "journal": "Frontiers in Pharmacology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Pharmacology",
+   "pdf_mb": 2.02,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10500129/"
+  },
+  {
+   "pmcid": "PMC10550001",
+   "title": "A CKD Patient with Microcystic Kidneys on Imaging",
+   "journal": "Kidney360",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Clinical Images in Nephrology and Dialysis",
+   "pdf_mb": 0.27,
+   "figures": 1,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "SCI",
+     "SI"
+    ],
+    "compartments_count": 2,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550001/"
+  },
+  {
+   "pmcid": "PMC10550006",
+   "title": "Effect of Anemia on Physical Function and Physical Activity in CKD: The National Health and Nutrition Examination Survey, 1999–2016",
+   "journal": "Kidney360",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Investigation",
+   "pdf_mb": 0.6,
+   "figures": 1,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550006/"
+  },
+  {
+   "pmcid": "PMC10550008",
+   "title": "Treatment Options for Faecolith (Stercoral) Obstruction of the Colon in Two Similar Cases",
+   "journal": "Cureus",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Medical Education",
+   "pdf_mb": 0.59,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550008/"
+  },
+  {
+   "pmcid": "PMC10550017",
+   "title": "Calcifying Nested Stromal-Epithelial Tumor: An Extremely Rare Hepatic Tumor",
+   "journal": "ACG Case Reports Journal",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Case Report",
+   "pdf_mb": 1.06,
+   "figures": 6,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "SCI",
+     "SI",
+     "TK"
+    ],
+    "compartments_count": 3,
+    "caveats": [
+     "ORCON"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550017/"
+  },
+  {
+   "pmcid": "PMC10550038",
+   "title": "Atypical Histiocytoid Sweet Syndrome in a Patient With Crohn's Disease",
+   "journal": "ACG Case Reports Journal",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Image",
+   "pdf_mb": 0.29,
+   "figures": 3,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "SCI"
+    ],
+    "compartments_count": 1,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550038/"
+  },
+  {
+   "pmcid": "PMC10550039",
+   "title": "Solitary Giant Simple Hepatic Cyst",
+   "journal": "ACG Case Reports Journal",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Image",
+   "pdf_mb": 0.27,
+   "figures": 3,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550039/"
+  },
+  {
+   "pmcid": "PMC10550053",
+   "title": "Frost Damage Index: The Antipode of Growing Degree Days",
+   "journal": "Plant Phenomics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research Article",
+   "pdf_mb": 10.63,
+   "figures": 6,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550053/"
+  },
+  {
+   "pmcid": "PMC10550072",
+   "title": "Scoring system for assessing the symmetry of tooth development in mixed dentition",
+   "journal": "Journal of Clinical and Experimental Dentistry",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research",
+   "pdf_mb": 0.47,
+   "figures": 2,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "SI"
+    ],
+    "compartments_count": 1,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550072/"
+  },
+  {
+   "pmcid": "PMC10550076",
+   "title": "Effect of Surface Treatments on Adhesion of Milled Polyetheretherketone Post to Different Composite Resin Core Build-Up Materials",
+   "journal": "Journal of Clinical and Experimental Dentistry",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research",
+   "pdf_mb": 0.58,
+   "figures": 2,
+   "marking": {
+    "classification": "S",
+    "compartments": [
+     "HCS",
+     "SI"
+    ],
+    "compartments_count": 2,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550076/"
+  },
+  {
+   "pmcid": "PMC10550079",
+   "title": "Extensive dental caries and periodontal disease in a child with GATA2 deficiency",
+   "journal": "Journal of Clinical and Experimental Dentistry",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Case Report",
+   "pdf_mb": 0.53,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550079/"
+  },
+  {
+   "pmcid": "PMC10550080",
+   "title": "Increased prevalence of oral potentially malignant lesions among Croatian War invalids, a cross-sectional study",
+   "journal": "Journal of Clinical and Experimental Dentistry",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research",
+   "pdf_mb": 0.53,
+   "figures": 2,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550080/"
+  },
+  {
+   "pmcid": "PMC10550083",
+   "title": "Identification of key claudin genes associated with survival prognosis and diagnosis in colon cancer through integrated bioinformatic analysis",
+   "journal": "Frontiers in Genetics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Genetics",
+   "pdf_mb": 5.94,
+   "figures": 8,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550083/"
+  },
+  {
+   "pmcid": "PMC10550087",
+   "title": "Cervical Necrotizing Fasciitis",
+   "journal": "Revista da Sociedade Brasileira de Medicina Tropical",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Images in Infectious Diseases",
+   "pdf_mb": 0.67,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550087/"
+  },
+  {
+   "pmcid": "PMC10550091",
+   "title": "Bronchial stenosis secondary to systemic paracoccidioidomycosis",
+   "journal": "Revista da Sociedade Brasileira de Medicina Tropical",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Images in Infectious Diseases",
+   "pdf_mb": 0.5,
+   "figures": 3,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550091/"
+  },
+  {
+   "pmcid": "PMC10550092",
+   "title": "Falciparum Malaria-Induced Splenic Infarction",
+   "journal": "Revista da Sociedade Brasileira de Medicina Tropical",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Images in Infectious Diseases",
+   "pdf_mb": 0.44,
+   "figures": 3,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "SCI",
+     "HCS",
+     "SI"
+    ],
+    "compartments_count": 3,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550092/"
+  },
+  {
+   "pmcid": "PMC10550097",
+   "title": "Microbiological profile of bloodstream infections and antimicrobial resistance patterns at a tertiary referral hospital in Amazon, Brazil",
+   "journal": "Revista da Sociedade Brasileira de Medicina Tropical",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Short Communication",
+   "pdf_mb": 0.57,
+   "figures": 1,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550097/"
+  },
+  {
+   "pmcid": "PMC10550102",
+   "title": "Hypothermic Circulatory Arrest in Median Sternotomy Hemorrhage During Redo Aortic Surgery",
+   "journal": "Brazilian Journal of Cardiovascular Surgery",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Article",
+   "pdf_mb": 0.77,
+   "figures": 2,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "SCI",
+     "HCS",
+     "SI"
+    ],
+    "compartments_count": 3,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550102/"
+  },
+  {
+   "pmcid": "PMC10550111",
+   "title": "Experiences and practices of traditional healers on snakebite treatment and prevention in rural Malawi",
+   "journal": "PLOS Neglected Tropical Diseases",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research Article",
+   "pdf_mb": 2.06,
+   "figures": 5,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550111/"
+  },
+  {
+   "pmcid": "PMC10550112",
+   "title": "Agricultural total factor productivity, digital economy and agricultural high-quality development",
+   "journal": "PLOS ONE",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research Article",
+   "pdf_mb": 0.57,
+   "figures": 6,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550112/"
+  },
+  {
+   "pmcid": "PMC10550115",
+   "title": "Lineage tracing identifies heterogeneous hepatoblast contribution to cell lineages and postembryonic organ growth dynamics",
+   "journal": "PLOS Biology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research Article",
+   "pdf_mb": 6.19,
+   "figures": 8,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550115/"
+  },
+  {
+   "pmcid": "PMC10550116",
+   "title": "Acute stress symptoms 1–2 weeks after stroke predict the subsequent development of post-traumatic stress symptoms: A prospective cohort study",
+   "journal": "PLOS ONE",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research Article",
+   "pdf_mb": 0.45,
+   "figures": 4,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550116/"
+  },
+  {
+   "pmcid": "PMC10550120",
+   "title": "Lymphatic filariasis in Zambia: A scoping review protocol",
+   "journal": "PLOS ONE",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Study Protocol",
+   "pdf_mb": 0.32,
+   "figures": 1,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550120/"
+  },
+  {
+   "pmcid": "PMC10550122",
+   "title": "DNA extraction from recently fertilised Atlantic salmon embryos for use in microsatellite validation of triploidy",
+   "journal": "PLOS ONE",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Lab Protocol",
+   "pdf_mb": 0.59,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550122/"
+  },
+  {
+   "pmcid": "PMC10550125",
+   "title": "Prevalence of malaria and dengue co-infections among febrile patients during dengue transmission season in Kassala, eastern Sudan",
+   "journal": "PLOS Neglected Tropical Diseases",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research Article",
+   "pdf_mb": 0.61,
+   "figures": 1,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10550125/"
+  },
+  {
+   "pmcid": "PMC10600000",
+   "title": "Geophysical evidence for an enriched molten silicate layer above Mars’s core",
+   "journal": "Nature",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 6.28,
+   "figures": 4,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600000/"
+  },
+  {
+   "pmcid": "PMC10600001",
+   "title": "A microfluidic transistor for automatic control of liquids",
+   "journal": "Nature",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 8.06,
+   "figures": 8,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [
+     "NOFORN"
+    ],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600001/"
+  },
+  {
+   "pmcid": "PMC10600002",
+   "title": "Cardiometabolic risk profile among children with migrant parents and role of parental education: the IDEFICS/I.Family cohort",
+   "journal": "International Journal of Obesity (2005)",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 0.94,
+   "figures": 1,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600002/"
+  },
+  {
+   "pmcid": "PMC10600003",
+   "title": "Effects of probiotics in patients with morbid obesity undergoing bariatric surgery: a systematic review and meta-analysis",
+   "journal": "International Journal of Obesity (2005)",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Review Article",
+   "pdf_mb": 4.6,
+   "figures": 8,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600003/"
+  },
+  {
+   "pmcid": "PMC10600008",
+   "title": "Sustained antidepressant effect of ketamine through NMDAR trapping in the LHb",
+   "journal": "Nature",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 8.0,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600008/"
+  },
+  {
+   "pmcid": "PMC10600012",
+   "title": "Evidence for a liquid silicate layer atop the Martian core",
+   "journal": "Nature",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 9.36,
+   "figures": 8,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600012/"
+  },
+  {
+   "pmcid": "PMC10600019",
+   "title": "CRH-R2 signalling modulates feeding and circadian gene expression in hypothalamic mHypoA-2/30 neurons",
+   "journal": "Frontiers in Endocrinology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Endocrinology",
+   "pdf_mb": 6.23,
+   "figures": 7,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600019/"
+  },
+  {
+   "pmcid": "PMC10600020",
+   "title": "Moving policy to practice: role of advocacy in enabling provision of injectable contraceptives by pharmacists in Kenya",
+   "journal": "Frontiers in Global Women's Health",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Global Women's Health",
+   "pdf_mb": 0.87,
+   "figures": 2,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600020/"
+  },
+  {
+   "pmcid": "PMC10600022",
+   "title": "Case Report: A management strategy and clinical analysis of primary squamous cell carcinoma of the colon",
+   "journal": "Frontiers in Oncology",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Oncology",
+   "pdf_mb": 1.66,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600022/"
+  },
+  {
+   "pmcid": "PMC10600023",
+   "title": "Impact of home monitoring program on interstage mortality after the Norwood procedure",
+   "journal": "Frontiers in Cardiovascular Medicine",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Cardiovascular Medicine",
+   "pdf_mb": 1.87,
+   "figures": 3,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600023/"
+  },
+  {
+   "pmcid": "PMC10600029",
+   "title": "Mass distribution and shape influence the perceived weight of objects",
+   "journal": "Attention, Perception & Psychophysics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 1.04,
+   "figures": 6,
+   "marking": {
+    "classification": "C",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600029/"
+  },
+  {
+   "pmcid": "PMC10600031",
+   "title": "Work loss and activity impairment due to extended nausea and vomiting in patients with breast cancer receiving CINV prophylaxis",
+   "journal": "Supportive Care in Cancer",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Research",
+   "pdf_mb": 0.62,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600031/"
+  },
+  {
+   "pmcid": "PMC10600034",
+   "title": "Are eyes special? Gaze, but not pointing gestures, elicits a reversed congruency effect in a spatial Stroop task",
+   "journal": "Attention, Perception & Psychophysics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Short Report",
+   "pdf_mb": 0.67,
+   "figures": 2,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600034/"
+  },
+  {
+   "pmcid": "PMC10600037",
+   "title": "Need for (expected) speed: Exploring the indirect influence of trial type consistency on representational momentum",
+   "journal": "Attention, Perception & Psychophysics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 1.46,
+   "figures": 4,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "IMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600037/"
+  },
+  {
+   "pmcid": "PMC10600040",
+   "title": "A review of materials used in tomographic volumetric additive manufacturing",
+   "journal": "Mrs Communications",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "MRS 50th Anniversary Prospective",
+   "pdf_mb": 2.54,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600040/"
+  },
+  {
+   "pmcid": "PMC10600041",
+   "title": "Evaluation of the antibacterial activity of Enamelast® and Fluor defender® fluoride varnishes against Streptococcus mutans biofilm: an in vitro study in primary teeth",
+   "journal": "European Archives of Paediatric Dentistry",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Scientific Article",
+   "pdf_mb": 2.62,
+   "figures": 6,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "SIGINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600041/"
+  },
+  {
+   "pmcid": "PMC10600042",
+   "title": "The location of the permanent mandibular canine as identified in orthopantomograms from children younger than 5 years of age: a case series study",
+   "journal": "European Archives of Paediatric Dentistry",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Scientific Article",
+   "pdf_mb": 1.36,
+   "figures": 5,
+   "marking": {
+    "classification": "TS",
+    "compartments": [
+     "HCS",
+     "SI"
+    ],
+    "compartments_count": 2,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600042/"
+  },
+  {
+   "pmcid": "PMC10600044",
+   "title": "Deviants violating higher-order auditory regularities can become predictive and facilitate behaviour",
+   "journal": "Attention, Perception & Psychophysics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Article",
+   "pdf_mb": 2.19,
+   "figures": 3,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600044/"
+  },
+  {
+   "pmcid": "PMC10600045",
+   "title": "A systematic review of quantitative studies exploring staff views on antipsychotic use in residents with dementia in care homes",
+   "journal": "International Journal of Clinical Pharmacy",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Review Article",
+   "pdf_mb": 0.89,
+   "figures": 1,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "OSINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600045/"
+  },
+  {
+   "pmcid": "PMC10600046",
+   "title": "Extreme image transformations affect humans and machines differently",
+   "journal": "Biological Cybernetics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Article",
+   "pdf_mb": 1.15,
+   "figures": 8,
+   "marking": {
+    "classification": "CUI",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600046/"
+  },
+  {
+   "pmcid": "PMC10600047",
+   "title": "Bio-inspired, task-free continual learning through activity regularization",
+   "journal": "Biological Cybernetics",
+   "year": 2023,
+   "licence": "CC BY",
+   "subject": "Original Article",
+   "pdf_mb": 1.73,
+   "figures": 8,
+   "marking": {
+    "classification": "U",
+    "compartments": [],
+    "compartments_count": 0,
+    "caveats": [],
+    "releasability": [
+     "USA",
+     "FVEY"
+    ],
+    "source_type": "HUMINT"
+   },
+   "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10600047/"
+  }
+ ]
+}

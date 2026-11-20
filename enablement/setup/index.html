@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DDIL Kit Setup Guide</title>
+<link rel="stylesheet" href="../brand/tokens.css">
+<style>
+/* DDIL kit setup guide. House style: light ground, Inter + IBM Plex Mono, mono eyebrows
+   with a blue square, blue second half of headlines, 1px ink borders with offset shadow. */
+:root{
+  --blue:#0B64DD; --blue-l:#D9E8FF; --teal:#02BCB7; --pink:#F04E98; --orange:#FF7E62; --yellow:#FEC514;
+  --ink:#1D1E24; --char:#343741; --grey:#69707D; --grey-l:#98A2B3; --line:#D3DAE6; --bg:#F5F7FA; --paper:#FFFFFF;
+  --sans:'Inter',-apple-system,system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{font-family:var(--sans);color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55}
+a{color:var(--blue)}
+code{font-family:var(--mono);font-size:.9em;color:var(--ink);background:var(--bg);padding:1px 4px;border:1px solid var(--line)}
+b{font-weight:600}
+.hl{color:var(--blue)}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:8px;height:8px;background:var(--blue);flex:none}
+.eyebrow.or::before{background:var(--orange)}
+.tag{display:inline-block;font:600 9.5px var(--mono);letter-spacing:.07em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--line);color:var(--grey);white-space:nowrap;vertical-align:1px;background:#fff}
+.tag.unc{border-color:var(--yellow);color:#7A5C00;background:#FFF8DB}
+.tag.doc{border-color:var(--grey-l);color:var(--grey)}
+.tag.usr{border-color:var(--blue);color:var(--blue)}
+.tag.src{border-color:var(--teal);color:#027F7B}
+.chip{display:inline-flex;align-items:center;font:500 11.5px var(--mono);letter-spacing:.03em;color:var(--char);border:1px solid var(--line);background:#fff;padding:5px 10px}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+.topbar .in{max-width:1480px;margin:0 auto;height:56px;padding:0 24px;display:flex;align-items:center;gap:16px}
+.topbar img{width:90px;height:30px;display:block}
+.topbar .t{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}
+.topbar .sp{flex:1}
+.topbar .prog{font:600 12px var(--mono);color:var(--ink)}
+.btn{font:600 12.5px var(--sans);padding:7px 12px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--bg)}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.topbar .bar{height:3px;background:var(--line)}
+.topbar .bar i{display:block;height:100%;width:0;background:var(--blue);transition:width .3s}
+
+/* hero */
+.hero{max-width:1480px;margin:0 auto;padding:40px 24px 8px}
+.hero h1{font-weight:600;font-size:44px;line-height:1.06;letter-spacing:-1.6px;margin-top:14px;max-width:1000px}
+.hero .lead{font-size:18px;line-height:1.5;color:var(--char);margin-top:14px;max-width:820px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+
+/* layout */
+.layout{max-width:1480px;margin:0 auto;padding:24px;display:grid;grid-template-columns:200px minmax(0,1fr) 460px;grid-template-areas:"rail main viewer";gap:32px;align-items:start}
+.rail{grid-area:rail;position:sticky;top:80px}
+.main{grid-area:main;min-width:0}
+.viewer{grid-area:viewer;position:sticky;top:76px;max-height:calc(100vh - 88px);overflow:auto}
+
+/* progress rail */
+.rail .k{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:10px}
+.rail ol{list-style:none;border-left:1px solid var(--line)}
+.rail li a{display:grid;grid-template-columns:26px 1fr auto;gap:6px;align-items:baseline;padding:7px 0 7px 12px;margin-left:-1px;border-left:2px solid transparent;text-decoration:none;color:var(--char);font-size:13px;line-height:1.3}
+.rail li a .n{font:600 11px var(--mono);color:var(--grey)}
+.rail li a .c{font:500 10.5px var(--mono);color:var(--grey-l)}
+.rail li a.on{border-left-color:var(--blue);color:var(--ink);font-weight:600}
+.rail li a.on .n{color:var(--blue)}
+.rail li a.done .c{color:#027F7B}
+.rail .tot{margin-top:16px;font:500 11px var(--mono);color:var(--grey)}
+.rail .tot b{display:block;font:600 28px var(--sans);letter-spacing:-1px;color:var(--ink);margin-bottom:2px}
+.rail .btn{margin-top:12px;width:100%}
+
+/* figure viewer */
+.card{border:1px solid var(--ink);background:#fff;box-shadow:12px 12px 0 rgba(29,30,36,.05)}
+.viewer .tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--ink)}
+.viewer .tabs button{font:600 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:11px 6px;background:var(--bg);border:0;border-right:1px solid var(--line);color:var(--grey);cursor:pointer;position:relative}
+.viewer .tabs button:last-child{border-right:0}
+.viewer .tabs button[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:inset 0 -3px 0 var(--blue)}
+.viewer .tabs button .badge{display:none;margin-left:6px;font:600 9.5px var(--mono);background:var(--blue);color:#fff;padding:1px 5px}
+.viewer .tabs button .badge.on{display:inline-block}
+.fig{position:relative;background:transparent;user-select:none}
+.fig img{display:block;width:100%;height:auto}
+.fig .view{display:none;position:relative}
+.fig .view.on{display:block;width:fit-content;max-width:100%;margin:0 auto}
+.fig .view img{max-height:calc(100vh - 230px);width:auto;max-width:100%;filter:drop-shadow(0 10px 14px rgba(29,30,36,.22)) drop-shadow(0 2px 3px rgba(29,30,36,.18))}
+.fig .vtitle{font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--grey);text-align:center;padding:10px 0 2px}
+.fig{padding:4px 14px 16px}
+.hs{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:var(--blue);color:#fff;font:700 11px var(--mono);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 1px var(--ink),0 2px 6px rgba(0,0,0,.25);padding:0;z-index:2}
+.hs:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.hs.dim{opacity:.35}
+.hs.lit{background:var(--pink);opacity:1;animation:pulse 1.4s ease-out infinite;z-index:3}
+@keyframes pulse{0%{box-shadow:0 0 0 1px var(--ink),0 0 0 0 rgba(240,78,152,.55)}100%{box-shadow:0 0 0 1px var(--ink),0 0 0 14px rgba(240,78,152,0)}}
+.tip{position:absolute;z-index:10;width:280px;border:1px solid var(--ink);background:#fff;box-shadow:10px 10px 0 rgba(29,30,36,.08);padding:12px 14px;display:none;font-size:13px;line-height:1.45}
+.tip.on{display:block}
+.tip .k{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.tip h4{font-size:15px;font-weight:600;margin:3px 0 4px;letter-spacing:-.2px}
+.tip .lb{font-size:12px;color:var(--grey);margin-bottom:6px}
+.tip .ad{font:500 11.5px/1.5 var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);padding:5px 7px;margin-bottom:6px}
+.tip .rl{color:var(--char)}
+.tip .st{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
+.tip .st a{font:600 10.5px var(--mono);text-decoration:none;border:1px solid var(--blue);color:var(--blue);padding:2px 6px}
+.tip .st a:hover{background:var(--blue-l)}
+.tip .x{position:absolute;right:6px;top:4px;border:0;background:none;font:600 16px var(--sans);color:var(--grey);cursor:pointer;padding:2px 6px}
+.viewer .cap{display:flex;justify-content:space-between;gap:12px;padding:9px 12px;border-top:1px solid var(--line);font:500 10.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--grey)}
+.viewer .hint{padding:0 12px 10px;font-size:12px;color:var(--grey)}
+.viewer .clear{font:600 10.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;background:none;border:0;color:var(--blue);cursor:pointer;padding:0}
+.viewer .legend{list-style:none;padding:4px 12px 12px;display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;font-size:12px;color:var(--char)}
+.viewer .legend li{display:flex;gap:6px;align-items:baseline;cursor:pointer}
+.viewer .legend li b{font:700 10.5px var(--mono);color:var(--blue);min-width:22px}
+
+/* sections */
+section.sec{padding-top:8px;margin-bottom:44px}
+section.sec h2{font-weight:600;font-size:30px;line-height:1.12;letter-spacing:-.8px;margin:10px 0 10px}
+section.sec .intro{font-size:15.5px;color:var(--char);max-width:760px;margin-bottom:16px}
+table.t{width:100%;border-collapse:collapse;font-size:13px;line-height:1.45;color:var(--char);margin:4px 0 18px;border-top:1px solid var(--ink)}
+table.t th{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-align:left;padding:8px;background:var(--bg);border-bottom:1px solid var(--line);vertical-align:bottom}
+table.t td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.k{font:600 12px var(--mono);color:var(--ink);white-space:nowrap}
+.hsref{display:inline-block;font:700 10.5px var(--mono);color:#fff;background:var(--blue);padding:1px 5px;margin:0 3px 3px 0;border:0;cursor:pointer}
+.warn{border:1px solid var(--ink);background:#FFF6F3;box-shadow:12px 12px 0 rgba(29,30,36,.05);margin:6px 0 22px}
+.warn .ch{padding:9px 14px;border-bottom:1px solid #F7C9BC;background:#FFE9E3;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--char);display:flex;align-items:center;gap:8px}
+.warn .ch::before{content:'';width:8px;height:8px;background:var(--orange)}
+.warn dl{padding:10px 14px 12px;display:grid;grid-template-columns:34px 1fr;gap:8px 10px;font-size:13.5px;color:var(--char)}
+.warn dt{font:700 12px var(--mono);color:#C2462B;padding-top:1px}
+.warn dd b{display:block;color:var(--ink)}
+
+/* steps */
+.step{border:1px solid var(--ink);background:#fff;box-shadow:12px 12px 0 rgba(29,30,36,.05);margin:0 0 18px;transition:box-shadow .2s,border-color .2s}
+.step.focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(240,78,152,.18),12px 12px 0 rgba(29,30,36,.05)}
+.step header{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.step .ck{display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;min-width:0}
+.step .ck input{appearance:none;-webkit-appearance:none;width:20px;height:20px;border:1.5px solid var(--ink);background:#fff;flex:none;cursor:pointer;display:grid;place-items:center;margin:0}
+.step .ck input:checked{background:var(--teal);border-color:var(--teal)}
+.step .ck input:checked::after{content:'';width:10px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.step .ck input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.step .num{font:600 12px var(--mono);color:var(--blue);flex:none}
+.step h3{font-size:16px;font-weight:600;letter-spacing:-.2px;line-height:1.3}
+.step.done h3{color:var(--grey)}
+.step .show{flex:none;font:600 10.5px var(--mono);letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--blue);background:#fff;color:var(--blue);padding:5px 8px;cursor:pointer;white-space:nowrap}
+.step .show:hover,.step.focus .show{background:var(--blue);color:#fff}
+.step .bd{padding:12px 14px 14px}
+.step .bd p{color:var(--char);margin-bottom:8px;font-size:14.5px}
+.cmd{display:flex;align-items:stretch;margin:8px 0 2px;background:#14161C;box-shadow:8px 8px 0 rgba(29,30,36,.06)}
+.cmd code{flex:1;min-width:0;display:block;background:none;border:0;color:#E6EDF7;font:500 12.5px/1.6 var(--mono);padding:9px 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd button{flex:none;font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;border:0;border-left:1px solid #2A2E38;background:#1E2129;color:#BFD3F5;padding:0 12px;cursor:pointer;min-width:66px}
+.cmd button:hover{background:#262A34;color:#fff}
+.cmd button.ok{color:#6EE7B7}
+.exp{font-size:13px;color:var(--char);padding:4px 0 6px 12px;border-left:2px solid var(--line);margin:2px 0 8px}
+.exp::before{content:'Expect ';font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#027F7B}
+.pass{font-size:13.5px;color:var(--ink);margin-top:6px;padding:7px 10px;background:#EEFBFA;border:1px solid #BDEBE8}
+.pass::before{content:'Pass ';font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#027F7B}
+footer.src{max-width:1480px;margin:0 auto;padding:24px 24px 60px;border-top:1px solid var(--line);font-size:12.5px;color:var(--grey);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+footer.src img{width:80px;height:27px}
+.printfigs{display:none}
+
+/* viewer card sits on the page ground so transparent PNGs show the page colour */
+.viewer .card{background:transparent}
+.viewer .tabs button[aria-selected="true"]{background:var(--paper)}
+
+/* view variants (Set up / Packed / Photo) */
+.variants{display:none;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.variants.on{display:flex}
+.variants button{font:600 10.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--line);background:#fff;color:var(--grey);cursor:pointer}
+.variants button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);box-shadow:inset 0 -2px 0 var(--blue)}
+.variants .vb{display:none;margin-left:5px;background:var(--pink);color:#fff;padding:0 4px}
+.variants .vb.on{display:inline-block}
+.view.photo img{border:1px solid var(--ink)}
+
+/* callouts: animated leader from a lit hotspot to a short label */
+.callout{position:absolute;z-index:4;transform:translateY(-50%);pointer-events:none;display:flex;align-items:center}
+.callout .ln{display:block;width:34px;height:2px;background:var(--pink);transform-origin:left center;animation:grow .45s cubic-bezier(.2,.7,.2,1) both}
+.callout.l{flex-direction:row-reverse}
+.callout.l .ln{transform-origin:right center}
+.callout .lb{font:700 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;background:var(--ink);color:#fff;padding:4px 7px;white-space:nowrap;animation:fade .35s .3s both;box-shadow:4px 4px 0 rgba(240,78,152,.35)}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.hs.lit::after{content:'';position:absolute;inset:-9px;border:2px solid var(--pink);border-radius:50%;animation:ring 1.4s ease-out infinite}
+@keyframes ring{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.5);opacity:0}}
+
+/* fill-in blanks */
+input.fill{font:500 12.5px var(--mono);color:var(--ink);border:0;border-bottom:1.5px dashed var(--orange);background:#FFF8F5;padding:2px 6px;max-width:100%}
+input.fill::placeholder{color:#B4705F}
+input.fill:focus{outline:2px solid var(--yellow);outline-offset:1px;background:#fff}
+input.fill.set{border-bottom-style:solid;border-bottom-color:var(--teal);background:#EEFBFA}
+.blank{font:500 11px var(--mono);color:#B4705F;border-bottom:1.2px dashed var(--orange);padding:0 4px;white-space:nowrap}
+
+/* cable rows */
+.cables{margin:8px 0 6px;border-top:1px solid var(--line)}
+.cable{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--char)}
+.cable .ty{display:flex;align-items:center;gap:7px;font:600 11px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.cable .ty svg{width:18px;height:18px;flex:none}
+.cable .ends{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cable .ends .to{font:600 10px var(--mono);color:var(--grey);text-transform:uppercase;letter-spacing:.08em}
+.see{font-size:14px;color:var(--ink);margin-top:8px;padding:8px 11px;background:#EEFBFA;border:1px solid #BDEBE8}
+.see::before{content:'You should see ';font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#027F7B}
+.rev{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey);margin-left:auto;white-space:nowrap}
+.step header{cursor:pointer}
+
+/* packing list */
+table.pack td{vertical-align:middle}
+table.pack .ic svg{width:22px;height:22px;display:block}
+table.pack .cb{text-align:center;width:64px}
+table.pack input[type=checkbox]{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1.5px solid var(--ink);background:#fff;cursor:pointer;display:inline-grid;place-items:center;vertical-align:middle}
+table.pack input[type=checkbox]:checked{background:var(--teal);border-color:var(--teal)}
+table.pack input[type=checkbox]:checked::after{content:'';width:9px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+
+/* indicator timeline */
+.timeline{border:1px solid var(--ink);background:#fff;box-shadow:12px 12px 0 rgba(29,30,36,.05);margin:4px 0 22px}
+.timeline .th{padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg);font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--char);display:flex;align-items:center;gap:8px}
+.timeline .th::before{content:'';width:8px;height:8px;background:var(--teal)}
+.timeline ol{list-style:none;padding:6px 14px 10px;position:relative}
+.timeline li{display:grid;grid-template-columns:22px 26px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);position:relative}
+.timeline li:last-child{border-bottom:0}
+.timeline li .dot{width:12px;height:12px;border-radius:50%;background:var(--teal);margin:4px 0 0 5px;box-shadow:0 0 0 4px rgba(2,188,183,.18)}
+.timeline li input[type=checkbox]{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1.5px solid var(--ink);background:#fff;cursor:pointer;display:grid;place-items:center;margin-top:1px}
+.timeline li input[type=checkbox]:checked{background:var(--teal);border-color:var(--teal)}
+.timeline li input[type=checkbox]:checked::after{content:'';width:9px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.timeline li h4{font-size:14.5px;font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.timeline li p{font-size:13.5px;color:var(--char);margin-top:3px}
+.timeline li button.hsref{margin-left:2px}
+.afterbox{border:1px solid var(--ink);background:var(--bg);padding:12px 14px;margin:4px 0 22px}
+.afterbox .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.afterbox p{font-size:14px;color:var(--char);margin-bottom:8px}
+.afterbox table.t{margin:0}
+
+/* reference photos and callout boxes */
+.refs{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 4px}
+figure.ref{border:1px solid var(--ink);background:#fff;max-width:250px;box-shadow:8px 8px 0 rgba(29,30,36,.05)}
+figure.ref img{display:block;width:auto;max-width:100%;height:auto;max-height:220px;margin:0 auto}
+figure.ref figcaption{font:500 10px/1.4 var(--mono);letter-spacing:.03em;color:var(--grey);padding:6px 8px;border-top:1px solid var(--line)}
+.callout-box{margin:10px 0 2px;padding:9px 12px;border:1px solid var(--ink);border-left-width:1px;background:#FFF1F7;font-size:13px;line-height:1.5;color:var(--char)}
+.callout-box b{color:#C0246E}
+
+/* tablet and phone: single column, viewer near the top, rail becomes the top progress bar */
+@media (max-width:1180px){
+  .layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"viewer" "main";gap:28px}
+  .rail{display:none}
+  .viewer{position:relative;top:0;max-width:640px;width:100%;margin:0 auto;max-height:none;overflow:visible}
+  .fig .view img{max-height:none;width:100%}
+  .hero h1{font-size:36px}
+}
+@media (max-width:600px){
+  .topbar .t{display:none}
+  .hero{padding:28px 16px 4px}
+  .hero h1{font-size:30px;letter-spacing:-1px}
+  .layout{padding:16px}
+  .step header{flex-wrap:wrap}
+  .step .show{margin-left:30px}
+  .viewer .legend{grid-template-columns:1fr}
+  table.t{font-size:12px}
+  .tscroll{overflow-x:auto}
+}
+
+/* print: all three figures with a static legend, then every step */
+@media print{
+  @page{size:letter;margin:0.55in 0.6in 0.6in}
+  html{scroll-behavior:auto}
+  body{font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .topbar,.rail,.viewer,.step .show,.cmd button,.tip,.btn,.callout{display:none !important}
+  input.fill{border:0;border-bottom:1px solid #999;background:none;font-size:10px;min-width:12em}
+  .see{font-size:10.5px;padding:5px 8px}
+  .cable{font-size:10.5px;padding:3px 0}
+  .timeline,.afterbox{box-shadow:none;break-inside:avoid}
+  figure.ref{box-shadow:none;max-width:1.8in}
+  .callout-box{font-size:10.5px}
+  .timeline li{padding:5px 0}
+  .timeline li p{font-size:10.5px}
+  .timeline li h4{font-size:11.5px}
+  .hero{padding:0}
+  .hero h1{font-size:28px}
+  .hero .lead{font-size:13px}
+  .layout{display:block;padding:0;max-width:none}
+  .printfigs{display:block}
+  .pfig{break-inside:avoid;page-break-inside:avoid;display:grid;grid-template-columns:3.6in 1fr;gap:0.25in;margin:0.2in 0 0.25in}
+  .pfig .fig{border-bottom:1px solid var(--ink)}
+  .pfig .view.on{width:auto}
+  .pfig .fig .view img{max-height:none;width:100%}
+  .pfig .hs{width:20px;height:20px;font-size:9px;box-shadow:0 0 0 1px var(--ink)}
+  .pfig h3{font-size:14px;margin:4px 0 6px}
+  .pfig table.t{font-size:10px}
+  .pfig .cap{font:500 9px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--grey);margin-top:4px}
+  .pagebrk{break-before:page;page-break-before:always}
+  section.sec{margin-bottom:16px}
+  section.sec h2{font-size:20px;break-after:avoid}
+  section.sec .intro{font-size:11.5px}
+  .step{box-shadow:none;break-inside:avoid;page-break-inside:avoid;margin-bottom:10px}
+  .step header{padding:7px 10px}
+  .step h3{font-size:12.5px}
+  .step .bd{padding:7px 10px 9px}
+  .step .bd p{font-size:11px}
+  .cmd{box-shadow:none}
+  .cmd code{font-size:9.5px;padding:6px 9px}
+  .exp,.pass{font-size:10.5px}
+  table.t{font-size:10px}
+  .warn,.card{box-shadow:none}
+  footer.src{padding:12px 0 0}
+}
+
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <img src="assets/logos/elastic-horizontal-dark-ink.svg" alt="Elastic" width="90" height="30">
+  <span class="t">DDIL kit · setup and pack-down · 13 Nov 2026</span>
+  <span class="sp"></span>
+  <span class="prog" id="prog">0 / 0</span>
+  <button type="button" class="btn" data-action="reset">Reset checklist</button>
+  <button type="button" class="btn pri" data-action="print">Print</button>
+</div><div class="bar"><i id="bar"></i></div></div>
+
+<header class="hero">
+  <div class="eyebrow">DDIL demo kit · SA enablement · Physical setup</div>
+  <h1>Out of the case. <span class="hl">Powered on in seven steps.</span></h1>
+  <p class="lead">Lift the kit out, seat the JetKVM, plug in the cables, switch on master power and join the kit network. Then reverse it to pack down. Tap any step to see exactly where each cable goes on the drawings.</p>
+  <div class="meta">
+    <span class="chip">Status as of 13 Nov 2026</span>
+    <span class="chip">Steps from the kit lead</span>
+    <span class="chip">Component map, confirm on your kit</span>
+    <span class="chip">Illustrations. Not to scale.</span>
+  </div>
+</header>
+
+<div class="printfigs"><div class="pfig"><div><div class="fig"><div class="view on" style="position:relative"><img src="img/front.webp" alt="Front view · Set up view illustration"><span class="hs" style="left:20%;top:6%">1</span><span class="hs" style="left:34%;top:26%">2</span><span class="hs" style="left:50%;top:42%">3</span><span class="hs" style="left:50%;top:58%">4</span><span class="hs" style="left:27.5%;top:69%">5</span><span class="hs" style="left:57%;top:68%">6</span><span class="hs" style="left:59.5%;top:76.5%">7</span><span class="hs" style="left:29.5%;top:86.5%">8</span></div></div><div class="cap">Front view · Set up · Illustration. Not to scale.</div></div><div><h3>Front view · Set up: legend</h3><table class="t"><tr><th>#</th><th>Part</th></tr><tr><td class="k">F1</td><td>Carry handles on top</td></tr><tr><td class="k">F2</td><td>Touchscreen panel, 2U</td></tr><tr><td class="k">F3</td><td>Blank panels covering the Framework Desktop</td></tr><tr><td class="k">F4</td><td>DGX Spark on its 10 in shelf</td></tr><tr><td class="k">F5</td><td>JetKVM on the front face</td></tr><tr><td class="k">F6</td><td>UniFi Express 7, white unit with cable</td></tr><tr><td class="k">F7</td><td>Switch Flex Mini, small white unit</td></tr><tr><td class="k">F8</td><td>PDU master power switch</td></tr></table><p style="font-size:10px;color:#69707D">Component map, confirm on your kit.</p></div></div><div class="pfig"><div><div class="fig"><div class="view on" style="position:relative"><img src="img/front-packed.webp" alt="Front view · Packed view illustration"><span class="hs" style="left:22%;top:7.5%">1</span><span class="hs" style="left:34%;top:26%">2</span><span class="hs" style="left:32%;top:38.5%">3</span><span class="hs" style="left:62%;top:46%">4</span><span class="hs" style="left:50%;top:56%">5</span><span class="hs" style="left:27%;top:63.5%">6</span><span class="hs" style="left:24.5%;top:71.5%">7</span><span class="hs" style="left:29.5%;top:75%">8</span><span class="hs" style="left:36.5%;top:67.5%">9</span><span class="hs" style="left:51%;top:64.5%">10</span><span class="hs" style="left:56.5%;top:77%">11</span><span class="hs" style="left:31%;top:84.5%">12</span></div></div><div class="cap">Front view · Packed · Illustration. Not to scale.</div></div><div><h3>Front view · Packed: legend</h3><table class="t"><tr><th>#</th><th>Part</th></tr><tr><td class="k">K1</td><td>Carry handles on top</td></tr><tr><td class="k">K2</td><td>Touchscreen, off in transport</td></tr><tr><td class="k">K3</td><td>Elastic sticker under the touchscreen</td></tr><tr><td class="k">K4</td><td>Blank panels covering the Framework Desktop</td></tr><tr><td class="k">K5</td><td>DGX Spark, NVIDIA logo on its face</td></tr><tr><td class="k">K6</td><td>Empty JetKVM bay</td></tr><tr><td class="k">K7</td><td>USB-C lead hanging from the bay</td></tr><tr><td class="k">K8</td><td>USB-A lead hanging from the bay</td></tr><tr><td class="k">K9</td><td>RJ45 Ethernet lead hanging from the bay</td></tr><tr><td class="k">K10</td><td>UniFi Express 7</td></tr><tr><td class="k">K11</td><td>UniFi USB-C power lead, unplugged and hanging</td></tr><tr><td class="k">K12</td><td>PDU master power switch</td></tr></table><p style="font-size:10px;color:#69707D">Component map, confirm on your kit.</p></div></div><div class="pfig"><div><div class="fig"><div class="view on" style="position:relative"><img src="img/photo-front.jpg" alt="Front view · Photo of the kit view illustration"><span class="hs" style="left:6%;top:3%">1</span><span class="hs" style="left:30%;top:26%">2</span><span class="hs" style="left:21.5%;top:43%">3</span><span class="hs" style="left:66%;top:52%">4</span><span class="hs" style="left:47%;top:64%">5</span><span class="hs" style="left:20%;top:74%">6</span><span class="hs" style="left:56.5%;top:74.5%">7</span><span class="hs" style="left:59.5%;top:82.5%">8</span><span class="hs" style="left:23%;top:92.3%">9</span></div></div><div class="cap">Front view · Photo of the kit · Photo of the kit, 13 Nov 2026</div></div><div><h3>Front view · Photo of the kit: legend</h3><table class="t"><tr><th>#</th><th>Part</th></tr><tr><td class="k">FP1</td><td>Carry handles on top</td></tr><tr><td class="k">FP2</td><td>Touchscreen panel</td></tr><tr><td class="k">FP3</td><td>Elastic sticker under the touchscreen</td></tr><tr><td class="k">FP4</td><td>Blank panels covering the Framework Desktop</td></tr><tr><td class="k">FP5</td><td>DGX Spark, NVIDIA logo on its face</td></tr><tr><td class="k">FP6</td><td>JetKVM bay with its three leads</td></tr><tr><td class="k">FP7</td><td>UniFi Express 7</td></tr><tr><td class="k">FP8</td><td>Switch Flex Mini, blue status LED by its USB-C lead</td></tr><tr><td class="k">FP9</td><td>PDU rocker switch, glows red when on</td></tr></table><p style="font-size:10px;color:#69707D">Component map, confirm on your kit.</p></div></div><div class="pfig"><div><div class="fig"><div class="view on" style="position:relative"><img src="img/back.webp" alt="Back view · Illustration view illustration"><span class="hs" style="left:50%;top:23.5%">1</span><span class="hs" style="left:26%;top:54%">2</span><span class="hs" style="left:46%;top:51.5%">3</span><span class="hs" style="left:53.5%;top:48%">4</span><span class="hs" style="left:72%;top:42%">5</span><span class="hs" style="left:45%;top:60.5%">6</span><span class="hs" style="left:50%;top:75%">7</span><span class="hs" style="left:40%;top:94%">8</span><span class="hs" style="left:85%;top:91%">9</span></div></div><div class="cap">Back view · Illustration · Illustration. Not to scale.</div></div><div><h3>Back view · Illustration: legend</h3><table class="t"><tr><th>#</th><th>Part</th></tr><tr><td class="k">B1</td><td>Top metal grate (vent panel)</td></tr><tr><td class="k">B2</td><td>Framework HDMI port, leftmost on the rear I/O plate</td></tr><tr><td class="k">B3</td><td>Framework USB Type-A ports</td></tr><tr><td class="k">B4</td><td>Framework Ethernet (RJ45) port</td></tr><tr><td class="k">B5</td><td>Framework PSU: IEC inlet and power button</td></tr><tr><td class="k">B6</td><td>DGX Spark rear ports and cables</td></tr><tr><td class="k">B7</td><td>Lower metal grates (vent panels)</td></tr><tr><td class="k">B8</td><td>Bottom unit (PDU per the front view)</td></tr><tr><td class="k">B9</td><td>Black mains cable exit, rear bottom right</td></tr></table><p style="font-size:10px;color:#69707D">Component map, confirm on your kit.</p></div></div><div class="pfig"><div><div class="fig"><div class="view on" style="position:relative"><img src="img/photo-back.jpg" alt="Back view · Photo of the kit view illustration"><span class="hs" style="left:50%;top:18.6%">1</span><span class="hs" style="left:22.5%;top:52.8%">2</span><span class="hs" style="left:45%;top:50%">3</span><span class="hs" style="left:53.3%;top:47.8%">4</span><span class="hs" style="left:76.7%;top:38.5%">5</span><span class="hs" style="left:48%;top:60%">6</span><span class="hs" style="left:50%;top:75.8%">7</span><span class="hs" style="left:91%;top:93%">8</span></div></div><div class="cap">Back view · Photo of the kit · Photo of the kit, 13 Nov 2026</div></div><div><h3>Back view · Photo of the kit: legend</h3><table class="t"><tr><th>#</th><th>Part</th></tr><tr><td class="k">BP1</td><td>Top metal grate</td></tr><tr><td class="k">BP2</td><td>Framework HDMI port, leftmost, labelled HDMI</td></tr><tr><td class="k">BP3</td><td>Framework USB-A ports</td></tr><tr><td class="k">BP4</td><td>Framework Ethernet (RJ45) port</td></tr><tr><td class="k">BP5</td><td>Framework PSU IEC inlet</td></tr><tr><td class="k">BP6</td><td>DGX Spark rear ports</td></tr><tr><td class="k">BP7</td><td>Lower metal grates</td></tr><tr><td class="k">BP8</td><td>Black mains cable exit, rear bottom right</td></tr></table><p style="font-size:10px;color:#69707D">Component map, confirm on your kit.</p></div></div><div class="pfig"><div><div class="fig"><div class="view on" style="position:relative"><img src="img/side.webp" alt="Side view · Illustration view illustration"><span class="hs" style="left:50%;top:3.5%">1</span><span class="hs" style="left:45%;top:26%">2</span><span class="hs" style="left:45%;top:40%">3</span><span class="hs" style="left:45%;top:55.5%">4</span><span class="hs" style="left:40%;top:67.5%">5</span><span class="hs" style="left:40%;top:85%">6</span><span class="hs" style="left:73%;top:60%">7</span><span class="hs" style="left:33%;top:22%">8</span><span class="hs" style="left:84%;top:45%">9</span></div></div><div class="cap">Side view · Illustration · Illustration. Not to scale.</div></div><div><h3>Side view · Illustration: legend</h3><table class="t"><tr><th>#</th><th>Part</th></tr><tr><td class="k">S1</td><td>Handle (lift point)</td></tr><tr><td class="k">S2</td><td>Top shelf, behind the touchscreen</td></tr><tr><td class="k">S3</td><td>Finned unit: Framework Desktop</td></tr><tr><td class="k">S4</td><td>Metal-foam unit: DGX Spark</td></tr><tr><td class="k">S5</td><td>Network gear shelf</td></tr><tr><td class="k">S6</td><td>Bottom finned unit (PDU per the front view)</td></tr><tr><td class="k">S7</td><td>Cable run up the rear post</td></tr><tr><td class="k">S8</td><td>Glass side panel</td></tr><tr><td class="k">S9</td><td>Rear face with the grate (lift point)</td></tr></table><p style="font-size:10px;color:#69707D">Component map, confirm on your kit.</p></div></div></div><div class="pagebrk"></div>
+
+<div class="layout">
+  <nav class="rail" aria-label="Progress">
+    <div class="k">Progress</div>
+    <ol><li><a href="#pack-list" data-sec="pack-out"><span class="n">01</span><span>Out of the case: items</span><span class="c"></span></a></li><li><a href="#steps" data-sec="steps"><span class="n">02</span><span>Seven steps</span><span class="c"></span></a></li><li><a href="#pack" data-sec="pack"><span class="n">03</span><span>Pack-down</span><span class="c"></span></a></li><li><a href="#trouble" data-sec=""><span class="n">04</span><span>Troubleshooting</span><span class="c"></span></a></li></ol>
+    <div class="tot"><b id="railtot">0%</b>of checkboxes ticked</div>
+    <button type="button" class="btn" data-action="reset">Reset checklist</button>
+  </nav>
+
+  <main class="main">
+    <section class="sec" id="pack-list"><div class="eyebrow">01 · What comes out of the case</div><h2>What comes out of the case. <span class="hl">And what stays in the kit.</span></h2><p class="intro">Tick <b>Out</b> as you unpack and <b>Back in</b> as you stow. The JetKVM leads and the UniFi power lead stay in the kit and only change state. Tags show the source: Kit lead (the kit lead's steps), Kit photo (photos of 13 Nov 2026), Confirm on kit (likely but not recorded).</p><div class="tscroll"><table class="t pack"><tr><th style="width:36px"></th><th>Item and where it connects</th><th style="text-align:center">Out</th><th style="text-align:center">Back in</th></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0V8zM12 18v4"/></svg></td><td><b>PDU power cable (long, black)</b> <span class="tag usr">Kit lead</span><br><span style="color:var(--grey)">Exits the kit at the rear bottom right; plug end to a wall outlet</span></td><td class="cb"><input type="checkbox" data-step="pk-pdu-out" data-sec="pack-out" aria-label="Out: PDU power cable (long, black)"></td><td class="cb"><input type="checkbox" data-step="pk-pdu-in" data-sec="pack-in" aria-label="Back in: PDU power cable (long, black)"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="8" y="8" width="8" height="6"/></svg></td><td><b>JetKVM unit</b> <span class="tag src">Kit photo</span><br><span style="color:var(--grey)">Lifted out of its bay on the front face for transport</span></td><td class="cb"><input type="checkbox" data-step="pk-kvm-out" data-sec="pack-out" aria-label="Out: JetKVM unit"></td><td class="cb"><input type="checkbox" data-step="pk-kvm-in" data-sec="pack-in" aria-label="Back in: JetKVM unit"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v10h-4v3H8v-3H4z"/><path d="M8 9v3M11 9v3M14 9v3M17 9v3" stroke-width="1.2"/></svg></td><td><b>JetKVM leads: USB-C, USB-A, RJ45 Ethernet</b> <span class="tag src">Kit photo</span><br><span style="color:var(--grey)">Stay in the kit, hanging in the empty bay. Tuck them in, do not pull them out</span></td><td class="cb"><input type="checkbox" data-step="pk-kvm-leads-out" data-sec="pack-out" aria-label="Out: JetKVM leads: USB-C, USB-A, RJ45 Ethernet"></td><td class="cb"><input type="checkbox" data-step="pk-kvm-leads-in" data-sec="pack-in" aria-label="Back in: JetKVM leads: USB-C, USB-A, RJ45 Ethernet"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="9" width="16" height="6" rx="3"/><path d="M8 12h8" stroke-width="1.2"/></svg></td><td><b>UniFi Express 7 USB-C power lead (white)</b> <span class="tag src">Kit photo</span><br><span style="color:var(--grey)">Stays in the kit, unplugged from the UniFi and hanging to the lower row</span></td><td class="cb"><input type="checkbox" data-step="pk-ux7-out" data-sec="pack-out" aria-label="Out: UniFi Express 7 USB-C power lead (white)"></td><td class="cb"><input type="checkbox" data-step="pk-ux7-in" data-sec="pack-in" aria-label="Back in: UniFi Express 7 USB-C power lead (white)"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h18v5l-3 3H6l-3-3z"/><path d="M7 11h10" stroke-width="1.2"/></svg></td><td><b>Touchscreen HDMI cable</b> <span class="tag usr">Kit lead</span><br><span style="color:var(--grey)">Touchscreen to the Framework HDMI port (rear, leftmost)</span></td><td class="cb"><input type="checkbox" data-step="pk-ts-hdmi-out" data-sec="pack-out" aria-label="Out: Touchscreen HDMI cable"></td><td class="cb"><input type="checkbox" data-step="pk-ts-hdmi-in" data-sec="pack-in" aria-label="Back in: Touchscreen HDMI cable"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="8" width="16" height="8"/><path d="M7 11h4v2H7zM13 11h4v2h-4z" stroke-width="1"/></svg></td><td><b>Touchscreen USB Type-A cable</b> <span class="tag usr">Kit lead</span><br><span style="color:var(--grey)">Touchscreen to a Framework USB Type-A port (rear)</span></td><td class="cb"><input type="checkbox" data-step="pk-ts-usba-out" data-sec="pack-out" aria-label="Out: Touchscreen USB Type-A cable"></td><td class="cb"><input type="checkbox" data-step="pk-ts-usba-in" data-sec="pack-in" aria-label="Back in: Touchscreen USB Type-A cable"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v10h-4v3H8v-3H4z"/><path d="M8 9v3M11 9v3M14 9v3M17 9v3" stroke-width="1.2"/></svg></td><td><b>Framework Ethernet cable</b> <span class="tag usr">Kit lead</span><br><span style="color:var(--grey)">Framework RJ45 (rear) to <input class="fill" type="text" data-fill="fw-eth-end" placeholder="confirm on kit: other end" style="width:28ch" aria-label="Confirm on kit: other end"></span></td><td class="cb"><input type="checkbox" data-step="pk-fw-eth-out" data-sec="pack-out" aria-label="Out: Framework Ethernet cable"></td><td class="cb"><input type="checkbox" data-step="pk-fw-eth-in" data-sec="pack-in" aria-label="Back in: Framework Ethernet cable"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M11 18h2"/></svg></td><td><b>Presenter iPad or laptop and its charger</b> <span class="tag unc">Confirm on kit</span><br><span style="color:var(--grey)">Joins Wi-Fi DDIL</span></td><td class="cb"><input type="checkbox" data-step="pk-client-out" data-sec="pack-out" aria-label="Out: Presenter iPad or laptop and its charger"></td><td class="cb"><input type="checkbox" data-step="pk-client-in" data-sec="pack-in" aria-label="Back in: Presenter iPad or laptop and its charger"></td></tr><tr><td class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg></td><td><b>Wi-Fi passphrase card</b> <span class="tag unc">Confirm on kit</span><br><span style="color:var(--grey)">Kept with the kit lead, not in the repo</span></td><td class="cb"><input type="checkbox" data-step="pk-pass-out" data-sec="pack-out" aria-label="Out: Wi-Fi passphrase card"></td><td class="cb"><input type="checkbox" data-step="pk-pass-in" data-sec="pack-in" aria-label="Back in: Wi-Fi passphrase card"></td></tr></table></div></section><section class="sec" id="steps"><div class="eyebrow">02 · Out of the case to powered on</div><h2>Out of the case. <span class="hl">Seven steps to powered on.</span></h2><p class="intro">Follow the steps in order. Tap a step to light its parts on the figure; the pink rings and labels show exactly where each cable goes. Blanks marked confirm on kit are not recorded anywhere yet: fill them in once and they are saved in this browser.</p><article class="step" id="s1"><header><label class="ck"><input type="checkbox" data-step="s1" data-sec="steps"><span class="num">1</span><h3>Lift the kit out of the case</h3></label><button type="button" class="show" data-step="s1" title="Show on the figure">Show K1 · S1 · B1 · B7 · S9</button></header><div class="bd"><p>The kit sits face down in the Pelican case. Grip the handle on top of the kit with one hand and the metal grate on the back of the kit with the other. Lift the kit straight out and stand it upright on a flat, hard surface with the touchscreen facing you. The front now looks like the <b>Packed</b> view.</p><p>Keep the front face and the rear grates clear. The side view shows a solid glass side panel and the back view shows perforated grates, so air moves through the front and the rear. Do not lift by the touchscreen, the glass panel or a cable.</p><div class="see">The kit stands upright and level, the touchscreen faces you, and nothing is caught on the case foam.</div></div></article><article class="step" id="s2"><header><label class="ck"><input type="checkbox" data-step="s2" data-sec="steps"><span class="num">2</span><h3>Plug in the PDU power cable</h3></label><button type="button" class="show" data-step="s2" title="Show on the figure">Show B9 · K12 · BP8</button></header><div class="bd"><p>Take the long PDU power cable out of the case. Check that the Kit Master Power switch on the PDU is off. The black mains cable exits at the rear bottom right of the kit (from the kit photo, 13 Nov 2026). Plug its other end into a wall outlet.</p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0V8zM12 18v4"/></svg>Power</div><div class="ends"><span>PDU, exit at the rear bottom right</span><span class="to">to</span><span>Wall outlet</span></div></div></div><div class="see">The cable reaches the outlet without strain. The kit stays dark because master power is still off.</div></div></article><article class="step" id="s3a"><header><label class="ck"><input type="checkbox" data-step="s3a" data-sec="steps"><span class="num">3a</span><h3>Find the JetKVM leads in the empty bay</h3></label><button type="button" class="show" data-step="s3a" title="Show on the figure">Show K6 · K7 · K8 · K9</button></header><div class="bd"><p>In transport the JetKVM is out of its bay on the front face. Three leads hang from the empty bay: a USB-C lead, a USB-A lead and an RJ45 Ethernet lead. Take the JetKVM out of the case.</p><div class="see">Three leads in the empty bay, matching the Packed view and the kit photo.</div></div></article><article class="step" id="s3b"><header><label class="ck"><input type="checkbox" data-step="s3b" data-sec="steps"><span class="num">3b</span><h3>Plug in the JetKVM on the front face</h3></label><button type="button" class="show" data-step="s3b" title="Show on the figure">Show F5 · FP6</button></header><div class="bd"><p>Connect the JetKVM on the front face of the kit: Ethernet, HDMI and USB-C power. Then seat it in its bay.</p><p>The bay also holds a USB-A lead that the kit lead's steps do not mention. Which lead carries HDMI, and what the USB-A lead connects to: <input class="fill" type="text" data-fill="kvm-leads" placeholder="confirm on kit: which lead carries HDMI / what the USB-A lead connects to" style="width:76ch" aria-label="Confirm on kit: which lead carries HDMI / what the USB-A lead connects to"> <span class="tag unc">Confirm on kit</span></p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v10h-4v3H8v-3H4z"/><path d="M8 9v3M11 9v3M14 9v3M17 9v3" stroke-width="1.2"/></svg>Ethernet</div><div class="ends"><span>RJ45 lead from the bay</span><span class="to">to</span><span>JetKVM</span></div></div><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="9" width="16" height="6" rx="3"/><path d="M8 12h8" stroke-width="1.2"/></svg>USB-C power</div><div class="ends"><span>USB-C lead from the bay</span><span class="to">to</span><span>JetKVM</span></div></div><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h18v5l-3 3H6l-3-3z"/><path d="M7 11h10" stroke-width="1.2"/></svg>HDMI</div><div class="ends"><span>The lead named in the blank above</span><span class="to">to</span><span>JetKVM</span></div></div></div><div class="see">The JetKVM sits in its bay with its leads seated, as in the Set up view. Its screen comes up after master power (step 6).</div><div class="refs"><figure class="ref"><img src="img/ref-jetkvm.jpg" alt="JetKVM standard screen. IP and MAC blurred; your IP will differ."><figcaption>JetKVM standard screen. IP and MAC blurred; your IP will differ.</figcaption></figure></div></div></article><article class="step" id="s3c"><header><label class="ck"><input type="checkbox" data-step="s3c" data-sec="steps"><span class="num">3c</span><h3>Reconnect the UniFi Express 7 power lead</h3></label><button type="button" class="show" data-step="s3c" title="Show on the figure">Show K11 · K10 · F6</button></header><div class="bd"><p>The white USB-C power lead of the UniFi Express 7 is unplugged for transport and hangs down to the lower row. Plug it back into the USB-C port in the middle of the UniFi Express 7.</p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="9" width="16" height="6" rx="3"/><path d="M8 12h8" stroke-width="1.2"/></svg>USB-C power</div><div class="ends"><span>White lead hanging to the lower row</span><span class="to">to</span><span>UniFi Express 7 USB-C port</span></div></div></div><div class="see">The lead loops from the UniFi down and back, as in the Set up view.</div></div></article><article class="step" id="s4"><header><label class="ck"><input type="checkbox" data-step="s4" data-sec="steps"><span class="num">4</span><h3>Plug the touchscreen into the back of the Framework</h3></label><button type="button" class="show" data-step="s4" title="Show on the figure">Show B2 · B3 · F2 · BP2 · BP3</button></header><div class="bd"><p>Connect the touchscreen to the back of the Framework PC with two cables: USB Type-A and HDMI. The HDMI carries the picture. The USB Type-A cable carries touch input; the kiosk launcher maps the touch device to the touchscreen output.</p><p>The HDMI port is the leftmost port on the rear I/O plate, labelled HDMI. To its right sit two USB-C ports, two USB-A ports, the RJ45 port, a blue USB-A port and an audio jack (from the kit photo, 13 Nov 2026). Use one of the two USB-A ports.</p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h18v5l-3 3H6l-3-3z"/><path d="M7 11h10" stroke-width="1.2"/></svg>HDMI</div><div class="ends"><span>Touchscreen</span><span class="to">to</span><span>Framework HDMI (rear, leftmost)</span></div></div><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="8" width="16" height="8"/><path d="M7 11h4v2H7zM13 11h4v2h-4z" stroke-width="1"/></svg>USB Type-A</div><div class="ends"><span>Touchscreen</span><span class="to">to</span><span>Framework USB Type-A (rear)</span></div></div></div><div class="see">Both plugs are seated at the Framework rear I/O and at the panel. The panel stays dark until master power is on.</div><div class="callout-box"><b>The kiosk probes are simulated.</b> <code>demo/kiosk/src/lib/health.ts</code> sets <code>MOCK = true</code>: each probe returns after a random delay and has a 5 % random chance of showing FAIL. A green board does not prove the services are up, and an occasional pink FAIL is noise. Use the checks in the kit configuration runbook for real status until <code>MOCK</code> is set to false.</div></div></article><article class="step" id="s5"><header><label class="ck"><input type="checkbox" data-step="s5" data-sec="steps"><span class="num">5</span><h3>Connect the Ethernet cable to the Framework</h3></label><button type="button" class="show" data-step="s5" title="Show on the figure">Show B4 · BP4 · F7</button></header><div class="bd"><p>Connect the Ethernet cable to the RJ45 port on the back of the Framework PC.</p><p>The network plan puts the Framework on switch port P2 <span class="tag doc">Doc-only</span>. Other end on this kit: <input class="fill" type="text" data-fill="fw-eth-end" placeholder="confirm on kit: other end" style="width:28ch" aria-label="Confirm on kit: other end"></p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v10h-4v3H8v-3H4z"/><path d="M8 9v3M11 9v3M14 9v3M17 9v3" stroke-width="1.2"/></svg>Ethernet</div><div class="ends"><span>Framework RJ45 (rear)</span><span class="to">to</span><span><input class="fill" type="text" data-fill="fw-eth-end" placeholder="confirm on kit: other end" style="width:28ch" aria-label="Confirm on kit: other end"></span></div></div></div><div class="see">The RJ45 plug clicks into place. The link light comes on after master power is on.</div></div></article><article class="step" id="s6"><header><label class="ck"><input type="checkbox" data-step="s6" data-sec="steps"><span class="num">6</span><h3>Turn on Kit Master Power at the PDU</h3></label><button type="button" class="show" data-step="s6" title="Show on the figure">Show F8 · FP9</button></header><div class="bd"><p>Switch Kit Master Power on at the PDU. The rocker glows red when on (from the kit photo, 13 Nov 2026). Every device fed by the PDU receives power together. Watch the JetKVM come up and the boot sequence start on the touchscreen.</p><p>The indicator timeline below lists what each device shows. If a node does not start by itself: <input class="fill" type="text" data-fill="node-start" placeholder="confirm on kit: how to start it" style="width:34ch" aria-label="Confirm on kit: how to start it"> <span class="tag unc">Confirm on kit</span></p><div class="see">The rocker glows red, the JetKVM shows its standard screen, the UniFi display reads Plug in Cable, and the touchscreen starts its boot sequence. Follow the timeline below.</div><div class="refs"><figure class="ref"><img src="img/ref-jetkvm.jpg" alt="JetKVM standard screen. IP and MAC blurred; your IP will differ."><figcaption>JetKVM standard screen. IP and MAC blurred; your IP will differ.</figcaption></figure><figure class="ref"><img src="img/ref-ux7.jpg" alt="UniFi Express 7 with no WAN uplink. Expected on the kit."><figcaption>UniFi Express 7 with no WAN uplink. Expected on the kit.</figcaption></figure></div></div></article><div class="timeline" id="timeline"><div class="th">Indicator lights and what you should see after master power</div><ol><li id="t-pdu"><span class="dot"></span><input type="checkbox" data-step="t-pdu" data-sec="steps" aria-label="Seen: PDU master switch"><div><h4>PDU master switch <span class="tag src">Kit photo</span> <button type="button" class="hsref" data-hs="F8" title="PDU master power switch">F8</button><button type="button" class="hsref" data-hs="FP9" title="PDU rocker switch, glows red when on">FP9</button></h4><p>The rocker glows red when on (from the kit photo, 13 Nov 2026).</p></div></li><li id="t-kvm"><span class="dot"></span><input type="checkbox" data-step="t-kvm" data-sec="steps" aria-label="Seen: JetKVM"><div><h4>JetKVM <span class="tag usr">Kit lead</span> <button type="button" class="hsref" data-hs="F5" title="JetKVM on the front face">F5</button></h4><p>Shows its standard screen: the JetKVM logo top left, "N active" sessions top right, the device IP address in large type with the MAC address below, and two status tiles at the bottom, USB and HDMI. The IP appears once Ethernet has a link. USB and HDMI read Disconnected until the Framework is up, then Connected. Your IP will differ from the photo.</p><div class="refs"><figure class="ref"><img src="img/ref-jetkvm.jpg" alt="JetKVM standard screen. IP and MAC blurred."><figcaption>JetKVM standard screen. IP and MAC blurred.</figcaption></figure></div></div></li><li id="t-ux7"><span class="dot"></span><input type="checkbox" data-step="t-ux7" data-sec="steps" aria-label="Seen: UniFi Express 7"><div><h4>UniFi Express 7 <span class="tag usr">Kit lead</span> <button type="button" class="hsref" data-hs="F6" title="UniFi Express 7, white unit with cable">F6</button></h4><p>The front display reads <b>Plug in Cable / Ethernet Disconnected</b> in white-blue text on a dark pill-shaped screen, with a blue icon below. The kit has no WAN uplink, so this is the expected state for DDIL operation. The kit network still runs. It is not a fault.</p><div class="refs"><figure class="ref"><img src="img/ref-ux7.jpg" alt="UniFi Express 7 display with no WAN uplink."><figcaption>UniFi Express 7 display with no WAN uplink.</figcaption></figure></div></div></li><li id="t-sw"><span class="dot"></span><input type="checkbox" data-step="t-sw" data-sec="steps" aria-label="Seen: Switch Flex Mini"><div><h4>Switch Flex Mini <span class="tag src">Kit photo</span> <button type="button" class="hsref" data-hs="F7" title="Switch Flex Mini, small white unit">F7</button><button type="button" class="hsref" data-hs="FP8" title="Switch Flex Mini, blue status LED by its USB-C lead">FP8</button></h4><p>A blue status LED is visible next to its USB-C power lead (from the kit photo, 13 Nov 2026). The network plan says the port LEDs initialise and a link light shows on each connected port. Port link light colour: <input class="fill" type="text" data-fill="t-sw" placeholder="confirm on kit: link light colour" style="width:36ch" aria-label="Confirm on kit: link light colour"></p></div></li><li id="t-spark"><span class="dot"></span><input type="checkbox" data-step="t-spark" data-sec="steps" aria-label="Seen: DGX Spark"><div><h4>DGX Spark <span class="tag unc">Confirm on kit</span> <button type="button" class="hsref" data-hs="F4" title="DGX Spark on its 10 in shelf">F4</button><button type="button" class="hsref" data-hs="B6" title="DGX Spark rear ports and cables">B6</button></h4><p>Boots; Ollama starts under systemd. Power indicator: <input class="fill" type="text" data-fill="t-spark" placeholder="confirm on kit: what shows" style="width:29ch" aria-label="Confirm on kit: what shows"></p></div></li><li id="t-fw"><span class="dot"></span><input type="checkbox" data-step="t-fw" data-sec="steps" aria-label="Seen: Framework Desktop"><div><h4>Framework Desktop <span class="tag src">Repo</span> <button type="button" class="hsref" data-hs="F3" title="Blank panels covering the Framework Desktop">F3</button><button type="button" class="hsref" data-hs="B5" title="Framework PSU: IEC inlet and power button">B5</button></h4><p>Power indicator: <input class="fill" type="text" data-fill="t-fw" placeholder="confirm on kit: what shows" style="width:29ch" aria-label="Confirm on kit: what shows">. If the branding script (<code>branding/deploy-splash.sh</code>) was deployed on this kit, the touchscreen shows the GRUB menu over an Elastic splash for about 3 s (<code>GRUB_TIMEOUT=3</code>), then the Plymouth boot splash, theme "DDIL Vineyard Intelligence". No record shows the script ran on this kit.</p></div></li><li id="t-launch"><span class="dot"></span><input type="checkbox" data-step="t-launch" data-sec="steps" aria-label="Seen: Touchscreen: kiosk launch"><div><h4>Touchscreen: kiosk launch <span class="tag src">Repo</span> <button type="button" class="hsref" data-hs="F2" title="Touchscreen panel, 2U">F2</button></h4><p><code>ddil-kiosk.service</code> runs <code>kiosk-launch.sh</code>: it sets the 1280x400 mode on the touchscreen output, maps touch input, disables blanking, hides the cursor and opens Chromium in kiosk mode at <code>http://localhost:3100/</code>, served by <code>ddil-kiosk-server.service</code>.</p></div></li><li id="t-boot"><span class="dot"></span><input type="checkbox" data-step="t-boot" data-sec="steps" aria-label="Seen: Touchscreen: Boot Diagnostics"><div><h4>Touchscreen: Boot Diagnostics <span class="tag src">Repo</span> <button type="button" class="hsref" data-hs="F2" title="Touchscreen panel, 2U">F2</button></h4><p>A dark screen with a monospace log on the right: "booting sovereign-ai kernel...", an ASCII banner, "mounting airgapped service mesh...", "loading runtime registry... ok", "initializing service probes...", then a probe line and an [ OK ] or [FAIL] line per service, "all subsystems checked." and "kit ready · awaiting demo handoff...". The left panel lists six services: Elasticsearch (GPU), Elasticsearch (CPU), Ollama LLM, Ollama Embeddings, Demo Backend, Field Sensor Bus. Status dots: pulsing yellow while probing, teal with a glow for OK, pink with a glow for FAIL, dim white for not yet probed. The progress bar fills teal, or pink if any probe failed.<div class="callout-box"><b>The kiosk probes are simulated.</b> <code>demo/kiosk/src/lib/health.ts</code> sets <code>MOCK = true</code>: each probe returns after a random delay and has a 5 % random chance of showing FAIL. A green board does not prove the services are up, and an occasional pink FAIL is noise. Use the checks in the kit configuration runbook for real status until <code>MOCK</code> is set to false.</div></p></div></li><li id="t-idle"><span class="dot"></span><input type="checkbox" data-step="t-idle" data-sec="steps" aria-label="Seen: Touchscreen: Idle carousel"><div><h4>Touchscreen: Idle carousel <span class="tag src">Repo</span> <button type="button" class="hsref" data-hs="F2" title="Touchscreen panel, 2U">F2</button></h4><p>About 2.2 s after "kit ready" the kiosk advances to Idle. Page 1, Branding: Elastic and DGX Spark identity either side of a QR code and the headline "Sovereign AI / Context Engineering Anywhere". Page 2, Diagnostics: hardware cards for the Framework and the DGX Spark. Swipe or use the page dots. Time from master power to Idle: <input class="fill" type="text" data-fill="t-idle" placeholder="confirm on kit: minutes" style="width:26ch" aria-label="Confirm on kit: minutes"></p></div></li></ol></div><article class="step" id="s7"><header><label class="ck"><input type="checkbox" data-step="s7" data-sec="steps"><span class="num">7</span><h3>Connect to DDIL</h3></label><button type="button" class="show" data-step="s7" title="Show on the figure">Show F6</button></header><div class="bd"><p>On the presenter iPad or laptop, join the Wi-Fi network <b>DDIL</b>, served by the UniFi gear in the kit.</p><p>Passphrase: <input class="fill" type="text" data-fill="passphrase" placeholder="confirm on kit: from the kit lead" style="width:36ch" aria-label="Confirm on kit: from the kit lead">. The passphrase is not stored in the repo. Do not write it into this guide if the guide leaves the kit.</p><p class="small">The network plan document names the SSID DDIL-Demo <span class="tag doc">Doc-only</span>. The kit lead's name for it is DDIL.</p><div class="see">The device joins DDIL and receives an address in 192.168.1.100-199 (DHCP range per the network plan). The UniFi display still reads Plug in Cable; that is expected with no WAN uplink.</div></div></article><div class="afterbox" id="after"><div class="k">After power-on</div><p>The kiosk health tiles use mock data (<code>MOCK = true</code>), so a healthy-looking touchscreen does not prove the services are up. The Jina embedding server needs a manual start after every boot. Run the software checks in the <a href="../docs/pdf/02-kit-configuration-runbook.pdf">kit configuration runbook</a> (<code>enablement/docs/pdf/02-kit-configuration-runbook.pdf</code>) (pages 4 to 7) before the first demo.</p><table class="t"><tr><td class="k">Demo app (Adventure Chooser)</td><td><code>http://192.168.1.10:3000</code></td></tr><tr><td class="k">Kiosk on the touchscreen</td><td><code>port 3100 on the Framework (192.168.1.10:3100)</code></td></tr></table></div></section><section class="sec" id="pack"><div class="eyebrow">03 · Pack-down</div><h2>Pack-down. <span class="hl">The same steps in reverse.</span></h2><p class="intro">Shut down the software first, then master power, then unplug in reverse order of steps 7 to 2, and lift the kit back into the case face down.</p><article class="step" id="p1"><header><label class="ck"><input type="checkbox" data-step="p1" data-sec="pack"><span class="num">P1</span><h3>Shut down the demos</h3></label><button type="button" class="show" data-step="p1" title="Show on the figure">Show F2</button></header><div class="bd"><p>Vineyard: sidebar Reset Demo. SEC Findings: Chapter 04 Reset conversation, then Esc. Multimodal: Exit to chooser. Close the browser on the presenter device.</p><div class="see">The Adventure Chooser, then the browser closed.</div></div></article><article class="step" id="p2"><header><label class="ck"><input type="checkbox" data-step="p2" data-sec="pack"><span class="num">P2</span><h3>Power off the Framework, then the DGX Spark</h3></label><button type="button" class="show" data-step="p2" title="Show on the figure">Show F3 · F4</button></header><div class="bd"><p>Shut down in this order: Framework first, then the DGX Spark. On the Spark, stop the Jina server with Ctrl-C in its session before the commands. Never add <code>-v</code> to <code>docker compose down</code>; it removes volumes that can hold index data.</p><div class="cmd"><code>cd ~/ddil/demo &amp;&amp; docker compose down &amp;&amp; sudo shutdown -h now</code><button type="button" aria-label="Copy command">Copy</button></div><div class="exp">Framework: four containers removed, then the OS powers off.</div><div class="cmd"><code>cd ~/ddil/docker &amp;&amp; sg docker -c &quot;docker compose down&quot; &amp;&amp; sudo shutdown -h now</code><button type="button" aria-label="Copy command">Copy</button></div><div class="exp">DGX Spark: es-gpu removed, then the OS powers off.</div><div class="see">Both nodes have finished shutting down. How to tell: <input class="fill" type="text" data-fill="p-off" placeholder="confirm on kit: sign that a node is off" style="width:42ch" aria-label="Confirm on kit: sign that a node is off"></div></div></article><article class="step" id="p3"><header><label class="ck"><input type="checkbox" data-step="p3" data-sec="pack"><span class="num">P3</span><h3>Turn off Kit Master Power at the PDU</h3></label><span class="rev">Reverses step 6</span><button type="button" class="show" data-step="p3" title="Show on the figure">Show F8 · FP9</button></header><div class="bd"><p>Switch Kit Master Power off at the PDU only after both nodes have finished shutting down.</p><div class="see">The red glow on the rocker goes out and everything fed by the PDU goes dark.</div></div></article><article class="step" id="p4"><header><label class="ck"><input type="checkbox" data-step="p4" data-sec="pack"><span class="num">P4</span><h3>Disconnect the presenter device from DDIL</h3></label><span class="rev">Reverses step 7</span><button type="button" class="show" data-step="p4" title="Show on the figure">Show F6</button></header><div class="bd"><p>Forget or leave the DDIL network on the iPad or laptop if it will join another network next.</p><div class="see">The device is off the kit network.</div></div></article><article class="step" id="p5"><header><label class="ck"><input type="checkbox" data-step="p5" data-sec="pack"><span class="num">P5</span><h3>Unplug the Framework Ethernet cable</h3></label><span class="rev">Reverses step 5</span><button type="button" class="show" data-step="p5" title="Show on the figure">Show B4 · BP4</button></header><div class="bd"><p>Press the RJ45 latch and pull the plug from the Framework. Unplug the other end. Coil the cable loosely and stow it.</p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v10h-4v3H8v-3H4z"/><path d="M8 9v3M11 9v3M14 9v3M17 9v3" stroke-width="1.2"/></svg>Ethernet</div><div class="ends"><span>Framework RJ45 (rear)</span><span class="to">to</span><span><input class="fill" type="text" data-fill="fw-eth-end" placeholder="confirm on kit: other end" style="width:28ch" aria-label="Confirm on kit: other end"></span></div></div></div><div class="see">Cable coiled and in the case.</div></div></article><article class="step" id="p6"><header><label class="ck"><input type="checkbox" data-step="p6" data-sec="pack"><span class="num">P6</span><h3>Unplug the touchscreen cables</h3></label><span class="rev">Reverses step 4</span><button type="button" class="show" data-step="p6" title="Show on the figure">Show B2 · B3 · BP2 · BP3</button></header><div class="bd"><p>Unplug the HDMI and the USB Type-A cables at the Framework and at the panel. Coil each one and stow it.</p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h18v5l-3 3H6l-3-3z"/><path d="M7 11h10" stroke-width="1.2"/></svg>HDMI</div><div class="ends"><span>Touchscreen</span><span class="to">to</span><span>Framework HDMI (rear)</span></div></div><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="8" width="16" height="8"/><path d="M7 11h4v2H7zM13 11h4v2h-4z" stroke-width="1"/></svg>USB Type-A</div><div class="ends"><span>Touchscreen</span><span class="to">to</span><span>Framework USB Type-A (rear)</span></div></div></div><div class="see">Two cables coiled and in the case.</div></div></article><article class="step" id="p7"><header><label class="ck"><input type="checkbox" data-step="p7" data-sec="pack"><span class="num">P7</span><h3>Unplug the UniFi Express 7 power lead</h3></label><span class="rev">Reverses step 3c</span><button type="button" class="show" data-step="p7" title="Show on the figure">Show F6 · K11</button></header><div class="bd"><p>Unplug the white USB-C power lead from the UniFi Express 7 and let it hang down to the lower row.</p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="9" width="16" height="6" rx="3"/><path d="M8 12h8" stroke-width="1.2"/></svg>USB-C power</div><div class="ends"><span>White lead</span><span class="to">to</span><span>UniFi Express 7 USB-C port</span></div></div></div><div class="see">The lead hangs to the lower row, as in the Packed view.</div></div></article><article class="step" id="p7b"><header><label class="ck"><input type="checkbox" data-step="p7b" data-sec="pack"><span class="num">P8</span><h3>Lift the JetKVM out of its bay</h3></label><span class="rev">Reverses steps 3a, 3b</span><button type="button" class="show" data-step="p7b" title="Show on the figure">Show F5 · K6 · K7 · K8 · K9</button></header><div class="bd"><p>Unplug the JetKVM's leads at the JetKVM, lift it out of its bay and pack it in the case. Leave the USB-C, USB-A and RJ45 leads hanging in the bay.</p><div class="see">Three leads hang in the empty bay, as in the Packed view.</div></div></article><article class="step" id="p8"><header><label class="ck"><input type="checkbox" data-step="p8" data-sec="pack"><span class="num">P9</span><h3>Unplug the PDU power cable</h3></label><span class="rev">Reverses step 2</span><button type="button" class="show" data-step="p8" title="Show on the figure">Show B9 · BP8</button></header><div class="bd"><p>Pull the plug from the wall outlet. Coil the long black cable that leaves the rear bottom right of the kit and stow it in the case.</p><div class="cables"><div class="cable"><div class="ty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0V8zM12 18v4"/></svg>Power</div><div class="ends"><span>PDU, exit at the rear bottom right</span><span class="to">to</span><span>Wall outlet</span></div></div></div><div class="see">Long cable coiled and in the case.</div></div></article><article class="step" id="p9"><header><label class="ck"><input type="checkbox" data-step="p9" data-sec="pack"><span class="num">P10</span><h3>Check the stow list</h3></label><button type="button" class="show" data-step="p9" title="Show on the figure">Show S7</button></header><div class="bd"><p>Tick every item in the "Back in" column of the transport list. Look through the glass side panel and check that no internal cable has worked loose.</p><div class="see">Every item ticked Back in.</div></div></article><article class="step" id="p10"><header><label class="ck"><input type="checkbox" data-step="p10" data-sec="pack"><span class="num">P11</span><h3>Lift the kit back into the case, face down</h3></label><span class="rev">Reverses step 1</span><button type="button" class="show" data-step="p10" title="Show on the figure">Show K1 · S1 · B1 · B7</button></header><div class="bd"><p>Check the front matches the <b>Packed</b> view. Grip the handle on top and the metal grate on the back. Lower the kit into the Pelican case face down, the way it came out. Close and latch the lid.</p><div class="see">Kit face down in the case, lid latched.</div></div></article></section><section class="sec" id="trouble"><div class="eyebrow or">04 · If something does not come up</div><h2>If something does not come up. <span class="hl">Check the cable first.</span></h2><p class="intro">Physical faults only. Software checks are in the kit configuration runbook.</p><div class="tscroll"><table class="t"><tr><th style="width:30%">Symptom</th><th style="width:30%">Likely cause</th><th>Fix</th></tr><tr><td>Master power on, rocker not red, nothing lights</td><td>PDU cable not plugged in, or the outlet is dead</td><td>Step 2: reseat the plug; try another outlet.</td></tr><tr><td>JetKVM stays dark</td><td>USB-C power lead not seated</td><td>Step 3b: reseat the USB-C lead at the JetKVM.</td></tr><tr><td>No DDIL Wi-Fi and the UniFi display is dark</td><td>UniFi USB-C power lead still unplugged</td><td>Step 3c: plug the white lead into the UniFi Express 7.</td></tr><tr><td>Touchscreen stays dark</td><td>HDMI not seated at the Framework, or the Framework is off</td><td>Step 4; check the Framework powered on (timeline).</td></tr><tr><td>Touchscreen picture stretched</td><td>The panel reports a 1920x1080 EDID</td><td>The kiosk launcher forces 1280x400; restart the kiosk on the Framework.</td></tr><tr><td>Touchscreen looks healthy but demos fail</td><td>Kiosk health uses mock data</td><td>Run the software checks in runbook 02.</td></tr><tr><td>DDIL network not visible</td><td>UniFi not ready yet</td><td>Wait for the status ring (about two minutes on first start).</td></tr><tr><td>Joined DDIL, app does not load</td><td>Services not started yet</td><td>Runbook 02, pages 4 to 7. The Jina server needs a manual start.</td></tr></table></div></section>
+  </main>
+
+  <aside class="viewer" aria-label="Kit illustrations">
+    <div class="card">
+      <div class="tabs" role="tablist"><button type="button" role="tab" data-tab="front" aria-selected="false">Front<span class="badge"></span></button><button type="button" role="tab" data-tab="back" aria-selected="false">Back<span class="badge"></span></button><button type="button" role="tab" data-tab="side" aria-selected="false">Side<span class="badge"></span></button></div>
+      <div class="variants" data-tab="front"><button type="button" data-view="front" aria-pressed="false">Set up<span class="vb"></span></button><button type="button" data-view="front-packed" aria-pressed="false">Packed<span class="vb"></span></button><button type="button" data-view="front-photo" aria-pressed="false">Photo of the kit<span class="vb"></span></button></div><div class="variants" data-tab="back"><button type="button" data-view="back" aria-pressed="false">Illustration<span class="vb"></span></button><button type="button" data-view="back-photo" aria-pressed="false">Photo of the kit<span class="vb"></span></button></div><div class="variants" data-tab="side"><button type="button" data-view="side" aria-pressed="false">Illustration<span class="vb"></span></button></div>
+      <div class="fig" id="fig"><div class="view" data-view="front"><div class="vtitle">Front view · Set up</div><div class="stage" style="position:relative"><img src="img/front.webp" alt="Front view · Set up: pencil illustration of the DDIL kit"></div></div><div class="view" data-view="front-packed"><div class="vtitle">Front view · Packed</div><div class="stage" style="position:relative"><img src="img/front-packed.webp" alt="Front view · Packed: pencil illustration of the DDIL kit"></div></div><div class="view photo" data-view="front-photo"><div class="vtitle">Front view · Photo of the kit</div><div class="stage" style="position:relative"><img src="img/photo-front.jpg" alt="Front view · Photo of the kit: photo of the DDIL kit"></div></div><div class="view" data-view="back"><div class="vtitle">Back view · Illustration</div><div class="stage" style="position:relative"><img src="img/back.webp" alt="Back view · Illustration: pencil illustration of the DDIL kit"></div></div><div class="view photo" data-view="back-photo"><div class="vtitle">Back view · Photo of the kit</div><div class="stage" style="position:relative"><img src="img/photo-back.jpg" alt="Back view · Photo of the kit: photo of the DDIL kit"></div></div><div class="view" data-view="side"><div class="vtitle">Side view · Illustration</div><div class="stage" style="position:relative"><img src="img/side.webp" alt="Side view · Illustration: pencil illustration of the DDIL kit"></div></div><div class="tip" id="tip" role="dialog" aria-live="polite"></div></div>
+      <div class="cap"><span id="figname">Front view</span><span id="figcap">Illustration. Not to scale.</span></div>
+      <div class="hint">Hover or tap a number. Tap a step to light its parts. <button type="button" class="clear" id="clearhl">Clear highlight</button></div>
+      <ul class="legend" data-view="front"><li data-hs="F1"><b>F1</b><span>Carry handles on top</span></li><li data-hs="F2"><b>F2</b><span>Touchscreen panel, 2U</span></li><li data-hs="F3"><b>F3</b><span>Blank panels covering the Framework Desktop</span></li><li data-hs="F4"><b>F4</b><span>DGX Spark on its 10 in shelf</span></li><li data-hs="F5"><b>F5</b><span>JetKVM on the front face</span></li><li data-hs="F6"><b>F6</b><span>UniFi Express 7, white unit with cable</span></li><li data-hs="F7"><b>F7</b><span>Switch Flex Mini, small white unit</span></li><li data-hs="F8"><b>F8</b><span>PDU master power switch</span></li></ul><ul class="legend" data-view="front-packed"><li data-hs="K1"><b>K1</b><span>Carry handles on top</span></li><li data-hs="K2"><b>K2</b><span>Touchscreen, off in transport</span></li><li data-hs="K3"><b>K3</b><span>Elastic sticker under the touchscreen</span></li><li data-hs="K4"><b>K4</b><span>Blank panels covering the Framework Desktop</span></li><li data-hs="K5"><b>K5</b><span>DGX Spark, NVIDIA logo on its face</span></li><li data-hs="K6"><b>K6</b><span>Empty JetKVM bay</span></li><li data-hs="K7"><b>K7</b><span>USB-C lead hanging from the bay</span></li><li data-hs="K8"><b>K8</b><span>USB-A lead hanging from the bay</span></li><li data-hs="K9"><b>K9</b><span>RJ45 Ethernet lead hanging from the bay</span></li><li data-hs="K10"><b>K10</b><span>UniFi Express 7</span></li><li data-hs="K11"><b>K11</b><span>UniFi USB-C power lead, unplugged and hanging</span></li><li data-hs="K12"><b>K12</b><span>PDU master power switch</span></li></ul><ul class="legend" data-view="front-photo"><li data-hs="FP1"><b>FP1</b><span>Carry handles on top</span></li><li data-hs="FP2"><b>FP2</b><span>Touchscreen panel</span></li><li data-hs="FP3"><b>FP3</b><span>Elastic sticker under the touchscreen</span></li><li data-hs="FP4"><b>FP4</b><span>Blank panels covering the Framework Desktop</span></li><li data-hs="FP5"><b>FP5</b><span>DGX Spark, NVIDIA logo on its face</span></li><li data-hs="FP6"><b>FP6</b><span>JetKVM bay with its three leads</span></li><li data-hs="FP7"><b>FP7</b><span>UniFi Express 7</span></li><li data-hs="FP8"><b>FP8</b><span>Switch Flex Mini, blue status LED by its USB-C lead</span></li><li data-hs="FP9"><b>FP9</b><span>PDU rocker switch, glows red when on</span></li></ul><ul class="legend" data-view="back"><li data-hs="B1"><b>B1</b><span>Top metal grate (vent panel)</span></li><li data-hs="B2"><b>B2</b><span>Framework HDMI port, leftmost on the rear I/O plate</span></li><li data-hs="B3"><b>B3</b><span>Framework USB Type-A ports</span></li><li data-hs="B4"><b>B4</b><span>Framework Ethernet (RJ45) port</span></li><li data-hs="B5"><b>B5</b><span>Framework PSU: IEC inlet and power button</span></li><li data-hs="B6"><b>B6</b><span>DGX Spark rear ports and cables</span></li><li data-hs="B7"><b>B7</b><span>Lower metal grates (vent panels)</span></li><li data-hs="B8"><b>B8</b><span>Bottom unit (PDU per the front view)</span></li><li data-hs="B9"><b>B9</b><span>Black mains cable exit, rear bottom right</span></li></ul><ul class="legend" data-view="back-photo"><li data-hs="BP1"><b>BP1</b><span>Top metal grate</span></li><li data-hs="BP2"><b>BP2</b><span>Framework HDMI port, leftmost, labelled HDMI</span></li><li data-hs="BP3"><b>BP3</b><span>Framework USB-A ports</span></li><li data-hs="BP4"><b>BP4</b><span>Framework Ethernet (RJ45) port</span></li><li data-hs="BP5"><b>BP5</b><span>Framework PSU IEC inlet</span></li><li data-hs="BP6"><b>BP6</b><span>DGX Spark rear ports</span></li><li data-hs="BP7"><b>BP7</b><span>Lower metal grates</span></li><li data-hs="BP8"><b>BP8</b><span>Black mains cable exit, rear bottom right</span></li></ul><ul class="legend" data-view="side"><li data-hs="S1"><b>S1</b><span>Handle (lift point)</span></li><li data-hs="S2"><b>S2</b><span>Top shelf, behind the touchscreen</span></li><li data-hs="S3"><b>S3</b><span>Finned unit: Framework Desktop</span></li><li data-hs="S4"><b>S4</b><span>Metal-foam unit: DGX Spark</span></li><li data-hs="S5"><b>S5</b><span>Network gear shelf</span></li><li data-hs="S6"><b>S6</b><span>Bottom finned unit (PDU per the front view)</span></li><li data-hs="S7"><b>S7</b><span>Cable run up the rear post</span></li><li data-hs="S8"><b>S8</b><span>Glass side panel</span></li><li data-hs="S9"><b>S9</b><span>Rear face with the grate (lift point)</span></li></ul>
+    </div>
+  </aside>
+</div>
+
+<footer class="src">
+  <img src="assets/logos/elastic-horizontal-dark-ink.svg" alt="Elastic" width="80" height="27">
+  <span>Steps from the kit lead, 13 Nov 2026. Supporting facts from enablement/FACTS.md (commit 5114c3a), docs runbook 02, 01-HARDWARE-INVENTORY.md, 05-NETWORK-CONFIG.md and the kiosk notes. The illustrations are drawings, not photographs; positions on them are a component map to confirm on your kit. Software checks: <a href="../docs/pdf/02-kit-configuration-runbook.pdf">kit configuration runbook</a>.</span>
+</footer>
+
+<script>
+/* Component map, confirm on your kit. Hotspot x/y are percent of the illustration box.
+   Source of truth: setup/src/hotspots.json (positions) and IMAGES in setup/build.py (files). */
+window.DDIL_IMAGES = {"front": "img/front.webp", "front-packed": "img/front-packed.webp", "front-photo": "img/photo-front.jpg", "back": "img/back.webp", "back-photo": "img/photo-back.jpg", "side": "img/side.webp"};
+window.DDIL_VIEWS = [{"key": "front", "tab": "Front", "variant": "Set up"}, {"key": "front-packed", "tab": "Front", "variant": "Packed"}, {"key": "front-photo", "tab": "Front", "variant": "Photo of the kit"}, {"key": "back", "tab": "Back", "variant": "Illustration"}, {"key": "back-photo", "tab": "Back", "variant": "Photo of the kit"}, {"key": "side", "tab": "Side", "variant": "Illustration"}];
+window.DDIL_HOTSPOTS = {
+ "front": [
+  {
+   "id": "F1",
+   "x": 20,
+   "y": 6,
+   "comp": [
+    "frame"
+   ],
+   "label": "Carry handles on top"
+  },
+  {
+   "id": "F2",
+   "x": 34,
+   "y": 26,
+   "comp": [
+    "kiosk"
+   ],
+   "label": "Touchscreen panel, 2U"
+  },
+  {
+   "id": "F3",
+   "x": 50,
+   "y": 42,
+   "comp": [
+    "framework"
+   ],
+   "label": "Blank panels covering the Framework Desktop"
+  },
+  {
+   "id": "F4",
+   "x": 50,
+   "y": 58,
+   "comp": [
+    "spark"
+   ],
+   "label": "DGX Spark on its 10 in shelf"
+  },
+  {
+   "id": "F5",
+   "x": 27.5,
+   "y": 69,
+   "comp": [
+    "jetkvm"
+   ],
+   "label": "JetKVM on the front face"
+  },
+  {
+   "id": "F6",
+   "x": 57,
+   "y": 68,
+   "comp": [
+    "ux7"
+   ],
+   "label": "UniFi Express 7, white unit with cable"
+  },
+  {
+   "id": "F7",
+   "x": 59.5,
+   "y": 76.5,
+   "comp": [
+    "switch"
+   ],
+   "label": "Switch Flex Mini, small white unit"
+  },
+  {
+   "id": "F8",
+   "x": 29.5,
+   "y": 86.5,
+   "comp": [
+    "pdu"
+   ],
+   "label": "PDU master power switch"
+  }
+ ],
+ "front-packed": [
+  {
+   "id": "K1",
+   "x": 22,
+   "y": 7.5,
+   "comp": [
+    "frame"
+   ],
+   "label": "Carry handles on top"
+  },
+  {
+   "id": "K2",
+   "x": 34,
+   "y": 26,
+   "comp": [
+    "kiosk"
+   ],
+   "label": "Touchscreen, off in transport"
+  },
+  {
+   "id": "K3",
+   "x": 32,
+   "y": 38.5,
+   "comp": [
+    "frame"
+   ],
+   "label": "Elastic sticker under the touchscreen"
+  },
+  {
+   "id": "K4",
+   "x": 62,
+   "y": 46,
+   "comp": [
+    "framework"
+   ],
+   "label": "Blank panels covering the Framework Desktop"
+  },
+  {
+   "id": "K5",
+   "x": 50,
+   "y": 56,
+   "comp": [
+    "spark"
+   ],
+   "label": "DGX Spark, NVIDIA logo on its face"
+  },
+  {
+   "id": "K6",
+   "x": 27,
+   "y": 63.5,
+   "comp": [
+    "jetkvm"
+   ],
+   "label": "Empty JetKVM bay"
+  },
+  {
+   "id": "K7",
+   "x": 24.5,
+   "y": 71.5,
+   "comp": [
+    "jetkvm"
+   ],
+   "label": "USB-C lead hanging from the bay"
+  },
+  {
+   "id": "K8",
+   "x": 29.5,
+   "y": 75,
+   "comp": [
+    "jetkvm"
+   ],
+   "label": "USB-A lead hanging from the bay"
+  },
+  {
+   "id": "K9",
+   "x": 36.5,
+   "y": 67.5,
+   "comp": [
+    "jetkvm"
+   ],
+   "label": "RJ45 Ethernet lead hanging from the bay"
+  },
+  {
+   "id": "K10",
+   "x": 51,
+   "y": 64.5,
+   "comp": [
+    "ux7"
+   ],
+   "label": "UniFi Express 7"
+  },
+  {
+   "id": "K11",
+   "x": 56.5,
+   "y": 77,
+   "comp": [
+    "ux7"
+   ],
+   "label": "UniFi USB-C power lead, unplugged and hanging"
+  },
+  {
+   "id": "K12",
+   "x": 31,
+   "y": 84.5,
+   "comp": [
+    "pdu"
+   ],
+   "label": "PDU master power switch"
+  }
+ ],
+ "front-photo": [
+  {
+   "id": "FP1",
+   "x": 6,
+   "y": 3,
+   "comp": [
+    "frame"
+   ],
+   "label": "Carry handles on top"
+  },
+  {
+   "id": "FP2",
+   "x": 30,
+   "y": 26,
+   "comp": [
+    "kiosk"
+   ],
+   "label": "Touchscreen panel"
+  },
+  {
+   "id": "FP3",
+   "x": 21.5,
+   "y": 43,
+   "comp": [
+    "frame"
+   ],
+   "label": "Elastic sticker under the touchscreen"
+  },
+  {
+   "id": "FP4",
+   "x": 66,
+   "y": 52,
+   "comp": [
+    "framework"
+   ],
+   "label": "Blank panels covering the Framework Desktop"
+  },
+  {
+   "id": "FP5",
+   "x": 47,
+   "y": 64,
+   "comp": [
+    "spark"
+   ],
+   "label": "DGX Spark, NVIDIA logo on its face"
+  },
+  {
+   "id": "FP6",
+   "x": 20,
+   "y": 74,
+   "comp": [
+    "jetkvm"
+   ],
+   "label": "JetKVM bay with its three leads"
+  },
+  {
+   "id": "FP7",
+   "x": 56.5,
+   "y": 74.5,
+   "comp": [
+    "ux7"
+   ],
+   "label": "UniFi Express 7"
+  },
+  {
+   "id": "FP8",
+   "x": 59.5,
+   "y": 82.5,
+   "comp": [
+    "switch"
+   ],
+   "label": "Switch Flex Mini, blue status LED by its USB-C lead"
+  },
+  {
+   "id": "FP9",
+   "x": 23,
+   "y": 92.3,
+   "comp": [
+    "pdu"
+   ],
+   "label": "PDU rocker switch, glows red when on"
+  }
+ ],
+ "back": [
+  {
+   "id": "B1",
+   "x": 50,
+   "y": 23.5,
+   "comp": [
+    "frame"
+   ],
+   "label": "Top metal grate (vent panel)"
+  },
+  {
+   "id": "B2",
+   "x": 26,
+   "y": 54,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework HDMI port, leftmost on the rear I/O plate"
+  },
+  {
+   "id": "B3",
+   "x": 46,
+   "y": 51.5,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework USB Type-A ports"
+  },
+  {
+   "id": "B4",
+   "x": 53.5,
+   "y": 48,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework Ethernet (RJ45) port"
+  },
+  {
+   "id": "B5",
+   "x": 72,
+   "y": 42,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework PSU: IEC inlet and power button"
+  },
+  {
+   "id": "B6",
+   "x": 45,
+   "y": 60.5,
+   "comp": [
+    "spark"
+   ],
+   "label": "DGX Spark rear ports and cables"
+  },
+  {
+   "id": "B7",
+   "x": 50,
+   "y": 75,
+   "comp": [
+    "frame"
+   ],
+   "label": "Lower metal grates (vent panels)"
+  },
+  {
+   "id": "B8",
+   "x": 40,
+   "y": 94,
+   "comp": [
+    "pdu"
+   ],
+   "label": "Bottom unit (PDU per the front view)"
+  },
+  {
+   "id": "B9",
+   "x": 85,
+   "y": 91,
+   "comp": [
+    "pdu"
+   ],
+   "label": "Black mains cable exit, rear bottom right"
+  }
+ ],
+ "back-photo": [
+  {
+   "id": "BP1",
+   "x": 50,
+   "y": 18.6,
+   "comp": [
+    "frame"
+   ],
+   "label": "Top metal grate"
+  },
+  {
+   "id": "BP2",
+   "x": 22.5,
+   "y": 52.8,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework HDMI port, leftmost, labelled HDMI"
+  },
+  {
+   "id": "BP3",
+   "x": 45,
+   "y": 50,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework USB-A ports"
+  },
+  {
+   "id": "BP4",
+   "x": 53.3,
+   "y": 47.8,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework Ethernet (RJ45) port"
+  },
+  {
+   "id": "BP5",
+   "x": 76.7,
+   "y": 38.5,
+   "comp": [
+    "framework"
+   ],
+   "label": "Framework PSU IEC inlet"
+  },
+  {
+   "id": "BP6",
+   "x": 48,
+   "y": 60,
+   "comp": [
+    "spark"
+   ],
+   "label": "DGX Spark rear ports"
+  },
+  {
+   "id": "BP7",
+   "x": 50,
+   "y": 75.8,
+   "comp": [
+    "frame"
+   ],
+   "label": "Lower metal grates"
+  },
+  {
+   "id": "BP8",
+   "x": 91,
+   "y": 93,
+   "comp": [
+    "pdu"
+   ],
+   "label": "Black mains cable exit, rear bottom right"
+  }
+ ],
+ "side": [
+  {
+   "id": "S1",
+   "x": 50,
+   "y": 3.5,
+   "comp": [
+    "frame"
+   ],
+   "label": "Handle (lift point)"
+  },
+  {
+   "id": "S2",
+   "x": 45,
+   "y": 26,
+   "comp": [
+    "kiosk"
+   ],
+   "label": "Top shelf, behind the touchscreen"
+  },
+  {
+   "id": "S3",
+   "x": 45,
+   "y": 40,
+   "comp": [
+    "framework"
+   ],
+   "label": "Finned unit: Framework Desktop"
+  },
+  {
+   "id": "S4",
+   "x": 45,
+   "y": 55.5,
+   "comp": [
+    "spark"
+   ],
+   "label": "Metal-foam unit: DGX Spark"
+  },
+  {
+   "id": "S5",
+   "x": 40,
+   "y": 67.5,
+   "comp": [
+    "ux7",
+    "switch"
+   ],
+   "label": "Network gear shelf"
+  },
+  {
+   "id": "S6",
+   "x": 40,
+   "y": 85,
+   "comp": [
+    "pdu"
+   ],
+   "label": "Bottom finned unit (PDU per the front view)"
+  },
+  {
+   "id": "S7",
+   "x": 73,
+   "y": 60,
+   "comp": [
+    "frame"
+   ],
+   "label": "Cable run up the rear post"
+  },
+  {
+   "id": "S8",
+   "x": 33,
+   "y": 22,
+   "comp": [
+    "frame"
+   ],
+   "label": "Glass side panel"
+  },
+  {
+   "id": "S9",
+   "x": 84,
+   "y": 45,
+   "comp": [
+    "frame"
+   ],
+   "label": "Rear face with the grate (lift point)"
+  }
+ ]
+};
+window.DDIL_MAP = {"components": {"kiosk": {"name": "Touchscreen panel", "addr": "HDMI and USB Type-A to the Framework \u00b7 kiosk app on :3100", "role": "DeskPi 7.84 in 1280x400 panel in a 2U mount, with an Elastic sticker on the panel below it. Shows the kiosk: Boot Diagnostics, then the Sovereign AI branding page with a QR code."}, "framework": {"name": "Framework Desktop", "addr": "192.168.1.10 \u00b7 frontend :3000 \u00b7 kiosk :3100", "role": "Ryzen AI Max+ 395, 64 GB. Runs the CPU Elasticsearch node, Kibana, the demo app and the kiosk. Flex ATX PSU at the rear."}, "spark": {"name": "DGX Spark", "addr": "192.168.1.20", "role": "GB10 Blackwell, 128 GB, metal-foam face with the NVIDIA logo. Runs the GPU Elasticsearch node, Ollama and the Jina embedding server."}, "jetkvm": {"name": "JetKVM", "addr": "Ethernet, HDMI and USB-C power", "role": "Remote console on the front face of the kit. Removed from its bay for transport; its leads stay in the bay."}, "ux7": {"name": "UniFi Express 7", "addr": "192.168.1.1 \u00b7 serves Wi-Fi DDIL", "role": "Gateway, DHCP (192.168.1.100-199 per the network plan) and Wi-Fi for the kit. Its white USB-C power lead is unplugged for transport."}, "switch": {"name": "Switch Flex Mini", "addr": "5-port GbE", "role": "Connects the UniFi, the Framework and the DGX Spark. A blue status LED is visible next to its USB-C power lead in the kit photo."}, "pdu": {"name": "PDU", "addr": "Kit Master Power switch", "role": "10 in rack PDU, 4 outlets, surge protection (per the inventory). The rocker glows red when on. The black mains cable exits at the rear bottom right of the kit."}, "frame": {"name": "Frame, handle and grates", "addr": "Lift points: handle on top, metal grate on the back", "role": "10 in mini rack with a glass side panel and perforated metal grates on the rear. Travels face down in a Pelican Air 1615 case."}}, "steps": {"s1": {"num": "1", "title": "Lift the kit out of the case", "hs": ["K1", "S1", "B1", "B7", "S9"], "callouts": {"K1": "Handle", "S1": "Handle", "B1": "Grate", "B7": "Grate", "S9": "Grate side"}, "sec": "steps"}, "s2": {"num": "2", "title": "Plug in the PDU power cable", "hs": ["B9", "K12", "BP8"], "callouts": {"B9": "Mains cable", "K12": "Leave OFF", "BP8": "Mains cable"}, "sec": "steps"}, "s3a": {"num": "3a", "title": "Find the JetKVM leads in the empty bay", "hs": ["K6", "K7", "K8", "K9"], "callouts": {"K6": "Empty bay", "K7": "USB-C", "K8": "USB-A", "K9": "RJ45"}, "sec": "steps"}, "s3b": {"num": "3b", "title": "Plug in the JetKVM on the front face", "hs": ["F5", "FP6"], "callouts": {"F5": "Ethernet \u00b7 HDMI \u00b7 USB-C", "FP6": "JetKVM bay"}, "sec": "steps"}, "s3c": {"num": "3c", "title": "Reconnect the UniFi Express 7 power lead", "hs": ["K11", "K10", "F6"], "callouts": {"K11": "Unplugged lead", "K10": "UniFi Express 7", "F6": "Plugged in"}, "sec": "steps"}, "s4": {"num": "4", "title": "Plug the touchscreen into the back of the Framework", "hs": ["B2", "B3", "F2", "BP2", "BP3"], "callouts": {"B2": "HDMI", "B3": "USB-A", "F2": "Touchscreen", "BP2": "HDMI", "BP3": "USB-A"}, "sec": "steps"}, "s5": {"num": "5", "title": "Connect the Ethernet cable to the Framework", "hs": ["B4", "BP4", "F7"], "callouts": {"B4": "Ethernet", "BP4": "Ethernet", "F7": "Switch"}, "sec": "steps"}, "s6": {"num": "6", "title": "Turn on Kit Master Power at the PDU", "hs": ["F8", "FP9"], "callouts": {"F8": "Master power ON", "FP9": "Glows red"}, "sec": "steps"}, "s7": {"num": "7", "title": "Connect to DDIL", "hs": ["F6"], "callouts": {"F6": "Wi-Fi DDIL"}, "sec": "steps"}, "p1": {"num": "P1", "title": "Shut down the demos", "hs": ["F2"], "callouts": {"F2": "Demos off"}, "sec": "pack"}, "p2": {"num": "P2", "title": "Power off the Framework, then the DGX Spark", "hs": ["F3", "F4"], "callouts": {"F3": "1st", "F4": "2nd"}, "sec": "pack"}, "p3": {"num": "P3", "title": "Turn off Kit Master Power at the PDU", "hs": ["F8", "FP9"], "callouts": {"F8": "Master power OFF", "FP9": "Red glow goes out"}, "sec": "pack"}, "p4": {"num": "P4", "title": "Disconnect the presenter device from DDIL", "hs": ["F6"], "callouts": {"F6": "Leave DDIL"}, "sec": "pack"}, "p5": {"num": "P5", "title": "Unplug the Framework Ethernet cable", "hs": ["B4", "BP4"], "callouts": {"B4": "Unplug", "BP4": "Unplug"}, "sec": "pack"}, "p6": {"num": "P6", "title": "Unplug the touchscreen cables", "hs": ["B2", "B3", "BP2", "BP3"], "callouts": {"B2": "HDMI", "B3": "USB-A", "BP2": "HDMI", "BP3": "USB-A"}, "sec": "pack"}, "p7": {"num": "P7", "title": "Unplug the UniFi Express 7 power lead", "hs": ["F6", "K11"], "callouts": {"F6": "Unplug", "K11": "Let it hang"}, "sec": "pack"}, "p7b": {"num": "P8", "title": "Lift the JetKVM out of its bay", "hs": ["F5", "K6", "K7", "K8", "K9"], "callouts": {"F5": "Unplug", "K6": "Empty bay", "K7": "USB-C", "K8": "USB-A", "K9": "RJ45"}, "sec": "pack"}, "p8": {"num": "P9", "title": "Unplug the PDU power cable", "hs": ["B9", "BP8"], "callouts": {"B9": "Coil", "BP8": "Coil"}, "sec": "pack"}, "p9": {"num": "P10", "title": "Check the stow list", "hs": ["S7"], "callouts": {"S7": "Nothing loose"}, "sec": "pack"}, "p10": {"num": "P11", "title": "Lift the kit back into the case, face down", "hs": ["K1", "S1", "B1", "B7"], "callouts": {"K1": "Handle", "S1": "Handle", "B1": "Grate", "B7": "Grate"}, "sec": "pack"}, "t-pdu": {"num": "T", "title": "PDU master switch", "hs": ["F8", "FP9"], "callouts": {"F8": "PDU master switch", "FP9": "PDU master switch"}, "sec": "steps"}, "t-kvm": {"num": "T", "title": "JetKVM", "hs": ["F5"], "callouts": {"F5": "JetKVM"}, "sec": "steps"}, "t-ux7": {"num": "T", "title": "UniFi Express 7", "hs": ["F6"], "callouts": {"F6": "UniFi Express 7"}, "sec": "steps"}, "t-sw": {"num": "T", "title": "Switch Flex Mini", "hs": ["F7", "FP8"], "callouts": {"F7": "Switch Flex Mini", "FP8": "Switch Flex Mini"}, "sec": "steps"}, "t-spark": {"num": "T", "title": "DGX Spark", "hs": ["F4", "B6"], "callouts": {"F4": "DGX Spark", "B6": "DGX Spark"}, "sec": "steps"}, "t-fw": {"num": "T", "title": "Framework Desktop", "hs": ["F3", "B5"], "callouts": {"F3": "Framework Desktop", "B5": "Framework Desktop"}, "sec": "steps"}, "t-launch": {"num": "T", "title": "Touchscreen: kiosk launch", "hs": ["F2"], "callouts": {"F2": "Touchscreen"}, "sec": "steps"}, "t-boot": {"num": "T", "title": "Touchscreen: Boot Diagnostics", "hs": ["F2"], "callouts": {"F2": "Touchscreen"}, "sec": "steps"}, "t-idle": {"num": "T", "title": "Touchscreen: Idle carousel", "hs": ["F2"], "callouts": {"F2": "Touchscreen"}, "sec": "steps"}}, "hsSteps": {"F1": [], "F2": ["s4", "p1"], "F3": ["p2"], "F4": ["p2"], "F5": ["s3b", "p7b"], "F6": ["s3c", "s7", "p4", "p7"], "F7": ["s5"], "F8": ["s6", "p3"], "K1": ["s1", "p10"], "K2": [], "K3": [], "K4": [], "K5": [], "K6": ["s3a", "p7b"], "K7": ["s3a", "p7b"], "K8": ["s3a", "p7b"], "K9": ["s3a", "p7b"], "K10": ["s3c"], "K11": ["s3c", "p7"], "K12": ["s2"], "FP1": [], "FP2": [], "FP3": [], "FP4": [], "FP5": [], "FP6": ["s3b"], "FP7": [], "FP8": [], "FP9": ["s6", "p3"], "B1": ["s1", "p10"], "B2": ["s4", "p6"], "B3": ["s4", "p6"], "B4": ["s5", "p5"], "B5": [], "B6": [], "B7": ["s1", "p10"], "B8": [], "B9": ["s2", "p8"], "BP1": [], "BP2": ["s4", "p6"], "BP3": ["s4", "p6"], "BP4": ["s5", "p5"], "BP5": [], "BP6": [], "BP7": [], "BP8": ["s2", "p8"], "S1": ["s1", "p10"], "S2": [], "S3": [], "S4": [], "S5": [], "S6": [], "S7": ["p9"], "S8": [], "S9": ["s1"]}};
+</script>
+<script>
+/* DDIL kit setup guide: figure viewer, hotspots, checklist, copy buttons.
+   Classic script, no modules, works from file://. Data: window.DDIL_HOTSPOTS, window.DDIL_MAP. */
+(function () {
+  'use strict';
+  var HS = window.DDIL_HOTSPOTS || {};
+  var MAP = window.DDIL_MAP || { components: {}, steps: {}, hsSteps: {} };
+  var VDEF = window.DDIL_VIEWS || [{ key: 'front', tab: 'Front', variant: '' }, { key: 'back', tab: 'Back', variant: '' }, { key: 'side', tab: 'Side', variant: '' }];
+  var VIEWS = VDEF.map(function (d) { return d.key; });
+  var TAB_OF = {}, VAR_OF = {}, lastOfTab = {};
+  VDEF.forEach(function (d) { TAB_OF[d.key] = d.tab.toLowerCase(); VAR_OF[d.key] = d.variant; if (!lastOfTab[d.tab.toLowerCase()]) lastOfTab[d.tab.toLowerCase()] = d.key; });
+  var STORE_KEY = 'ddil-setup-guide-v1';
+  var byId = {};
+  VIEWS.forEach(function (v) { (HS[v] || []).forEach(function (h) { h.view = v; byId[h.id] = h; }); });
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  /* ---------- storage ---------- */
+  function load() {
+    try { var raw = window.localStorage.getItem(STORE_KEY); return raw ? JSON.parse(raw) : {}; }
+    catch (e) { return {}; }
+  }
+  function save(state) {
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* private mode or blocked storage */ }
+  }
+  var state = load();
+  if (!state.checks) state = { checks: state, fills: {} };
+  if (!state.fills) state.fills = {};
+
+  /* ---------- hotspots ---------- */
+  var fig = $('#fig');
+  var tip = $('#tip');
+  var pinned = null;
+
+  function placeHotspots() {
+    VIEWS.forEach(function (v) {
+      var host = $('.view[data-view="' + v + '"] .stage', fig);
+      if (!host) return;
+      (HS[v] || []).forEach(function (h) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'hs';
+        b.textContent = h.id.replace(/^[A-Z]+/, '');
+        b.setAttribute('data-hs', h.id);
+        b.setAttribute('aria-label', h.id + ': ' + h.label);
+        b.style.left = h.x + '%';
+        b.style.top = h.y + '%';
+        b.addEventListener('mouseenter', function () { if (!pinned) showTip(h, b); });
+        b.addEventListener('mouseleave', function () { if (!pinned) hideTip(); });
+        b.addEventListener('focus', function () { if (!pinned) showTip(h, b); });
+        b.addEventListener('blur', function () { if (!pinned) hideTip(); });
+        b.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          if (pinned === h.id) { pinned = null; hideTip(); return; }
+          pinned = h.id; showTip(h, b);
+        });
+        host.appendChild(b);
+      });
+    });
+  }
+
+  function showTip(h, btn) {
+    var comps = (h.comp || []).map(function (c) { return MAP.components[c]; }).filter(Boolean);
+    var steps = MAP.hsSteps[h.id] || [];
+    var html = '<button class="x" type="button" aria-label="Close">&times;</button>' +
+      '<div class="k">' + esc(h.id) + ' · ' + esc(TAB_OF[h.view]) + ' view · ' + esc(VAR_OF[h.view]) + '</div>';
+    comps.forEach(function (c) {
+      html += '<h4>' + esc(c.name) + '</h4><div class="ad">' + esc(c.addr) + '</div><div class="rl">' + esc(c.role) + '</div>';
+    });
+    html += '<div class="lb" style="margin-top:6px">Drawing: ' + esc(h.label) + '. Component map, confirm on your kit.</div>';
+    if (steps.length) {
+      html += '<div class="k" style="margin-top:8px">Steps that touch it</div><div class="st">' +
+        steps.map(function (s) {
+          var st = MAP.steps[s];
+          return '<a href="#' + esc(s) + '" data-step="' + esc(s) + '" title="' + esc(st ? st.title : s) + '">' + esc(st ? st.num : s) + '</a>';
+        }).join('') + '</div>';
+    }
+    tip.innerHTML = html;
+    tip.classList.add('on');
+    var fr = fig.getBoundingClientRect(), br = btn.getBoundingClientRect();
+    var w = Math.min(280, fr.width - 16);
+    tip.style.width = w + 'px';
+    var left = br.left - fr.left + br.width / 2 - w / 2;
+    left = Math.max(8, Math.min(left, fr.width - w - 8));
+    tip.style.left = left + 'px';
+    var below = br.bottom - fr.top + 8;
+    tip.style.top = below + 'px';
+    var th = tip.offsetHeight;
+    if (below + th > fr.height - 4) { tip.style.top = Math.max(4, br.top - fr.top - th - 8) + 'px'; }
+    $('.x', tip).addEventListener('click', function (ev) { ev.stopPropagation(); pinned = null; hideTip(); });
+    $all('.st a', tip).forEach(function (a) {
+      a.addEventListener('click', function () { focusStep(a.getAttribute('data-step'), false); pinned = null; hideTip(); });
+    });
+  }
+  function hideTip() { tip.classList.remove('on'); }
+  document.addEventListener('click', function (ev) {
+    if (pinned && !tip.contains(ev.target)) { pinned = null; hideTip(); }
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { pinned = null; hideTip(); } });
+
+  /* ---------- tabs ---------- */
+  function setView(v) {
+    if (TAB_OF[v] === undefined) v = VIEWS[0];
+    var tab = TAB_OF[v]; lastOfTab[tab] = v;
+    $all('.tabs button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === tab ? 'true' : 'false'); });
+    $all('.variants').forEach(function (bar) { bar.classList.toggle('on', bar.getAttribute('data-tab') === tab && bar.children.length > 1); });
+    $all('.variants button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-view') === v ? 'true' : 'false'); });
+    var fc = $('#figcap'); if (fc) fc.textContent = /photo$/.test(v) ? 'Photo of the kit, 13 Nov 2026' : 'Illustration. Not to scale.';
+    $all('.view', fig).forEach(function (el) { el.classList.toggle('on', el.getAttribute('data-view') === v); });
+    $all('.legend').forEach(function (ul) { ul.style.display = ul.getAttribute('data-view') === v ? '' : 'none'; });
+    var cap = $('#figname'); if (cap) cap.textContent = tab.charAt(0).toUpperCase() + tab.slice(1) + ' view · ' + VAR_OF[v];
+    pinned = null; hideTip();
+  }
+  $all('.tabs button').forEach(function (b) { b.addEventListener('click', function () { setView(lastOfTab[b.getAttribute('data-tab')]); }); });
+  $all('.variants button').forEach(function (b) { b.addEventListener('click', function () { setView(b.getAttribute('data-view')); }); });
+  $all('.legend li').forEach(function (li) {
+    li.addEventListener('click', function () {
+      var b = $('.hs[data-hs="' + li.getAttribute('data-hs') + '"]', fig);
+      if (b) { pinned = li.getAttribute('data-hs'); showTip(byId[pinned], b); }
+    });
+  });
+
+  /* ---------- step to hotspot highlight ---------- */
+  function clearCallouts() { $all('.callout', fig).forEach(function (c) { c.parentNode.removeChild(c); }); }
+  function addCallouts(labels) {
+    clearCallouts();
+    Object.keys(labels || {}).forEach(function (id) {
+      var h = byId[id]; if (!h) return;
+      var host = $('.view[data-view="' + h.view + '"] .stage', fig); if (!host) return;
+      /* labels run right unless near the right edge or another lit spot sits just to the right */
+      var crowd = Object.keys(labels).some(function (o) {
+        var q = byId[o]; return q && q !== h && q.view === h.view && q.x > h.x && q.x - h.x < 30 && Math.abs(q.y - h.y) < 7;
+      });
+      var left = h.x > 58 || crowd;
+      var c = document.createElement('div');
+      c.className = 'callout' + (left ? ' l' : '');
+      c.style.top = h.y + '%';
+      if (left) { c.style.right = (100 - h.x) + '%'; c.style.marginRight = '14px'; }
+      else { c.style.left = h.x + '%'; c.style.marginLeft = '14px'; }
+      c.innerHTML = '<span class="ln"></span><span class="lb">' + esc(labels[id]) + '</span>';
+      host.appendChild(c);
+    });
+  }
+  function highlight(ids, labels) {
+    var set = {}; ids.forEach(function (i) { set[i] = true; });
+    addCallouts(labels || {});
+    var any = ids.length > 0;
+    $all('.hs', fig).forEach(function (b) {
+      var on = !!set[b.getAttribute('data-hs')];
+      b.classList.toggle('lit', on);
+      b.classList.toggle('dim', any && !on);
+    });
+    var per = {};
+    VIEWS.forEach(function (v) {
+      var n = (HS[v] || []).filter(function (h) { return set[h.id]; }).length;
+      per[TAB_OF[v]] = (per[TAB_OF[v]] || 0) + n;
+      var vb = $('.variants button[data-view="' + v + '"] .vb');
+      if (vb) { vb.textContent = n ? n : ''; vb.classList.toggle('on', n > 0); }
+    });
+    $all('.tabs button').forEach(function (b) {
+      var n = per[b.getAttribute('data-tab')] || 0, badge = $('.badge', b);
+      if (badge) { badge.textContent = n; badge.classList.toggle('on', n > 0); }
+    });
+    var clr = $('#clearhl'); if (clr) clr.style.visibility = any ? 'visible' : 'hidden';
+  }
+  function focusStep(id, scrollViewer) {
+    var st = MAP.steps[id];
+    $all('.step.focus').forEach(function (el) { el.classList.remove('focus'); });
+    var el = document.getElementById(id);
+    if (el) el.classList.add('focus');
+    if (!st) return;
+    highlight(st.hs, st.callouts);
+    /* the first hotspot of a step names its primary view */
+    if (st.hs.length && byId[st.hs[0]]) setView(byId[st.hs[0]].view);
+    if (scrollViewer && window.matchMedia && window.matchMedia('(max-width:1180px)').matches) {
+      var vw = $('.viewer'); if (vw) vw.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+  $all('.step .show').forEach(function (b) {
+    b.addEventListener('click', function (ev) { ev.stopPropagation(); focusStep(b.getAttribute('data-step'), true); });
+  });
+  $all('.step header').forEach(function (hd) {
+    hd.addEventListener('click', function (ev) {
+      var t = ev.target;
+      if (t.closest('label') || t.closest('button') || t.tagName === 'INPUT') return;
+      var art = hd.closest('.step'); if (art) focusStep(art.id, true);
+    });
+  });
+  $all('.hsref').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = b.getAttribute('data-hs'); var h = byId[id]; if (!h) return;
+      setView(h.view); var lab = {}; lab[id] = h.id; highlight([id], lab);
+      if (window.matchMedia && window.matchMedia('(max-width:1180px)').matches) {
+        var vw = $('.viewer'); if (vw) vw.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  var clr = $('#clearhl');
+  if (clr) clr.addEventListener('click', function () { highlight([], {}); $all('.step.focus').forEach(function (el) { el.classList.remove('focus'); }); });
+
+  /* ---------- checklist ---------- */
+  var boxes = $all('input[type=checkbox][data-step]');
+  function refresh() {
+    var total = boxes.length, done = 0;
+    boxes.forEach(function (b) {
+      var on = !!state.checks[b.getAttribute('data-step')];
+      b.checked = on; if (on) done++;
+      var art = b.closest('.step'); if (art && b.closest('.ck')) art.classList.toggle('done', on);
+    });
+    var pct = total ? Math.round(done * 100 / total) : 0;
+    var p = $('#prog'); if (p) p.textContent = done + ' / ' + total;
+    var bar = $('#bar'); if (bar) bar.style.width = pct + '%';
+    var tot = $('#railtot'); if (tot) tot.textContent = pct + '%';
+    $all('.rail li a').forEach(function (a) {
+      var sec = a.getAttribute('data-sec');
+      var mine = boxes.filter(function (b) { return b.getAttribute('data-sec') === sec; });
+      var d = mine.filter(function (b) { return b.checked; }).length;
+      var c = $('.c', a); if (c) c.textContent = d + '/' + mine.length;
+      a.classList.toggle('done', mine.length > 0 && d === mine.length);
+    });
+  }
+  boxes.forEach(function (b) {
+    b.addEventListener('change', function () {
+      var id = b.getAttribute('data-step');
+      if (b.checked) state.checks[id] = 1; else delete state.checks[id];
+      save(state); refresh();
+    });
+  });
+  $all('[data-action="reset"]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (!window.confirm('Clear every checkbox in this guide? Filled-in blanks are kept.')) return;
+      state.checks = {}; save(state); refresh();
+    });
+  });
+  $all('[data-action="print"]').forEach(function (b) { b.addEventListener('click', function () { window.print(); }); });
+
+  /* ---------- fill-in blanks (same id stays in sync everywhere) ---------- */
+  var fills = $all('input.fill');
+  function paintFills() {
+    fills.forEach(function (f) {
+      var v = state.fills[f.getAttribute('data-fill')] || '';
+      if (f !== document.activeElement) f.value = v;
+      f.classList.toggle('set', !!v);
+    });
+  }
+  fills.forEach(function (f) {
+    f.addEventListener('input', function () {
+      var id = f.getAttribute('data-fill');
+      state.fills[id] = f.value; if (!f.value) delete state.fills[id];
+      fills.forEach(function (o) { if (o !== f && o.getAttribute('data-fill') === id) o.value = f.value; });
+      save(state); paintFills();
+    });
+  });
+
+  /* ---------- copy buttons ---------- */
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta); return ok;
+  }
+  $all('.cmd button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var text = $('code', b.parentNode).textContent;
+      function done(ok) {
+        b.textContent = ok ? 'Copied' : 'Select';
+        b.classList.toggle('ok', ok);
+        setTimeout(function () { b.textContent = 'Copy'; b.classList.remove('ok'); }, 1600);
+      }
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallbackCopy(text)); });
+        } else { done(fallbackCopy(text)); }
+      } catch (e) { done(fallbackCopy(text)); }
+    });
+  });
+
+  /* ---------- rail: active section ---------- */
+  var links = $all('.rail li a');
+  if ('IntersectionObserver' in window && links.length) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          var id = en.target.id;
+          links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-sec') === id); });
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    $all('section.sec').forEach(function (s) { io.observe(s); });
+  }
+
+  placeHotspots();
+  setView('front');
+  highlight([]);
+  refresh();
+  paintFills();
+  if (location.hash) {
+    var id = location.hash.slice(1);
+    if (MAP.steps[id]) {
+      focusStep(id, false);
+      var tgt = document.getElementById(id);
+      if (tgt) { document.documentElement.style.scrollBehavior = 'auto'; tgt.scrollIntoView({ block: 'start' }); window.scrollBy(0, -72); document.documentElement.style.scrollBehavior = ''; }
+    }
+  }
+  /* deep links for QA and for sharing a part: ?view=back&tip=B4 */
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('view')) setView(q.get('view'));
+    var t = q.get('tip');
+    if (t && byId[t]) {
+      setView(byId[t].view);
+      var tb = $('.hs[data-hs="' + t + '"]', fig);
+      if (tb) { pinned = t; showTip(byId[t], tb); }
+    }
+  } catch (e) { /* URLSearchParams unavailable */ }
+})();
+
+/* print figures reuse the viewer images (the single-file build stores each image once) */
+Array.prototype.forEach.call(document.querySelectorAll('img[data-copy]'), function (im) {
+  var src = document.querySelector('.viewer .view[data-view="' + im.getAttribute('data-copy') + '"] img');
+  if (src) im.src = src.src;
+});
+</script>
+</body>
+</html>

@@ -14,7 +14,7 @@ const PILLARS = [
   {
     Icon: Layers,
     title: "Speed, scale, efficiency unlock new use-cases",
-    body: "GPU-built indexes make daily re-ingestion of fresh enterprise data affordable. The 89% TCO reduction from chapter 02 turns 'periodic refresh' into 'always current.'",
+    body: "GPU-built indexes make daily re-ingestion of fresh data practical on the kit itself. Faster graph builds turn 'periodic refresh' into 'always current', with no cloud bill attached.",
   },
   {
     Icon: Sparkles,
@@ -28,7 +28,7 @@ export function Chapter02_5_Elastic() {
     <ChapterShell
       number="—"
       title="Elastic"
-      subtitle="From a faster index to a faster business. The GPU compressed the cost of building the vector layer; now Elastic is the platform that turns it into search, agents, and workflows."
+      subtitle="From a faster index to a faster business. The GPU shortened the build of the vector layer; now Elastic is the platform that turns it into search, agents, and workflows, all inside the case."
     >
       <div className="space-y-6">
         {/* Pillars row */}
@@ -79,7 +79,7 @@ export function Chapter02_5_Elastic() {
             <span className="text-[10px] text-slate-500 italic">SEC 10-K corpus · provisioned for this demo</span>
           </div>
           <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-            Public S&P 500 annual reports pulled from SEC EDGAR, parsed, chunked, and embedded with Bedrock Cohere Embed v4 — then bulk-loaded into the GPU-built index from chapter 01. Same vectors flow into the search UI (03), the agent (04), and the workflow trigger.
+            Public S&P 500 annual reports pulled from SEC EDGAR, parsed, chunked, and embedded on the kit with Jina Embeddings v5 Omni (768-d) on the DGX Spark, then bulk-loaded into the GPU-built index from chapter 01. Same vectors flow into the search UI (03), the agent (04), and the workflow trigger.
           </p>
           <DataPipeline />
         </div>

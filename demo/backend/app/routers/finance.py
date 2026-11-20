@@ -3,8 +3,8 @@
 Endpoints
 ---------
 GET  /api/finance/sectors             list of distinct sectors in sec_10k_2026
-POST /api/finance/search              query embed (Bedrock) → ES kNN; returns hits + the raw ES request body
-POST /api/finance/agent/chat          SSE proxy to Kibana Agent Builder (nvidia space)
+POST /api/finance/search              query embed (Jina v5 Omni on the kit) → ES kNN; returns hits + the raw ES request body
+POST /api/finance/agent/chat          SSE proxy to Kibana Agent Builder (kit Kibana, KIBANA_SPACE)
 GET  /api/finance/agent/state         compact "what's wired" summary for chapter 04 sidebar
 """
 
@@ -13,62 +13,32 @@ from __future__ import annotations
 import json
 from typing import Any
 
-import anyio
 import httpx
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.config import settings
-from app.services.embedder import embed_text
+from app.services.embedder import embed_sec_query, sec_embed_model_name
 
 router = APIRouter()
 
 
-# ─────────────── Bedrock client (lazy, bench only) ───────────────────────────
-# boto3 is imported lazily so airgapped deploys (EMBED_BACKEND="ollama") don't
-# need it installed.
-_bedrock_client = None
-
-
-def _bedrock():
-    global _bedrock_client
-    if _bedrock_client is None:
-        import boto3  # noqa: PLC0415 — optional dep, bench only
-        session = boto3.Session(profile_name=settings.AWS_PROFILE, region_name=settings.AWS_REGION)
-        _bedrock_client = session.client("bedrock-runtime")
-    return _bedrock_client
-
-
-def _embed_bedrock(text: str) -> list[float]:
-    """Embed one query string via Bedrock Cohere v4 (1536-d, search_query mode)."""
-    body = json.dumps({
-        "texts": [text],
-        "input_type": "search_query",
-        "embedding_types": ["float"],
-    })
-    resp = _bedrock().invoke_model(
-        modelId=settings.BEDROCK_EMBED_MODEL,
-        body=body,
-        contentType="application/json",
-    )
-    payload = json.loads(resp["body"].read())
-    return payload["embeddings"]["float"][0]
-
-
+# ─────────────── Query embedding (on the kit) ────────────────────────────────
 async def _embed_query(text: str) -> list[float]:
-    """Embed a search query with the configured backend.
-
-    Airgapped (EMBED_BACKEND="ollama") uses the local nomic-embed-text model;
-    the bench path runs the blocking Bedrock SDK call off the event loop.
-    """
-    if settings.EMBED_BACKEND == "ollama":
-        return await embed_text(text)
-    return await anyio.to_thread.run_sync(_embed_bedrock, text)
+    """Embed a search query on the kit: Jina v5 Omni (default) or Ollama (fallback)."""
+    return await embed_sec_query(text)
 
 
 def _embed_model_name() -> str:
-    return settings.EMBED_MODEL if settings.EMBED_BACKEND == "ollama" else settings.BEDROCK_EMBED_MODEL
+    return sec_embed_model_name()
+
+
+def _embed_vector_label() -> str:
+    """What the audience sees in place of the elided query vector."""
+    if settings.EMBED_BACKEND == "ollama":
+        return f"<{settings.SEC_EMBED_DIMS}-d embedding from {settings.EMBED_MODEL} via Ollama on the DGX Spark>"
+    return f"<{settings.SEC_EMBED_DIMS}-d embedding from Jina Embeddings v5 Omni ({settings.JINA_OMNI_MODEL}) on the DGX Spark>"
 
 
 # ─────────────── ES helpers ──────────────────────────────────────────────────
@@ -98,7 +68,7 @@ class SearchRequest(BaseModel):
 
 @router.post("/search")
 async def finance_search(req: SearchRequest):
-    """Embed the query via Bedrock and run a kNN against sec_10k_2026.
+    """Embed the query on the kit and run a kNN against sec_10k_2026.
 
     Returns both the hits and the raw ES request body so chapter 03's
     'show the call' panel can display the actual API call alongside results.
@@ -146,12 +116,12 @@ async def finance_search(req: SearchRequest):
         })
 
     # The "request body" we return is the kNN payload with the vector elided so
-    # the UI can show a clean example without 1536-d noise.
+    # the UI can show a clean example without the raw vector noise.
     show_body = {
         **es_body,
         "knn": {
             **es_body["knn"],
-            "query_vector": "<1536-d embedding from Cohere Embed v4 via Bedrock>",
+            "query_vector": _embed_vector_label(),
         },
     }
     return {
@@ -198,7 +168,7 @@ async def agent_state():
         "space":          settings.KIBANA_SPACE,
         "agent_id":       settings.AGENT_BUILDER_AGENT_ID,
         "connector_id":   settings.AGENT_BUILDER_CONNECTOR_ID,
-        "llm_model":      settings.BEDROCK_LLM_MODEL if settings.EMBED_BACKEND == "bedrock" else settings.LLM_MODEL,
+        "llm_model":      settings.SEC_AGENT_LLM_MODEL,
         "embed_model":    _embed_model_name(),
         "embed_backend":  settings.EMBED_BACKEND,
         "sec_index":      settings.SEC_INDEX,

@@ -7,16 +7,16 @@ interface Props {
   method: string;
   path: string;       // e.g. /sec_10k_2026/_search
   body: Record<string, unknown>;
-  esHost?: string;    // for cURL — default localhost
+  esHost?: string;    // for cURL; default is the kit ES GPU node
 }
 
 /**
  * "Here's the call we just made" — three flavors of the same request:
- *   - cURL (against the AWS GPU box ES)
+ *   - cURL (against the kit ES GPU node, es.ddil / 192.168.1.20:9200 per config)
  *   - Python (elasticsearch-py)
- *   - Kibana Dev Tools (copy-paste into /s/nvidia/app/dev_tools)
+ *   - Kibana Dev Tools (copy-paste into the kit Kibana /app/dev_tools)
  */
-export function ShowTheCall({ method, path, body, esHost = "http://localhost:9200" }: Props) {
+export function ShowTheCall({ method, path, body, esHost = "http://es.ddil:9200" }: Props) {
   const [tab, setTab] = useState<Tab>("curl");
   const [copied, setCopied] = useState<Tab | null>(null);
 
@@ -86,7 +86,7 @@ function pythonSnippet(path: string, body: Record<string, unknown>, host: string
   const m = path.match(/^\/([^/]+)\/_search$/);
   const index = m ? m[1] : "<index>";
   const bodyStr = JSON.stringify(body, null, 4).replace(/\n/g, "\n");
-  const pyHost = (host || "http://localhost:9200").replace(/^(https?:\/\/)[^@]*@/, "$1");
+  const pyHost = (host || "http://es.ddil:9200").replace(/^(https?:\/\/)[^@]*@/, "$1");
   return `from elasticsearch import Elasticsearch
 
 es = Elasticsearch(

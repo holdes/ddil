@@ -3,11 +3,11 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 /**
  * One fetch of /api/finance/agent/state, shared across the SEC deck so Kibana
  * deep-links and "show the call" host strings come from backend config instead
- * of being hardcoded. This is what lets the same deck point at the AWS bench or
- * the airgapped box without code changes.
+ * of being hardcoded. The values point at the airgapped DDIL kit (es.ddil,
+ * kibana.ddil) as set in the backend config.
  */
 export interface FinanceConfig {
-  kibanaUrl: string;     // space-scoped Kibana base, e.g. http://host:5601/s/nvidia
+  kibanaUrl: string;     // space-scoped Kibana base, e.g. http://kibana.ddil:5601
   space: string;
   esUrl: string;         // ES host shown in the cURL / Python snippets
   secIndex: string;
@@ -15,7 +15,7 @@ export interface FinanceConfig {
   connectorId: string;
   embedModel: string;
   llmModel: string;
-  embedBackend: string;  // "bedrock" | "ollama"
+  embedBackend: string;  // "jina" (default) | "ollama" (fallback)
 }
 
 const DEFAULTS: FinanceConfig = {

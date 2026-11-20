@@ -1,0 +1,421 @@
+<!-- ============ PAGE 1: COVER ============ -->
+<div class="page cover">
+  <div class="top">
+    <div class="eyebrow">DDIL demo kit · SA enablement · 02</div>
+    <h1>Kit configuration runbook. <span class="hl">Power on, prove it, reset, power off.</span></h1>
+    <p class="sub">Step-by-step bring-up of both nodes, health checks with exact endpoints, data staging and provisioning per adventure, environment variables, reset, shutdown and troubleshooting.</p>
+    <div class="meta">
+      <span class="chip">Status as of 13 Nov 2026</span>
+      <span class="chip">Code basis: commit 5114c3a</span>
+      <span class="chip">Read page 2 before the first bring-up</span>
+    </div>
+
+    <h3 class="mt2">The procedure at a glance</h3>
+    <table class="t">
+      <tr><th style="width:40px">#</th><th style="width:170px">Stage</th><th>Outcome</th><th style="width:60px">Page</th></tr>
+      <tr><td class="k">1</td><td>Read the known issues</td><td>You know which committed settings need attention on this kit.</td><td>2</td></tr>
+      <tr><td class="k">2</td><td>Power on in order</td><td>Network, then the DGX Spark, then the Framework Desktop.</td><td>3</td></tr>
+      <tr><td class="k">3</td><td>Bring up services</td><td>es-gpu, Ollama and the Jina server on the Spark. es-cpu, Kibana, backend and frontend on the Framework.</td><td>4-5</td></tr>
+      <tr><td class="k">4</td><td>Health checks</td><td>Every service answers. The backend serves live data, not fallbacks. The model is warm.</td><td>6-7</td></tr>
+      <tr><td class="k">5</td><td>Stage data (first time)</td><td>Indices, inference endpoint, agent and Kibana objects exist for each adventure.</td><td>8</td></tr>
+      <tr><td class="k">6</td><td>Present, then reset</td><td>Each adventure returns to the chooser in a known state.</td><td>10</td></tr>
+      <tr><td class="k">7</td><td>Shut down</td><td>Services stop in reverse order with data intact.</td><td>10</td></tr>
+      <tr><td class="k">8</td><td>Showcase configuration (once per kit)</td><td>Elastic 9.5.6 on every node and Kibana. Nemotron 3.5 Lightning and Jina Embeddings v5 Omni on the Spark.</td><td>13-14</td></tr>
+    </table>
+  </div>
+  <div class="band">
+    <div>
+      <div class="k">Before you start</div>
+      <ul>
+        <li>Shell access to both nodes as the kit operator account.</li>
+        <li>The <span class="m" style="color:#fff">elastic</span> password from <span class="m" style="color:#fff">docker/.env</span> on the Spark. Never paste it into slides, chat or tickets.</li>
+        <li>A browser on the kit LAN.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="k">Conventions</div>
+      <p>Commands assume the repo is checked out at <span class="m" style="color:#fff">~/ddil</span> on both nodes. <span class="m" style="color:#fff">$ELASTIC_PASSWORD</span> stands for the password; export it in your shell first.</p>
+      <img src="../assets/logos/elastic-horizontal-white.svg" alt="Elastic" width="120" height="40">
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2: KNOWN ISSUES ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Known issues</span></div>
+  <div class="eyebrow or">Read first</div>
+  <h2>Known issues <span class="hl">as of 13 Nov 2026.</span></h2>
+  <p>These items come from the committed code at 5114c3a. The kit may already carry local fixes. Check each item on the kit and record what you find.</p>
+
+  <div class="warn card">
+    <div class="ch">Known issues as of 13 Nov 2026</div>
+    <div class="cb">
+      <h3 style="margin-top:0">K1 · Showcase target: Elastic 9.5.6 on every node</h3>
+      <p>The kit showcases Elasticsearch and Kibana 9.5.6 with one security configuration. Change from the committed pins: es-gpu 9.4.2 with security and transport TLS on; es-cpu 9.3.1 and Kibana 9.3.1 with security off. <b>Fix:</b> page 13. <b>Check:</b> <code>_cat/nodes</code> lists <code>spark-gpu</code> and <code>framework-cpu</code> on 9.5.6 (page 6).</p>
+
+      <h3>K2 · The backend container has no Elasticsearch credentials</h3>
+      <p>Compose sets no <code>VINEYARD_ES_USER</code> or <code>VINEYARD_ES_PASSWORD</code>, has no <code>env_file</code>, and <code>.env</code> is excluded from the image. Every backend call to the secured node returns 401. Vineyard screens then show fallback numbers with no error; SEC and Multimodal show errors. <b>Fix options (not yet in the repo):</b> add both variables to the backend <code>environment</code> in <code>demo/docker-compose.yml</code>, or run the backend natively with <code>demo/backend/run.sh</code>, which reads <code>demo/backend/.env</code>.</p>
+
+      <h3>K3 · Showcase model lineup: Nemotron 3.5 Lightning and Jina v5 Omni</h3>
+      <p>The kit showcases NVIDIA Nemotron 3.5 Lightning and Jina Embeddings v5 Omni. Change from the committed config: <code>gpt-oss:120b</code>, <code>nomic-embed-text</code>, <code>EMBED_BACKEND=bedrock</code> and the <code>serve_jina_v4.py</code> server. <code>.env.airgapped</code> is not read inside the container, so set values in the compose environment. The SEC code on this branch embeds queries with Jina v5 Omni (<code>EMBED_BACKEND=jina</code>, 768 dims) and the SEC index must be re-embedded to match (page 14). With the Jina server down, SEC Chapter 03 search returns 502 "Query embed failed". <b>Fix:</b> page 14. <b>Check:</b> <code>/api/finance/agent/state</code>.</p>
+
+      <h3>K4 · The .ddil names are untested on the box</h3>
+      <p>Commit 5114c3a switched backend defaults to <code>es.ddil</code>, <code>ollama.ddil</code>, <code>jina.ddil</code> and <code>kibana.ddil</code> while the app was not running. If resolution fails, every cross-host call fails. <b>Check</b> from inside the backend container (page 6). <b>Fallback:</b> set the URL variables to raw IP addresses.</p>
+
+      <h3>K5 · Stale TROUBLESHOOTING.md step deletes the model</h3>
+      <p>The "Unload unused models" step calls Ollama <code>DELETE /api/delete</code>. That call deletes the model from disk. Re-pulling <code>nemotron-3.5-lightning</code> needs an internet connection the kit does not have. <b>Never run it.</b> The same file names containers, ports and models that the kit does not use. Use it only for generic Elasticsearch fixes (memlock, <code>vm.max_map_count</code>, allocation explain).</p>
+    </div>
+  </div>
+
+  <h3 class="mt2">Also note</h3>
+  <ul>
+    <li><code>run-all.sh</code> passes only <code>EP</code>; <code>setup-index-local.sh</code> also needs <code>ES_USER</code> and <code>ES_PASSWORD</code>. <code>setup-indices.sh</code>, <code>bulk-index-synthetic.sh</code> and <code>race.sh</code> send no credentials at all.</li>
+    <li>After the 9.5.6 upgrade, run one Agent Builder <code>converse/async</code> question end to end before a show.</li>
+    <li><code>scripts/ddil-startup.sh</code> checks raw IPs without auth and probes Ollama on .10. Its health banner is stale.</li>
+  </ul>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 3: POWER ON + SPARK ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Power on</span></div>
+  <div class="eyebrow">Power on</div>
+  <h2>Network first, <span class="hl">then the Spark, then the Framework.</span></h2>
+  <p>The repo does not document a power-on order. This order follows the service dependencies: the backend on the Framework calls Elasticsearch, Ollama and the Jina server on the Spark, and the two ES nodes discover each other on <code>:9300</code>.</p>
+  <table class="t tight">
+    <tr><th style="width:36px">#</th><th style="width:150px">Device</th><th>Action</th><th>Ready when</th></tr>
+    <tr><td class="k">1</td><td>UniFi Express 7, Switch Flex Mini</td><td>Power on.</td><td>Gateway answers at <code>192.168.1.1</code>.</td></tr>
+    <tr><td class="k">2</td><td>DGX Spark</td><td>Power on. Ollama starts under systemd.</td><td><code>192.168.1.20</code> answers ping; <code>ollama list</code> works.</td></tr>
+    <tr><td class="k">3</td><td>Framework Desktop</td><td>Power on. The kiosk starts on the touchscreen.</td><td><code>192.168.1.10</code> answers ping.</td></tr>
+    <tr><td class="k">4</td><td>Presenter browser</td><td>Join the kit LAN.</td><td>Opens <code>http://192.168.1.10:3000</code> after bring-up.</td></tr>
+  </table>
+
+  <h3 class="mt2">Prerequisites, checked once per kit</h3>
+  <pre class="code"><span class="c"># DGX Spark: es-gpu reads ELASTIC_PASSWORD from docker/.env (placeholder in docker/.env.example)</span>
+test -f ~/ddil/docker/.env &amp;&amp; echo ok
+<span class="c"># DGX Spark: host paths hardcoded in docker/docker-compose.yml</span>
+ls /home/blakester205/ddil/docker/certs/elastic-certificates.p12
+ls /home/blakester205/miniforge3/envs/cuvs-build/lib | head -3
+ls /usr/local/cuda/lib64 | head -3
+<span class="c"># Framework Desktop: Elasticsearch needs this kernel setting</span>
+sysctl vm.max_map_count                     <span class="c"># must be 262144</span>
+sudo sysctl -w vm.max_map_count=262144</pre>
+  <p class="small">The certificate and the cuVS library paths sit under one user's home directory on the Spark because the compose file hardcodes them. Moving the repo or changing the operator account breaks es-gpu until the compose file is updated.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE: SPARK BRING-UP ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Bring-up on the DGX Spark</span></div>
+  <div class="eyebrow">Bring-up · DGX Spark (192.168.1.20)</div>
+  <h2>Elasticsearch, Ollama <span class="hl">and the Jina server.</span></h2>
+  <h3>Start Elasticsearch (es-gpu)</h3>
+  <pre class="code">cd ~/ddil/docker
+sg docker -c "docker compose up -d"
+sg docker -c "docker compose ps"          <span class="c"># es-gpu should be Up</span>
+sg docker -c "docker compose logs --tail 50 es-gpu"</pre>
+
+  <h3>Confirm Ollama and its models</h3>
+  <pre class="code">systemctl status ollama --no-pager
+ollama list                                <span class="c"># expect nemotron-3.5-lightning</span></pre>
+  <p class="small">No repo script pulls the model. Pull it with <code>ollama pull nemotron-3.5-lightning</code> while connected (page 14). If it is missing, the kit cannot run the adventures until the model is copied in from a connected machine.</p>
+
+  <h3>Start the Jina Embeddings v5 Omni server</h3>
+  <pre class="code"><span class="c"># in a tmux or screen session so it survives logout</span>
+conda activate jina-embed
+<span class="c"># serve jinaai/jina-embeddings-v5-omni-small on 0.0.0.0:8081; launch command: confirm on kit (page 14)</span></pre>
+  <p class="small">There is no systemd unit for the Jina server. It must be started by hand after every boot. <code>GET :8081/health</code> reports the loaded model; it must name <code>jina-embeddings-v5-omni-small</code>.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 4: FRAMEWORK ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>The Framework Desktop</span></div>
+  <div class="eyebrow">Bring-up · Framework Desktop (192.168.1.10)</div>
+  <h2>Four containers <span class="hl">and the kiosk.</span></h2>
+
+  <p>Confirm <code>vm.max_map_count</code> is 262144 (page 3) before starting es-cpu.</p>
+
+  <h3>Start es-cpu, Kibana, backend and frontend</h3>
+  <pre class="code">cd ~/ddil/demo                              <span class="c"># CLAUDE.md shows "cd ~/demo"; use the demo/ directory of the checkout</span>
+docker compose up -d
+docker compose ps                           <span class="c"># es-cpu, kibana, backend, frontend Up</span>
+docker compose logs --tail 50 backend       <span class="c"># look for 401 or connection errors</span></pre>
+
+  <table class="t">
+    <tr><th style="width:90px">Container</th><th style="width:60px">Port</th><th>What to expect</th></tr>
+    <tr><td class="k">es-cpu</td><td>9200</td><td>Node <code>framework-cpu</code>, version 9.5.6 (page 13). Joins <code>ddil-vineyard</code> with matched security settings.</td></tr>
+    <tr><td class="k">kibana</td><td>5601</td><td>Talks to <code>http://es-cpu:9200</code>. Agent Builder and the SEC data view and dashboard live here.</td></tr>
+    <tr><td class="k">backend</td><td>8000</td><td>FastAPI. Calls <code>es.ddil:9200</code>, <code>ollama.ddil:11434</code>, <code>jina.ddil:8081</code>, <code>kibana.ddil:5601</code>.</td></tr>
+    <tr><td class="k">frontend</td><td>3000</td><td>Vite dev server. Proxies <code>/api</code>, <code>/tiles</code> and <code>/ws</code> to the backend.</td></tr>
+  </table>
+
+  <h3>Kiosk on the touchscreen</h3>
+  <p>The kiosk is a separate app on port 3100, served by systemd units on the Framework. Its health page uses mock data while <code>MOCK = true</code> in <code>demo/kiosk/src/lib/health.ts</code>, which is the committed default. A green kiosk does not prove the services are up. Use the checks on the next page.</p>
+
+  <h3>Applying environment changes to the backend</h3>
+  <p>The backend reads <code>VINEYARD_*</code> variables from its process environment. In the container, only the <code>environment</code> block of the backend service in <code>demo/docker-compose.yml</code> reaches it. After editing that block, recreate the container:</p>
+  <pre class="code">docker compose up -d --force-recreate backend
+curl -s http://192.168.1.10:8000/api/finance/agent/state</pre>
+  <p class="small">Variable names are on page 9. Do not commit secret values to the repo.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 5: HEALTH CHECKS ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Health checks</span></div>
+  <div class="eyebrow tl">Health checks · services</div>
+  <h2>Prove every service answers <span class="hl">before the audience arrives.</span></h2>
+  <p>Run from any shell on the kit LAN. Each block lists the expected result.</p>
+
+  <h3>Name resolution and the Elasticsearch cluster (K4, K1)</h3>
+  <pre class="code">cd ~/ddil/demo &amp;&amp; docker compose exec backend getent hosts es.ddil ollama.ddil jina.ddil kibana.ddil
+<span class="g"># expect .20, .20, .20, .10</span>
+curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cat/nodes?v&amp;h=name,version,node.role'
+<span class="g"># expect spark-gpu and framework-cpu, both 9.5.6</span>
+curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cluster/health?pretty'
+<span class="g"># expect cluster_name ddil-vineyard, number_of_nodes 2, status green or yellow</span>
+curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cat/indices/vineyard-*,sec_10k_2026,jina-multimodal,pmc-unstructured?v&amp;h=index,health,docs.count'
+curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_inference/text_embedding/jina-omni-text'</pre>
+
+  <h3>Models</h3>
+  <pre class="code">curl -s http://192.168.1.20:11434/api/tags                <span class="g"># lists nemotron-3.5-lightning</span>
+curl -s http://192.168.1.20:8081/health                   <span class="g"># model jina-embeddings-v5-omni-small</span></pre>
+
+  <h3>Warm Nemotron 3.5 Lightning</h3>
+  <pre class="code">curl -s http://192.168.1.20:11434/api/chat -d '{"model":"nemotron-3.5-lightning","stream":false,
+  "messages":[{"role":"user","content":"Reply with the word ready."}]}' | head -c 200</pre>
+  <p class="small">A cold load or slow generation beyond 120 s breaks the Vineyard pipeline mid-stream. Run this warm-up within a few minutes of the session and again after any long idle period.</p>
+
+  <h3>Kibana and the app</h3>
+  <pre class="code">curl -s -o /dev/null -w '%{http_code}\n' http://192.168.1.10:5601/api/status   <span class="g"># 200</span>
+curl -s -o /dev/null -w '%{http_code}\n' http://192.168.1.10:3000/             <span class="g"># 200</span></pre>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 6: LIVE DATA CHECKS ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Health checks</span></div>
+  <div class="eyebrow tl">Health checks · live data, not fallback</div>
+  <h2>The screens cannot tell you. <span class="hl">The API can.</span></h2>
+  <p>Several screens show canned values when the backend fails. Check the backend responses directly.</p>
+
+  <table class="t sm">
+    <tr><th style="width:230px">Request</th><th>Pass condition</th><th style="width:120px">If it fails</th></tr>
+    <tr><td><code>GET :8000/api/vineyard/dashboard</code></td><td><code>block_summaries</code> is present and not empty. An empty list makes the Dashboard fall back to canned values.</td><td>K2, K1, or data not loaded</td></tr>
+    <tr><td><code>GET :8000/api/vineyard/blocks/BLK-C/summary</code></td><td>Moisture is a number, not null. Repeat for any block you plan to show.</td><td>Map shows mock values for that block</td></tr>
+    <tr><td><code>GET :8000/api/finance/agent/state</code></td><td><code>llm_model</code> is <code>nemotron-3.5-lightning</code>; <code>embed_backend</code> is <code>jina</code>; <code>agent_id</code> is <code>finance-analyst</code>; <code>connector_id</code> is <code>finance-ollama-llm</code>; <code>sec_index</code> is <code>sec_10k_2026</code>.</td><td>K3; page 14</td></tr>
+    <tr><td><code>GET :8000/api/finance/sectors</code></td><td>Returns sector buckets. This call has no error handling and returns 500 if ES fails.</td><td>K2, or SEC index missing</td></tr>
+    <tr><td><code>GET :8000/api/jina/analysts</code></td><td>Four personas: Public User, Analyst A, Analyst B, Senior Analyst.</td><td>Backend down</td></tr>
+    <tr><td><code>GET :8000/api/jina/state</code></td><td>Responds with the Jina configuration.</td><td>Backend down</td></tr>
+  </table>
+
+  <h3>Then click through, once, in the browser</h3>
+  <ul class="chk">
+    <li>Vineyard: open the Dashboard and the Vineyard map. Select BLK-C and confirm the detail panel shows readings.</li>
+    <li>Vineyard: from the map, run "Investigate with AI" on BLK-C and let all five phases finish.</li>
+    <li>SEC: open Chapter 03 and run "Cybersecurity incident response". Hits and a <code>took_ms</code> value appear.</li>
+    <li>SEC: open Chapter 04 and run one example question to completion, then press "Reset conversation".</li>
+    <li>Multimodal: run "a red square" in Search by Image. Run one Need-to-Know question as Public User and as Senior Analyst; the visible-document count must differ.</li>
+    <li>Return to the chooser with Reset Demo or Esc.</li>
+  </ul>
+
+  <div class="card mt">
+    <div class="ch tl">Pre-show sign-off</div>
+    <div class="cb">
+      <p>Record the time of the checks, the node list from <code>_cat/nodes</code>, the index counts from <code>_cat/indices</code>, and the <code>llm_model</code> and <code>embed_backend</code> values. Pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. Quote counts in the session only from this record.</p>
+    </div>
+  </div>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 7: DATA STAGING ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Data staging and provisioning</span></div>
+  <div class="eyebrow">Data staging and provisioning · first time or after a wipe</div>
+  <h2>One provisioning path <span class="hl">per adventure.</span></h2>
+  <p>Data sets are not in git. Stage them on the kit while a connection is still available, then provision offline. Scripts live under <code>demo/scripts/</code>.</p>
+
+  <table class="t sm">
+    <tr><th style="width:84px">Adventure</th><th style="width:240px">Steps in order</th><th>Notes and gaps</th></tr>
+    <tr><td class="k">Vineyard</td><td>1. Generate synthetic data: <code>python3 -m demo.datagen.generate</code> from the repo root (output <code>demo/data/synthetic/</code>).<br>2. <code>demo/scripts/setup-indices.sh</code> creates the <code>vineyard-*</code> indices and the <code>race-*</code> pairs.<br>3. <code>bash demo/scripts/bulk-index-synthetic.sh http://localhost:9200</code> on the Spark.<br>4. Map tiles in <code>demo/data/tiles</code>.</td><td>Steps 2 and 3 send no credentials and fail against a secured node until auth is added. The bulk script loads wine, harvest, npk and soil only. Nothing in the repo loads <code>vineyard-imagery</code>. The <code>race-*</code> indices are never written.</td></tr>
+    <tr><td class="k">SEC Findings</td><td>1. Stage <code>sec_10k_bulk.ndjson</code> on the kit (CLAUDE.md describes S3 presigned links and <code>demo/scripts/data-transfer/stage-from-urls.sh</code>).<br>2. <code>demo/scripts/finance/run-all.sh</code> runs five steps: <code>reembed-local.py</code> (Jina v5 Omni), <code>setup-index-local.sh</code>, <code>provision-connector-local.sh</code>, <code>provision-agent-local.sh</code>, <code>provision-kibana-local.sh</code>.</td><td>Export <code>EP</code> (elastic password) and also <code>ES_USER</code> and <code>ES_PASSWORD</code>, which step 2 needs. The committed index is 1536-d: re-embed with Jina Embeddings v5 Omni on the kit before the demo (page 14, STAGED, confirm on kit). <code>run-all.sh</code> reads <code>SEC_EMBED_DIMS</code> (768) from <code>config.py</code> for both steps. Batch 64, 8,000-character cap. Index is 768-dim cosine HNSW. Guide: <code>demo/scripts/finance/SEC-AIRGAP-SETUP.md</code>.</td></tr>
+    <tr><td class="k">Multimodal</td><td>1. Start the Jina server (page 4).<br>2. Place media under <code>demo/data/preprocessed/jina/</code> (<code>manifest.json</code>, <code>images</code>, <code>scale/...</code>).<br>3. <code>demo/scripts/jina/setup-indices-local.sh</code> creates <code>jina-omni-text</code>, <code>jina-embed-caption</code>, <code>jina-multimodal</code> and <code>pmc-unstructured</code>.<br>4. <code>ingest-multimodal.py</code>, then <code>ingest-pmc.py</code> (applies <code>markings.py</code>).</td><td>Scripts authenticate with <code>-u elastic:$EP</code>. Arguments for the ingest scripts are in <code>demo/scripts/jina/JINA-SETUP.md</code>. That guide states 9,636 text chunks and 198 image records (doc-only); compare with <code>_cat/indices</code>.</td></tr>
+  </table>
+
+  <div class="card mt">
+    <div class="ch">Provisioning is idempotent where it matters</div>
+    <div class="cb">
+      <p>The SEC tools and the <code>finance-analyst</code> agent are recreated by delete then POST, so <code>provision-agent-local.sh</code> can be re-run safely to restore the agent. FACTS.md does not record whether the index setup scripts delete an existing index. Read a setup script before re-running it on a kit that already works.</p>
+    </div>
+  </div>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 8: ENV VARS ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Environment variables</span></div>
+  <div class="eyebrow">Environment variables · names only</div>
+  <h2>The backend reads <span class="hl">VINEYARD_ variables.</span></h2>
+  <p>Every name below carries the prefix <code>VINEYARD_</code>. No secret values appear in this document.</p>
+  <table class="t sm">
+    <tr><th style="width:200px">Variable</th><th style="width:170px">Code default</th><th>Kit requirement</th></tr>
+    <tr><td class="k">ES_GPU_URL</td><td><code>http://es.ddil:9200</code></td><td>All adventure queries go here. Use the raw IP if .ddil fails.</td></tr>
+    <tr><td class="k">ES_GPU_HOST / ES_GPU_PORT</td><td>none / 9200</td><td>HOST overrides the URL when set.</td></tr>
+    <tr><td class="k">ES_MAIN_URL</td><td><code>http://es-cpu:9200</code></td><td>CPU client.</td></tr>
+    <tr><td class="k">ES_CPU_HOST / ES_CPU_PORT</td><td>none / 9201</td><td>The CPU node listens on 9200; 9201 appears only in labels and this default.</td></tr>
+    <tr><td class="k">ES_USER / ES_PASSWORD</td><td>none</td><td><b>Required</b> with security on (K2).</td></tr>
+    <tr><td class="k">OLLAMA_EMBED_URL / OLLAMA_LLM_URL</td><td><code>http://ollama.ddil:11434</code></td><td>Spark.</td></tr>
+    <tr><td class="k">EMBED_MODEL / LLM_MODEL</td><td><code>nomic-embed-text</code> / <code>gpt-oss:120b</code></td><td>Change from these. LLM: <code>nemotron-3.5-lightning</code>. Embedder: Jina v5 Omni (page 14).</td></tr>
+    <tr><td class="k">EMBED_BACKEND</td><td><code>jina</code></td><td>Keep. Change from <code>bedrock</code> at 5114c3a. <code>ollama</code> is the fallback (K3, page 14).</td></tr>
+    <tr><td class="k">SEC_INDEX</td><td><code>sec_10k_2026</code></td><td>Keep.</td></tr>
+    <tr><td class="k">KIBANA_URL / KIBANA_SPACE</td><td><code>http://kibana.ddil:5601</code> / <code>default</code></td><td>Keep.</td></tr>
+    <tr><td class="k">KIBANA_USER / KIBANA_PASSWORD</td><td>none</td><td>Needed once Kibana security is on.</td></tr>
+    <tr><td class="k">AGENT_BUILDER_AGENT_ID</td><td><code>finance-analyst</code></td><td>Keep.</td></tr>
+    <tr><td class="k">AGENT_BUILDER_CONNECTOR_ID</td><td>none</td><td>Set <code>finance-ollama-llm</code>.</td></tr>
+    <tr><td class="k">JINA_OMNI_URL / JINA_OMNI_MODEL</td><td><code>http://jina.ddil:8081</code> / <code>jina-embeddings-v5-omni-small</code></td><td>Keep. The server must load this model (page 14).</td></tr>
+    <tr><td class="k">JINA_MM_INDEX / INFERENCE_ID / DIMS</td><td><code>jina-multimodal</code> / <code>jina-omni-text</code> / 768</td><td>Keep.</td></tr>
+    <tr><td class="k">JINA_DLS_INDEX / DIMS</td><td><code>pmc-unstructured</code> / 1024</td><td>Keep.</td></tr>
+    <tr><td class="k">JINA_FIG_DIR / PDF_DIR / IMG_DIR</td><td><code>/data/jina/extracted_imgs</code>, <code>/samples</code>, <code>/images</code></td><td><code>.env.airgapped</code> uses <code>/data/jina/scale/...</code>. Match where the media sits.</td></tr>
+    <tr><td class="k">RACE_BATCH_SIZE / RACE_METRICS_INTERVAL_MS</td><td>500 / 500</td><td>Batch size is unused by the simulated race.</td></tr>
+    <tr><td class="k">SEC_EMBED_DIMS / SEC_AGENT_LLM_MODEL</td><td>768 / <code>nemotron-3.5-lightning</code></td><td>Keep. One dimension for re-embed, index and query.</td></tr>
+  </table>
+  <p class="small">Other variables: <code>ELASTIC_PASSWORD</code> in <code>docker/.env</code> on the Spark bootstraps es-gpu. Provisioning scripts read <code>EP</code>, and <code>setup-index-local.sh</code> reads <code>ES_USER</code> and <code>ES_PASSWORD</code>. <code>.env.airgapped</code> holds placeholders only.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 9: RESET AND SHUTDOWN ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Reset and shutdown</span></div>
+  <div class="eyebrow">Reset between demos</div>
+  <h2>Return to the chooser <span class="hl">in a known state.</span></h2>
+  <p>The adventures read data and do not write it, so a reset is a front-end and session reset. No index needs to be restored between audiences.</p>
+  <table class="t">
+    <tr><th style="width:110px">Adventure</th><th>Reset</th><th>What it does not reset</th></tr>
+    <tr><td class="k">Vineyard</td><td>Sidebar "Reset Demo". Clears the adventure, scene, selected block, pending query and the <code>vineyard-conversations</code> history, and returns to the chooser.</td><td>Server race state. Press Reset on the race screen or run <code>curl -X POST http://192.168.1.10:8000/api/race/reset</code>. The next race start also reinitialises it.</td></tr>
+    <tr><td class="k">SEC Findings</td><td>Chapter 04 "Reset conversation", then Esc to the chooser. Press Reset on the Chapter 01 race if it ran.</td><td>Nothing else is stored.</td></tr>
+    <tr><td class="k">Multimodal</td><td>"Exit to chooser" or Esc.</td><td>Select Public User again at the start of the next run.</td></tr>
+    <tr><td class="k">Browser</td><td>Reload the page between audiences.</td><td>Recent Investigations persist in local storage until Reset Demo.</td></tr>
+  </table>
+
+  <div class="eyebrow mt2">Shutdown</div>
+  <h3>Reverse order: Framework, then Spark, then network</h3>
+  <pre class="code"><span class="c"># Framework Desktop</span>
+cd ~/ddil/demo &amp;&amp; docker compose down
+sudo shutdown -h now
+
+<span class="c"># DGX Spark: stop the Jina server with Ctrl-C in its session, then</span>
+cd ~/ddil/docker &amp;&amp; sg docker -c "docker compose down"
+sudo shutdown -h now
+
+<span class="c"># Then power off the switch and the gateway</span></pre>
+
+  <div class="warn card mt">
+    <div class="ch">Never by habit</div>
+    <div class="cb">
+      <p><code>docker compose down -v</code> also removes the compose volumes, which can hold index data. Use it only when you intend to wipe and re-provision. Never run the Ollama "unload" step from TROUBLESHOOTING.md (K5).</p>
+    </div>
+  </div>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 10: TROUBLESHOOTING 1 ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Troubleshooting</span></div>
+  <div class="eyebrow or">Troubleshooting · 1 of 2</div>
+  <h2>Symptom, cause, <span class="hl">fix.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:170px">Symptom</th><th style="width:190px">Likely cause</th><th>Fix</th></tr>
+    <tr><td>Only one node in <code>_cat/nodes</code></td><td>K1 nodes not on the same version or security settings</td><td>Align both nodes on 9.5.6 with matched security and transport TLS (page 13).</td></tr>
+    <tr><td>es-gpu exits at start</td><td>Missing <code>docker/.env</code>, cert, cuVS libs or CUDA path</td><td>Run the prerequisite checks on page 3. Read <code>docker compose logs es-gpu</code>.</td></tr>
+    <tr><td>es-cpu exits at start</td><td><code>vm.max_map_count</code> too low</td><td><code>sudo sysctl -w vm.max_map_count=262144</code>, then restart es-cpu.</td></tr>
+    <tr><td>Backend log shows 401 from ES</td><td>K2 no credentials in the container</td><td>Set <code>VINEYARD_ES_USER</code> and <code>VINEYARD_ES_PASSWORD</code>; recreate the backend.</td></tr>
+    <tr><td>Every cross-host call fails</td><td>K4 .ddil names do not resolve</td><td><code>getent hosts</code> inside the backend; set URL variables to raw IPs.</td></tr>
+    <tr><td>Dashboard total reads 869,000 and never changes</td><td>Silent fallback: dashboard call failed or empty</td><td>Check <code>/api/vineyard/dashboard</code> and the backend log. Do not present the numbers as live.</td></tr>
+    <tr><td>Agronomist reports BLK-C at 46.2 % moisture and K 50 whatever you ask</td><td>Phase 0 mock fallback: ES unreachable</td><td>Fix ES access (K1, K2). Then rerun.</td></tr>
+    <tr><td>Agronomist stays "running" with no final result</td><td>An LLM call exceeded the 120 s timeout; the stream ended without completion</td><td>Reload the page, warm the model (page 6), ask again from the map.</td></tr>
+    <tr><td>Agronomist takes several minutes</td><td>Four sequential LLM calls; worst case about 8 minutes</td><td>Narrate the phase timeline. Warm the model before the session.</td></tr>
+    <tr><td>Agronomist answers about the wrong block</td><td>Typed questions and chips send no block</td><td>Start from the map "Investigate with AI" or the sidebar "Investigate" for a selected block.</td></tr>
+    <tr><td>Vineyard Search lists "Soil Station #17" in Block B3</td><td>Semantic and hybrid queries fail; canned results</td><td>Skip the Search screen.</td></tr>
+    <tr><td>Crop Health always says Black Rot</td><td>Endpoint is canned</td><td>Skip the screen.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 11: TROUBLESHOOTING 2 ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Troubleshooting</span></div>
+  <div class="eyebrow or">Troubleshooting · 2 of 2</div>
+  <h2>SEC, Multimodal <span class="hl">and the platform.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:170px">Symptom</th><th style="width:190px">Likely cause</th><th>Fix</th></tr>
+    <tr><td>SEC Chapter 03: 502 "Query embed failed", or a dims error</td><td>K3 Jina v5 Omni unreachable on <code>:8081</code>, or the SEC index is still 1536-d</td><td><code>curl :8081/health</code>; check <code>embed_backend</code> <code>jina</code> in <code>/api/finance/agent/state</code>; re-embed the index (page 14).</td></tr>
+    <tr><td>SEC sector chips missing, 500 in the log</td><td><code>/api/finance/sectors</code> has no error handling; ES failed</td><td>Fix ES access. Confirm <code>sec_10k_2026</code> exists.</td></tr>
+    <tr><td>SEC agent never finishes</td><td>The agent call has no read timeout; a hung model run hangs the UI</td><td>"Reset conversation", reload, check Ollama and Kibana. Use a shorter example question.</td></tr>
+    <tr><td>SEC agent errors or shows malformed events</td><td>Agent or connector out of date after the 9.5.6 upgrade</td><td>Re-run <code>provision-connector-local.sh</code> and <code>provision-agent-local.sh</code>. Report the error to the kit owner.</td></tr>
+    <tr><td>Workflows links return 404</td><td>The workflow is not provisioned</td><td>Do not click them. Describe the YAML only.</td></tr>
+    <tr><td>Search by Image returns an error</td><td>Jina server stopped, or inference endpoint missing</td><td><code>curl :8081/health</code>; restart the server; check <code>_inference/text_embedding/jina-omni-text</code>.</td></tr>
+    <tr><td>Need-to-Know figure strip or PDF links 404</td><td>Media path mismatch: config defaults against <code>/data/jina/scale/...</code></td><td>Set <code>VINEYARD_JINA_FIG_DIR</code>, <code>PDF_DIR</code> and <code>IMG_DIR</code> to where the media sits under <code>/data/jina</code>.</td></tr>
+    <tr><td>Need-to-Know results look weak</td><td>Query wording or embedder setting (quality issue, not an error)</td><td>Use the suggested questions from runbook 05.</td></tr>
+    <tr><td>Browser console shows repeated race socket reconnects</td><td>Client reconnects every 3 s after the server closes the socket</td><td>Harmless. Ignore.</td></tr>
+    <tr><td>Kiosk shows healthy while services are down</td><td>Kiosk health runs on mock data</td><td>Use the checks on pages 6 and 7.</td></tr>
+    <tr><td><code>ddil-startup.sh</code> banner disagrees with reality</td><td>Script checks raw IPs without auth and Ollama on .10</td><td>Ignore the banner. Use this runbook.</td></tr>
+    <tr><td>Provisioning scripts return 401</td><td>Scripts without credentials; <code>run-all.sh</code> passes only <code>EP</code></td><td>Export <code>ES_USER</code> and <code>ES_PASSWORD</code> for the SEC index step. Vineyard scripts need auth added by the kit owner.</td></tr>
+    <tr><td>Backend or frontend rebuild fails offline</td><td>Images install packages at build time</td><td>Use prebuilt images. Do not rebuild on a disconnected kit without local caches.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 13: SHOWCASE CONFIG 1 · ELASTIC 9.5.6 ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Showcase configuration · Elastic 9.5.6</span></div>
+  <div class="eyebrow pk">Showcase configuration · once per kit</div>
+  <h2>Every node and Kibana <span class="hl">on Elastic 9.5.6.</span></h2>
+  <p>The kit showcases Elasticsearch and Kibana 9.5.6 on both machines with one security configuration. The committed files pin older images (K1). Make these changes while a network is available, then verify. Keep the data volumes: never run <code>docker compose down -v</code> for an upgrade. Indices built on 9.3 and 9.4 are readable on 9.5; confirm on kit before any data migration beyond a restart on the new images.</p>
+  <table class="t sm">
+    <tr><th style="width:24px">#</th><th style="width:150px">File</th><th style="width:150px">Change from</th><th>Change to</th></tr>
+    <tr><td class="k">1</td><td>Record state</td><td>n/a</td><td>Save <code>_cat/nodes</code> and <code>_cat/indices</code> output. Pull <code>elasticsearch:9.5.6</code> and <code>kibana:9.5.6</code> on the hosts that need them.</td></tr>
+    <tr><td class="k">2</td><td><code>docker/es-gpu/Dockerfile</code></td><td><code>FROM .../elasticsearch:9.4.2</code>, <code>COPY cuvs-java-25.12.0.jar</code></td><td><code>FROM docker.elastic.co/elasticsearch/elasticsearch:9.5.6</code>. Replace the jar with the aarch64 cuVS Java build that matches the jar in the 9.5.6 <code>modules/gpu</code> directory (command below). Jar version and build source: confirm on kit. The native cuVS libs mounted at <code>/opt/cuvs/lib</code> must match that jar.</td></tr>
+    <tr><td class="k">3</td><td><code>demo/docker-compose.yml</code> es-cpu</td><td><code>elasticsearch:9.3.1</code>, <code>xpack.security.enabled=false</code>, <code>http.ssl.enabled=false</code></td><td><code>elasticsearch:9.5.6</code>. Copy the es-gpu security lines: <code>security.enabled=true</code>, <code>authc.api_key.enabled=true</code>, <code>http.ssl.enabled=false</code>, <code>transport.ssl.enabled=true</code>, <code>verification_mode=certificate</code>, keystore and truststore <code>certs/elastic-certificates.p12</code>. Mount the same p12 on the Framework (host path: confirm on kit).</td></tr>
+    <tr><td class="k">4</td><td><code>demo/docker-compose.yml</code> kibana</td><td><code>kibana:9.3.1</code>, no ES credentials</td><td><code>kibana:9.5.6</code>. Set <code>ELASTICSEARCH_USERNAME=kibana_system</code> and <code>ELASTICSEARCH_PASSWORD</code> after setting that user's password through <code>_security/user/kibana_system/_password</code>. Keep the encryption keys.</td></tr>
+    <tr><td class="k">5</td><td>Restart</td><td>n/a</td><td>Framework: <code>docker compose down</code>. Spark: <code>sg docker -c "docker compose build es-gpu &amp;&amp; docker compose up -d"</code>. Framework: <code>docker compose up -d</code>.</td></tr>
+  </table>
+  <h3 class="mt">Verify</h3>
+  <pre class="code"><span class="c"># cuVS jar the 9.5.6 image expects (step 2)</span>
+docker run --rm --entrypoint ls docker.elastic.co/elasticsearch/elasticsearch:9.5.6 /usr/share/elasticsearch/modules/gpu
+curl -s -u elastic:$ELASTIC_PASSWORD http://192.168.1.20:9200/ | grep '"number"'   <span class="g"># "9.5.6"</span>
+curl -s -u elastic:$ELASTIC_PASSWORD http://192.168.1.10:9200/ | grep '"number"'   <span class="g"># "9.5.6"</span>
+curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cat/nodes?v&amp;h=name,version,node.role'
+<span class="g"># spark-gpu 9.5.6 and framework-cpu 9.5.6</span>
+curl -s -u elastic:$ELASTIC_PASSWORD http://192.168.1.10:5601/api/status | grep -o '"number":"[^"]*"'   <span class="g"># 9.5.6</span></pre>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 14: SHOWCASE CONFIG 2 · MODELS ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Showcase configuration · models</span></div>
+  <div class="eyebrow pk">Showcase configuration · once per kit</div>
+  <h2>Nemotron 3.5 Lightning <span class="hl">and Jina Embeddings v5 Omni.</span></h2>
+  <p>The kit showcases NVIDIA Nemotron 3.5 Lightning (Ollama tag <code>nemotron-3.5-lightning</code>) and Jina Embeddings v5 Omni (<code>jina-embeddings-v5-omni-small</code>) on the DGX Spark. The committed config names other models (K3). Pull the model while a network is available. Set backend values in the compose <code>environment</code> block (page 5).</p>
+  <table class="t sm">
+    <tr><th style="width:150px">Setting</th><th style="width:150px">Change from</th><th>Change to</th></tr>
+    <tr><td class="k">Ollama on the Spark</td><td><code>gpt-oss:120b</code>, <code>nomic-embed-text</code></td><td><code>ollama pull nemotron-3.5-lightning</code></td></tr>
+    <tr><td class="k">VINEYARD_LLM_MODEL</td><td><code>gpt-oss:120b</code></td><td><code>nemotron-3.5-lightning</code></td></tr>
+    <tr><td class="k">Connector finance-ollama-llm</td><td><code>MODEL=gpt-oss:120b</code> default</td><td>Re-run <code>EP=... bash demo/scripts/finance/provision-connector-local.sh</code> (default <code>MODEL</code> is now <code>nemotron-3.5-lightning</code>)</td></tr>
+    <tr><td class="k">Jina server :8081</td><td><code>serve_jina_v4.py</code>, <code>JINA_MODEL_ID</code> default <code>jinaai/jina-embeddings-v4</code></td><td>Serve <code>jinaai/jina-embeddings-v5-omni-small</code> (JINA-SETUP.md prerequisite 1). Server script, launch command and cu128 build for the GB10: confirm on kit.</td></tr>
+    <tr><td class="k">Jina indices</td><td>Vectors from the old server</td><td>Re-run <code>setup-indices-local.sh</code>, <code>ingest-multimodal.py</code>, <code>ingest-pmc.py</code> (page 8). The setup script deletes and recreates both indices.</td></tr>
+    <tr><td class="k">VINEYARD_EMBED_BACKEND / EMBED_MODEL</td><td><code>bedrock</code> / <code>nomic-embed-text</code></td><td><code>jina</code> (code default on this branch). Compose sets <code>VINEYARD_EMBED_BACKEND=jina</code>, <code>VINEYARD_JINA_OMNI_URL</code> and <code>VINEYARD_SEC_EMBED_DIMS=768</code>. SEC queries call <code>/v1/embeddings</code>; Vineyard search still calls Ollama <code>/api/embed</code>.</td></tr>
+    <tr><td class="k">SEC corpus</td><td><code>reembed-local.py --model nomic-embed-text</code></td><td>Required before the demo: the committed index is 1536-d. <code>run-all.sh</code> runs <code>reembed-local.py --backend jina --dims 768</code>, then <code>setup-index-local.sh</code> with <code>DIMS=768</code> (drops and recreates only <code>sec_10k_2026</code>). STAGED, confirm on kit.</td></tr>
+    <tr><td class="k">VINEYARD_JINA_OMNI_MODEL</td><td><code>jina-embeddings-v5-omni-small</code></td><td>Keep. The <code>jina-omni-text</code> endpoint already names this model.</td></tr>
+  </table>
+  <h3 class="mt">Verify</h3>
+  <pre class="code">curl -s http://192.168.1.20:11434/api/tags | grep -o 'nemotron-3.5-lightning[^"]*'
+curl -s http://192.168.1.20:8081/health                <span class="g"># "model" names jina-embeddings-v5-omni-small</span>
+curl -s http://192.168.1.20:8081/v1/embeddings -H 'Content-Type: application/json' \
+  -d '{"input":["ping"],"model":"jina-embeddings-v5-omni-small","dimensions":768}' | head -c 120
+curl -s http://192.168.1.10:8000/api/finance/agent/state
+<span class="g"># llm_model nemotron-3.5-lightning, embed_backend jina, connector_id finance-ollama-llm</span>
+curl -s -u elastic:$ELASTIC_PASSWORD http://192.168.1.10:5601/api/actions/connector/finance-ollama-llm
+<span class="g"># config.defaultModel nemotron-3.5-lightning</span></pre>
+  <!--foot-->
+</div>

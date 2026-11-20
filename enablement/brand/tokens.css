@@ -1,0 +1,26 @@
+/* DDIL enablement brand tokens.
+   Light = the house HTML deck palette (Anduril-Lattice-Deck-FS / Elastic Security deck engine).
+   Dark  = the same system on the Elastic navy ground, used by the demo apps and kiosk-style screens.
+   Fonts are self-hosted (fonts.css) because the kit is airgapped. Never load Google Fonts from kit-served pages. */
+@import url("fonts.css");
+
+:root {
+  --blue:#0B64DD; --blue-l:#D9E8FF; --teal:#02BCB7; --pink:#F04E98; --orange:#FF7E62; --yellow:#FEC514;
+  --ink:#1D1E24; --char:#343741; --grey:#69707D; --grey-l:#98A2B3; --line:#D3DAE6; --bg:#F5F7FA; --paper:#FFFFFF;
+  --sans:'Inter',-apple-system,system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+
+/* Dark brand ground (apps). Accents are the brighter brand ramp so they hold contrast on navy. */
+.theme-dark, [data-theme="dark"] {
+  --blue:#5B9BFF; --blue-l:#16285A; --teal:#48EFCF; --pink:#F04E98; --orange:#FF957D; --yellow:#FEC514;
+  --ink:#F5F7FA; --char:#C9D3E3; --grey:#98A2B3; --grey-l:#69707D; --line:#24345F; --bg:#0B1633; --paper:#101C3F;
+}
+
+/* Signature elements, shared by docs, deck, mock and apps */
+.eyebrow{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:8px;height:8px;background:var(--blue);flex:none}
+.eyebrow.pk::before{background:var(--pink)} .eyebrow.tl::before{background:var(--teal)}
+.hl{color:var(--blue)}
+.card{border:1px solid var(--ink);background:var(--paper);box-shadow:12px 12px 0 rgba(29,30,36,.05)}
+.chip{display:inline-flex;align-items:center;font:500 13px var(--mono);letter-spacing:.04em;color:var(--char);border:1px solid var(--line);background:var(--paper);padding:6px 12px}

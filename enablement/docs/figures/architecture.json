@@ -1,0 +1,36 @@
+{
+  "title": "DDIL kit architecture",
+  "canvas": { "unit": 26, "background": "none", "gutter": 60, "labelSize": 22 },
+  "nodes": [
+    { "id": "framework", "at": [0, 0, 0], "size": [5.4, 5.4, 6.6], "fill": "glass", "children": [
+      { "id": "fw-base", "at": [0.5, 0.5, 0.3], "size": [4.4, 4.4, 0.5], "fill": "outline" },
+      { "id": "es-cpu", "at": [0.5, 0.5, 1.2], "size": [4.4, 4.4, 0.8], "fill": "tone:blue" },
+      { "id": "kibana", "at": [0.5, 0.5, 2.4], "size": [4.4, 4.4, 0.8], "fill": "accent:pink" },
+      { "id": "backend", "at": [0.5, 0.5, 3.6], "size": [4.4, 4.4, 0.8], "fill": "outline" },
+      { "id": "frontend", "at": [0.5, 0.5, 4.8], "size": [4.4, 4.4, 0.8], "fill": "tint:teal" }
+    ]},
+    { "id": "spark", "at": [9, -9, 0], "size": [5.4, 5.4, 6.6], "fill": "glass", "children": [
+      { "id": "sp-base", "at": [0.5, 0.5, 0.3], "size": [4.4, 4.4, 0.5], "fill": "outline" },
+      { "id": "es-gpu", "at": [0.5, 0.5, 1.2], "size": [4.4, 4.4, 1.2], "fill": "tone:blue", "faces": { "right": "midnight" } },
+      { "id": "ollama", "at": [0.5, 0.5, 2.8], "size": [4.4, 4.4, 1.2], "fill": "accent:poppy-mid" },
+      { "id": "jina", "at": [0.5, 0.5, 4.4], "size": [4.4, 4.4, 1.2], "fill": "tint:yellow" }
+    ]},
+    { "id": "switch", "at": [8.2, -1.6, 0], "size": [2.0, 2.0, 0.5], "fill": "flat:ink" }
+  ],
+  "flows": [
+    { "from": { "node": "framework", "anchor": [1, 0.3, 0.05] }, "to": { "node": "switch", "anchor": "left" }, "color": "blue/0.8" },
+    { "from": { "node": "switch", "anchor": "right" }, "to": { "node": "spark", "anchor": [0.6, 1, 0.05] }, "color": "blue/0.8" }
+  ],
+  "labels": [
+    { "target": "frontend", "anchor": [0, 1, 0.5], "side": "left", "column": "framework", "text": ["**FRONTEND :3000**", "VITE DEV SERVER"] },
+    { "target": "backend", "anchor": [0, 1, 0.5], "side": "left", "column": "framework", "text": ["**BACKEND :8000**", "FASTAPI · PYTHON 3.12"] },
+    { "target": "kibana", "anchor": [0, 1, 0.5], "side": "left", "column": "framework", "text": ["**KIBANA 9.5.6 :5601**", "AGENT BUILDER"] },
+    { "target": "es-cpu", "anchor": [0, 1, 0.5], "side": "left", "column": "framework", "text": ["**ES-CPU 9.5.6 :9200**", "NODE FRAMEWORK-CPU"] },
+    { "target": "fw-base", "anchor": [0, 1, 0.5], "side": "left", "column": "framework", "text": ["**FRAMEWORK DESKTOP**", "192.168.1.10 · X86_64"] },
+    { "target": "jina", "anchor": [1, 0, 0.5], "side": "right", "column": "spark", "text": ["**JINA SERVER :8081**", "JINA EMBEDDINGS V5 OMNI"] },
+    { "target": "ollama", "anchor": [1, 0, 0.5], "side": "right", "column": "spark", "text": ["**OLLAMA :11434**", "NEMOTRON 3.5 LIGHTNING"] },
+    { "target": "es-gpu", "anchor": [1, 0, 0.5], "side": "right", "column": "spark", "text": ["**ES-GPU 9.5.6 :9200**", "NODE SPARK-GPU · CUVS"] },
+    { "target": "sp-base", "anchor": [1, 0, 0.5], "side": "right", "column": "spark", "text": ["**DGX SPARK**", "192.168.1.20 · AARCH64"] },
+    { "target": "switch", "anchor": "bottom-corner", "dy": 34, "text": ["**SWITCH FLEX MINI**", "GATEWAY 192.168.1.1"] }
+  ]
+}

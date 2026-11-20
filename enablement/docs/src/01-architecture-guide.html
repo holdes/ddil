@@ -1,0 +1,249 @@
+<!-- ============ PAGE 1: COVER ============ -->
+<div class="page cover">
+  <div class="top">
+    <div class="eyebrow">DDIL demo kit · SA enablement · 01</div>
+    <h1>Architecture guide. <span class="hl">Two nodes, one cluster, local models.</span></h1>
+    <p class="sub">The hardware, network, Elasticsearch cluster, inference services, Kibana and the demo application, and how a request flows through them in each adventure.</p>
+    <div class="meta">
+      <span class="chip">Status as of 13 Nov 2026</span>
+      <span class="chip">Code basis: commit 5114c3a</span>
+      <span class="chip">Source: FACTS.md sections 1 to 4</span>
+    </div>
+    <div class="fig"><!--fig:architecture--></div>
+    <div class="figcap">Figure 1 · Services by node. Both nodes join one Elasticsearch cluster over the kit switch.</div>
+    <table class="t tight mt2">
+      <tr><th style="width:150px">Cluster</th><th>Elasticsearch nodes</th><th>Local models</th></tr>
+      <tr><td class="k">ddil-vineyard</td><td><code>spark-gpu</code> 9.5.6 with cuVS · <code>framework-cpu</code> 9.5.6</td><td>Nemotron 3.5 Lightning · Jina Embeddings v5 Omni</td></tr>
+    </table>
+  </div>
+  <div class="band">
+    <div>
+      <div class="k">In one paragraph</div>
+      <p>The DGX Spark runs the GPU Elasticsearch node with cuVS, Ollama with <span class="m" style="color:#fff">nemotron-3.5-lightning</span>, and the Jina Embeddings v5 Omni server. The Framework Desktop runs the CPU Elasticsearch node, Kibana with Agent Builder, the FastAPI backend and the React frontend in Docker. The backend sends every adventure query to the Spark node.</p>
+    </div>
+    <div>
+      <div class="k">Read with care</div>
+      <p>Where the committed configuration is inconsistent, this guide states what the code does and marks it "current state, verify on the kit". Page 3 lists those items.</p>
+      <img src="../assets/logos/elastic-horizontal-white.svg" alt="Elastic" width="120" height="40">
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2: HARDWARE AND NETWORK ============ -->
+<div class="page">
+  <div class="rh"><span>01 · Architecture guide</span><span>Hardware and network</span></div>
+  <div class="eyebrow">Hardware and network</div>
+  <h2>Two compute nodes <span class="hl">on a flat 192.168.1.0/24 LAN.</span></h2>
+  <table class="t">
+    <tr><th style="width:120px">Item</th><th style="width:90px">Address</th><th>Specification</th><th>Runs</th></tr>
+    <tr><td class="k">DGX Spark</td><td><code>192.168.1.20</code></td><td>GB10 Blackwell, 128 GB unified memory, aarch64</td><td>es-gpu (Docker), Ollama (native, systemd), Jina embedding server (native, started by hand)</td></tr>
+    <tr><td class="k">Framework Desktop</td><td><code>192.168.1.10</code></td><td>Ryzen AI Max+ 395, 64 GB, x86_64</td><td>es-cpu, Kibana, backend, frontend (Docker); kiosk on the attached touchscreen</td></tr>
+    <tr><td class="k">Gateway</td><td><code>192.168.1.1</code></td><td>UniFi Express 7</td><td>Routing. DHCP pool 192.168.1.100-199 per network docs (doc-only)</td></tr>
+    <tr><td class="k">Switch</td><td>n/a</td><td>Switch Flex Mini, 5-port GbE</td><td>Node interconnect</td></tr>
+  </table>
+  <p class="small">The Architecture screen in the app shows "&lt;1.2ms latency" and "1 Gbps Cat6a". Those strings are static UI text and are not measured.</p>
+
+  <h3 class="mt">Friendly .ddil names</h3>
+  <p>Commit 5114c3a moved the backend defaults from raw IP addresses to .ddil names. The backend container resolves them through <code>extra_hosts</code> in <code>demo/docker-compose.yml</code>. The commit message says UniFi local DNS and <code>/etc/hosts</code> on both hosts also carry them; neither is in the repo. The app was not running when the change was committed, so the names are <b>unverified on the box</b>.</p>
+  <table class="t tight">
+    <tr><th style="width:120px">Name</th><th style="width:100px">Address</th><th>Used by</th></tr>
+    <tr><td class="k">es.ddil</td><td><code>192.168.1.20</code></td><td><code>VINEYARD_ES_GPU_URL</code> default <code>http://es.ddil:9200</code>. All Vineyard, SEC and Jina queries.</td></tr>
+    <tr><td class="k">ollama.ddil</td><td><code>192.168.1.20</code></td><td><code>OLLAMA_EMBED_URL</code> and <code>OLLAMA_LLM_URL</code>, port 11434</td></tr>
+    <tr><td class="k">jina.ddil</td><td><code>192.168.1.20</code></td><td><code>JINA_OMNI_URL</code>, port 8081</td></tr>
+    <tr><td class="k">kibana.ddil</td><td><code>192.168.1.10</code></td><td><code>KIBANA_URL</code>, port 5601</td></tr>
+    <tr><td class="k">framework.ddil</td><td><code>192.168.1.10</code></td><td>Kiosk health check for the CPU node</td></tr>
+    <tr><td class="k">spark.ddil</td><td><code>192.168.1.20</code></td><td>Config value only; no code reads it</td></tr>
+    <tr><td class="k">vllm, relay, gw</td><td>.20, .20, .1</td><td>Mapped in extra_hosts only. No code references them.</td></tr>
+  </table>
+  <ul>
+    <li>Elasticsearch transport (discovery and publish) stays on raw IP addresses by design.</li>
+    <li><code>demo/backend/.env.airgapped</code> still uses raw IP addresses.</li>
+  </ul>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 3: SERVICES, PORTS, CLUSTER ============ -->
+<div class="page">
+  <div class="rh"><span>01 · Architecture guide</span><span>Services, ports and the cluster</span></div>
+  <div class="eyebrow">Services and ports</div>
+  <h2>Eight services. <span class="hl">One Elasticsearch cluster.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:68px">Host</th><th style="width:80px">Service</th><th style="width:62px">Port</th><th>Image or build, key settings</th></tr>
+    <tr><td>Spark</td><td class="k">es-gpu</td><td>9200, 9300</td><td>Build <code>docker/es-gpu</code> from <code>elasticsearch:9.5.6</code> plus the aarch64 cuVS Java jar built for that release. Node <code>spark-gpu</code>, <code>node.attr.accel=gpu</code>, <code>vectors.indexing.use_gpu=true</code>, heap 16g, security on, no <code>ml</code> role.</td></tr>
+    <tr><td>Spark</td><td class="k">Ollama</td><td>11434</td><td>Native, systemd. Not in compose. Serves NVIDIA Nemotron 3.5 Lightning, tag <code>nemotron-3.5-lightning</code>.</td></tr>
+    <tr><td>Spark</td><td class="k">Jina server</td><td>8081</td><td>Jina Embeddings v5 Omni (<code>jina-embeddings-v5-omni-small</code>), OpenAI-compatible server on <code>0.0.0.0:8081</code>. Started by hand in the <code>jina-embed</code> conda env (runbook 02). No systemd unit.</td></tr>
+    <tr><td>Framework</td><td class="k">es-cpu</td><td>9200, 9300</td><td><code>elasticsearch:9.5.6</code>. Node <code>framework-cpu</code>, <code>accel=cpu</code>, <code>use_gpu=false</code>, heap 8g, security and transport TLS matched to es-gpu.</td></tr>
+    <tr><td>Framework</td><td class="k">kibana</td><td>5601</td><td><code>kibana:9.5.6</code>, <code>ELASTICSEARCH_HOSTS=http://es-cpu:9200</code>, credentials for the secured cluster (runbook 02).</td></tr>
+    <tr><td>Framework</td><td class="k">backend</td><td>8000</td><td>Build <code>demo/backend</code> (python:3.12-slim, uvicorn). Environment sets ES, Ollama and DATA_DIR only. Mounts <code>./data/preprocessed:/data:ro</code> and <code>./data/tiles:/tiles:ro</code>.</td></tr>
+    <tr><td>Framework</td><td class="k">frontend</td><td>3000</td><td>Build <code>demo/frontend</code> (node:22). Vite dev server, not a production build. Proxies <code>/api</code>, <code>/tiles</code>, <code>/ws</code> to <code>backend:8000</code>.</td></tr>
+    <tr><td>Framework</td><td class="k">kiosk</td><td>3100</td><td>Static server for the 1280x400 touchscreen shell. Health uses mock data by default (<code>MOCK = true</code>).</td></tr>
+  </table>
+
+  <h3>The cluster</h3>
+  <p>One cluster, <code>ddil-vineyard</code>. Each node seeds the other at <code>:9300</code>, with <code>cluster.initial_master_nodes=spark-gpu,framework-cpu</code>. The ML role was removed from the ARM node so that ELSER, which is x86 only, can allocate on the Framework.</p>
+
+  <div class="warn card mt">
+    <div class="ch">Showcase configuration, verify on the kit</div>
+    <div class="cb">
+      <table class="t tight" style="margin:0 0 8px">
+        <tr><th style="width:110px">Component</th><th style="width:70px">Version</th><th>Security</th></tr>
+        <tr><td class="k">es-gpu</td><td>9.5.6</td><td>Security on, API keys on, HTTP plaintext, transport TLS with <code>certs/elastic-certificates.p12</code></td></tr>
+        <tr><td class="k">es-cpu</td><td>9.5.6</td><td>Same security and transport TLS settings as es-gpu</td></tr>
+        <tr><td class="k">kibana</td><td>9.5.6</td><td>Points at es-cpu with credentials for the secured cluster</td></tr>
+        <tr><td class="k">backend client</td><td>8.17.0</td><td><code>elasticsearch[async]</code>. Basic auth only if both <code>VINEYARD_ES_USER</code> and <code>VINEYARD_ES_PASSWORD</code> are set; compose sets neither</td></tr>
+      </table>
+      <p>Pre-show check: all nodes and Kibana on 9.5.6, security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. Confirm the running state with <code>_cat/nodes</code> before quoting any version (runbook 02).</p>
+    </div>
+  </div>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 4: INFERENCE ============ -->
+<div class="page">
+  <div class="rh"><span>01 · Architecture guide</span><span>Inference</span></div>
+  <div class="eyebrow tl">Inference</div>
+  <h2>Every model runs <span class="hl">on the DGX Spark.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:150px">Model</th><th style="width:150px">Served by</th><th>Used by</th></tr>
+    <tr><td class="k">Nemotron 3.5 Lightning<br><code>nemotron-3.5-lightning</code></td><td>Ollama <code>/api/chat</code>, port 11434</td><td>Vineyard five-phase pipeline, RAG chat, Need-to-Know analyst answer</td></tr>
+    <tr><td class="k">Nemotron 3.5 Lightning</td><td>Kibana <code>.gen-ai</code> connector <code>finance-ollama-llm</code> to Ollama <code>/v1/chat/completions</code></td><td>SEC <code>finance-analyst</code> agent in Agent Builder</td></tr>
+    <tr><td class="k">Jina Embeddings v5 Omni<br><code>jina-embeddings-v5-omni-small</code></td><td>Jina server <code>/v1/embeddings</code>, port 8081</td><td>Multimodal adventure (both indices and query embedding), SEC corpus and query embedding (768-dim), Vineyard Search query embedding</td></tr>
+  </table>
+  <p class="small">NVIDIA describes Nemotron 3.5 Lightning as an open-weight mixture-of-experts model in the NVIDIA NeMo family: about 30B parameters with about 3B active, hybrid Mamba-2 and attention layers, built for long-running agentic workloads. Licence OpenMDW-1.1, commercial use permitted. Jina Embeddings v5 Omni places text and images in one vector space. Jina is part of Elastic.</p>
+
+  <h3 class="mt">Jina embedding server contract</h3>
+  <ul>
+    <li><code>POST /v1/embeddings</code> with <code>{input: [text or {type: "image_base64", ...}], dimensions?}</code>. Response is OpenAI shaped. <code>GET /health</code> for status.</li>
+    <li>The ES inference endpoint, <code>jina-multimodal</code> and SEC request 768 dimensions. Need-to-Know sends no <code>dimensions</code> and takes the server default, 1024. Confirm the server default on the kit.</li>
+    <li>Callers send model name <code>jina-embeddings-v5-omni-small</code>.</li>
+  </ul>
+
+  <h3 class="mt">Elasticsearch inference endpoints and pipelines</h3>
+  <table class="t tight">
+    <tr><th style="width:190px">Object</th><th>Definition</th><th style="width:70px">Status</th></tr>
+    <tr><td class="k">text_embedding/jina-omni-text</td><td><code>service: openai</code>, <code>url: ${OMNI}/v1/embeddings</code>, <code>model_id: jina-embeddings-v5-omni-small</code>, <code>dimensions: 768</code>, dummy api_key. Created by <code>demo/scripts/jina/setup-indices-local.sh</code>.</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">pipeline jina-embed-caption</td><td>Inference processor: <code>caption</code> to <code>caption_vector</code>.</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">ollama-embeddings, ollama-chat</td><td>Described in CLAUDE.md. No script creates them.</td><td><span class="tag doc">Doc-only</span></td></tr>
+    <tr><td class="k">ddil-embeddings, ddil-llm</td><td>Described in <code>09-AI-INFERENCE.md</code>. No script creates them.</td><td><span class="tag doc">Doc-only</span></td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 5: KIBANA, BACKEND, FRONTEND ============ -->
+<div class="page">
+  <div class="rh"><span>01 · Architecture guide</span><span>Kibana, backend and frontend</span></div>
+  <div class="eyebrow pk">Kibana and Agent Builder</div>
+  <h2>One agent, three ES|QL tools, <span class="hl">one local connector.</span></h2>
+  <p>All Agent Builder objects come from <code>demo/scripts/finance/</code>. The SEC adventure is the only consumer.</p>
+  <table class="t sm">
+    <tr><th style="width:170px">Object</th><th>Definition</th></tr>
+    <tr><td class="k">Connector finance-ollama-llm</td><td><code>.gen-ai</code>, provider Other, to <code>${OLLAMA}/v1/chat/completions</code>, model <code>nemotron-3.5-lightning</code>. Script: <code>provision-connector-local.sh</code>.</td></tr>
+    <tr><td class="k">Tool finance.company_disclosures</td><td>ES|QL: <code>FROM sec_10k_2026 METADATA _score | WHERE ticker == ?ticker AND MATCH(text, ?topic) | SORT _score DESC | ... | LIMIT ?top_n</code></td></tr>
+    <tr><td class="k">Tool finance.compare_companies</td><td>ES|QL: <code>WHERE ticker IN (?t1..?t6) AND MATCH(text, ?topic) ... LIMIT 60</code></td></tr>
+    <tr><td class="k">Tool finance.sector_breakdown</td><td>ES|QL: <code>WHERE MATCH(text, ?topic) | STATS filings = COUNT_DISTINCT(accession) BY sector</code></td></tr>
+    <tr><td class="k">Agent finance-analyst</td><td>"Financial Filings Analyst". The three finance tools plus <code>platform.core.search</code>, <code>execute_esql</code>, <code>generate_esql</code>, <code>get_document_by_id</code>, <code>get_index_mapping</code>, <code>list_indices</code>, <code>index_explorer</code> (10 tools). Max 6 tool calls, cites ticker and accession. <code>enable_elastic_capabilities: false</code>. Created by delete then POST.</td></tr>
+    <tr><td class="k">Data view, dashboard</td><td><code>sec-10k-data-view</code>, 4 Lens visualisations, dashboard <code>sec-10k-overview</code>. Script: <code>provision-kibana-local.sh</code>.</td></tr>
+  </table>
+  <p class="small">The Vineyard agent <code>vineyard-advisor</code> and its five tools are described in CLAUDE.md only. No script provisions them. The SEC Workflows chapter links to <code>daily-10-k-ai-risk-digest</code>, which no script provisions.</p>
+
+  <div class="eyebrow mt2">Backend API (FastAPI, port 8000)</div>
+  <table class="t sm">
+    <tr><th style="width:90px">Router</th><th>Endpoints</th></tr>
+    <tr><td class="k">vineyard</td><td><code>GET /api/vineyard/config</code>, <code>GET /api/vineyard/dashboard</code>, <code>GET /api/vineyard/blocks/{id}/summary</code>; tiles at <code>GET /tiles/{z}/{x}/{y}.png</code></td></tr>
+    <tr><td class="k">race</td><td><code>POST /api/race/start</code>, <code>WS /api/race/status</code> (pushes every 500 ms, closes on complete), <code>POST /api/race/reset</code></td></tr>
+    <tr><td class="k">chat</td><td><code>POST /api/chat/agent/stream</code> (SSE, five phases)</td></tr>
+    <tr><td class="k">search, images</td><td><code>POST /api/search</code>, <code>POST /api/images/search</code> (canned response)</td></tr>
+    <tr><td class="k">finance</td><td><code>GET /api/finance/sectors</code>, <code>POST /api/finance/search</code>, <code>GET /api/finance/agent/state</code>, <code>POST /api/finance/agent/chat</code> (raw SSE from Kibana <code>/api/agent_builder/converse/async</code>, no read timeout)</td></tr>
+    <tr><td class="k">jina</td><td><code>GET /api/jina/analysts</code>, <code>/api/jina/state</code>, <code>/api/jina/multimodal/search</code>, <code>/api/jina/search</code>, <code>/api/jina/analyst/answer</code>, plus media routes for figures, PDFs and images</td></tr>
+  </table>
+  <p class="small">The frontend has no authentication and the backend allows CORS from any origin. Treat the kit LAN as the security boundary.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 6: DATA FLOWS ============ -->
+<div class="page">
+  <div class="rh"><span>01 · Architecture guide</span><span>Data flow per adventure</span></div>
+  <div class="eyebrow">Data flow</div>
+  <h2>How one request travels <span class="hl">through the kit.</span></h2>
+  <p>Every flow starts in the browser at <code>http://192.168.1.10:3000</code>. The Vite server proxies <code>/api</code> to the backend on port 8000. The backend sends all adventure queries to <code>es.ddil:9200</code>, the Spark node.</p>
+
+  <div class="cols2">
+    <div class="card">
+      <div class="ch">Vineyard · AI Agronomist</div>
+      <div class="cb">
+        <ol>
+          <li><code>POST /api/chat/agent/stream</code> opens an SSE stream.</li>
+          <li>Phase 0: latest <code>vineyard-soil</code> and <code>vineyard-npk</code> doc for the block, or across all blocks when no block is passed.</li>
+          <li>Phase 1: kNN on 8-dim <code>reading_vector</code>, k=5, num_candidates 100, filtered to the block. Then an LLM call.</li>
+          <li>Phases 2, 3, 4: risk, recommendation, action plan. One LLM call each, in sequence.</li>
+          <li>Each LLM call: Ollama <code>/api/chat</code>, <code>nemotron-3.5-lightning</code>, temperature 0.1, 120 s timeout.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">SEC · Search and agent</div>
+      <div class="cb">
+        <ol>
+          <li>Search: the backend embeds the query with Jina Embeddings v5 Omni on the Spark (768-dim).</li>
+          <li>kNN on <code>emb</code> in <code>sec_10k_2026</code>, k=8 by default, optional sector filter. Hits and <code>took_ms</code> return to the UI.</li>
+          <li>Agent: the backend posts to Kibana <code>/api/agent_builder/converse/async</code> with the input, agent id and connector id.</li>
+          <li>Agent Builder runs <code>finance-analyst</code>. Tools run ES|QL on the cluster. The connector calls Nemotron 3.5 Lightning on Ollama.</li>
+          <li>Kibana streams events back. The backend relays them unchanged.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch tl">Multimodal · Search by Image</div>
+      <div class="cb">
+        <ol>
+          <li><code>GET /api/jina/multimodal/search?q&amp;space</code>.</li>
+          <li>The backend sends one kNN with <code>query_vector_builder</code>, model <code>jina-omni-text</code>, on <code>image_vector</code> or <code>caption_vector</code>, k=6.</li>
+          <li>Elasticsearch calls the inference endpoint, which calls the Jina server for a 768-dim query vector.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch pk">Multimodal · Need-to-Know</div>
+      <div class="cb">
+        <ol>
+          <li>The backend builds the clearance filter for the selected persona.</li>
+          <li>It embeds the question on the Jina server (1024-dim).</li>
+          <li>RRF of BM25 on <code>content</code> and kNN on <code>embedding</code> (k=50, 200 candidates) with the filter, collapsed on <code>parent_id</code>, top 6.</li>
+          <li>Passages, capped at 1,200 characters, go to Nemotron 3.5 Lightning with a prompt that forbids outside knowledge.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 7: INDICES AND DATA ============ -->
+<div class="page">
+  <div class="rh"><span>01 · Architecture guide</span><span>Indices and data</span></div>
+  <div class="eyebrow">Indices and data</div>
+  <h2>What the cluster holds <span class="hl">and where the data lives.</span></h2>
+  
+  <table class="t sm">
+    <tr><th style="width:130px">Index</th><th style="width:150px">Vectors</th><th>Notes</th></tr>
+    <tr><td class="k">vineyard-soil</td><td><code>reading_vector</code> 8, cosine</td><td>841,536 is the race constant and dashboard fallback. Check the live count.</td></tr>
+    <tr><td class="k">vineyard-npk, -harvest, -wine</td><td><code>npk_vector</code> 7 (npk only)</td><td>Fallback counts 10,032, 175, 106.</td></tr>
+    <tr><td class="k">vineyard-imagery</td><td><code>image_embedding</code> 768 in mapping</td><td>UI and docs say 2048. <code>bulk-index-synthetic.sh</code> does not load it and the generator has no imagery step.</td></tr>
+    <tr><td class="k">sec_10k_2026</td><td><code>emb</code> 768, cosine HNSW</td><td><code>dynamic: false</code>. 503 filings and 93,541 chunks are static text.</td></tr>
+    <tr><td class="k">jina-multimodal</td><td>image and caption, 768 each</td><td>Image vectors embedded by the app, captions by the ingest pipeline.</td></tr>
+    <tr><td class="k">pmc-unstructured</td><td><code>embedding</code> 1024, bbq_hnsw</td><td>Clearance fields. 1 shard, 0 replicas.</td></tr>
+  </table>
+
+  <h3 class="mt">Data that is not in git</h3>
+  <p>The repo carries code and small fixtures. The data sets travel separately and must be on the kit before any adventure works.</p>
+  <table class="t tight">
+    <tr><th style="width:170px">Data</th><th>Where it must sit</th></tr>
+    <tr><td class="k">Preprocessed data</td><td><code>demo/data/preprocessed</code> on the Framework, mounted read-only at <code>/data</code> in the backend container.</td></tr>
+    <tr><td class="k">Map tiles</td><td><code>demo/data/tiles</code>, mounted at <code>/tiles</code> and served by the backend at <code>/tiles/{z}/{x}/{y}.png</code>.</td></tr>
+    <tr><td class="k">Synthetic vineyard JSONL</td><td>Output of the generator in <code>demo/datagen</code> (years 2018-2025, seed 42), loaded by <code>bulk-index-synthetic.sh</code>.</td></tr>
+    <tr><td class="k">SEC corpus</td><td><code>sec_10k_bulk.ndjson</code> (2.1 GB per CLAUDE.md, doc-only), re-embedded on the kit by <code>reembed-local.py</code>.</td></tr>
+    <tr><td class="k">Jina media</td><td>Under <code>demo/data/preprocessed/jina/...</code> so that it appears at <code>/data/jina/...</code> in the container. Config defaults and <code>.env.airgapped</code> disagree on the sub-path (see runbook 02).</td></tr>
+  </table>
+  <p class="small">The backend and frontend images run <code>pip install</code> and <code>npm install</code> at build time. A disconnected kit needs prebuilt images or local package caches before a rebuild.</p>
+  <!--foot-->
+</div>

@@ -1,14 +1,7 @@
-import { useState } from "react";
-import { Clock, Cpu, Coins, ExternalLink, TrendingDown, Sparkles, AlertTriangle, Users } from "lucide-react";
+import { Clock, Cpu, Coins, ExternalLink, Sparkles, AlertTriangle, ShieldCheck } from "lucide-react";
 import type { RoundMetadata } from "../../hooks/useAgentChat";
 import { SearchSpectrum } from "../diagrams/SearchSpectrum";
 import { TraditionalComparison } from "./TraditionalComparison";
-
-// Typical per-answer cost across a representative spread of finance-analyst
-// questions (single lookup → multi-company comparison) on Sonnet 4.6.
-// Used as the *stable* basis for annualized projections.
-const TYPICAL_COST_PER_ANSWER = 0.60;
-const QPD_PRESETS = [100, 1_000, 10_000, 100_000];
 
 interface Props {
   meta: RoundMetadata;
@@ -16,44 +9,27 @@ interface Props {
 }
 
 /**
- * Below-the-answer panel: pairs the live run's cost / latency with the
+ * Below-the-answer panel: pairs the live run's latency and token counts with the
  * "Search is changing" spectrum + Elastic context-management story.
+ *
+ * The agent runs on the airgapped kit (Nemotron 3.5 Lightning via Ollama on the
+ * DGX Spark), so there is no per-token bill to compute or project.
  *
  * Numbers cited:
  *   21–39% token reduction via dynamically loaded skills
  *   27–34% via top-snippets retrieval
- *   Up to 40% combined cost reduction
+ *   Up to 40% combined reduction
  *   30+ turn conversations without degradation
  *   — Elastic Search Labs (Agent Builder context management)
  */
 
-// Per-million-token Bedrock pricing keyed off the model that actually answered.
-// We resolve from meta.model returned by Agent Builder.
-function priceFor(model: string | undefined): { input: number; output: number; label: string } {
-  if (!model) return { input: 3.0, output: 15.0, label: "Sonnet 4.6 default" };
-  if (model.includes("opus"))   return { input: 15.0, output: 75.0, label: "Opus" };
-  if (model.includes("haiku"))  return { input: 1.0,  output: 5.0,  label: "Haiku" };
-  return { input: 3.0, output: 15.0, label: "Sonnet" };
-}
-
 export function TradeoffPanel({ meta, toolCallCount }: Props) {
-  const px = priceFor(meta.model);
-  const inputCost  = (meta.inputTokens  ?? 0) / 1_000_000 * px.input;
-  const outputCost = (meta.outputTokens ?? 0) / 1_000_000 * px.output;
-  const cost = inputCost + outputCost;
-
-  // Annual projection: queries-per-day × 365 × typical-cost-per-answer × (1 vs 0.6)
-  const [qpd, setQpd] = useState(1_000);
-  const annualBaseline  = qpd * 365 * TYPICAL_COST_PER_ANSWER;
-  const annualOptimized = annualBaseline * 0.60;
-  const annualSavings   = annualBaseline - annualOptimized;
-
   return (
     <div className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 space-y-5">
       <div className="flex items-baseline justify-between">
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-200">The tradeoff in agentic search</h3>
-          <p className="text-xs text-slate-400 mt-1">Autonomy isn't free — every extra reasoning hop costs tokens, time, and dollars. Context management is how Elastic keeps it bounded.</p>
+          <p className="text-xs text-slate-400 mt-1">Autonomy isn't free: every extra reasoning hop costs tokens and GPU time on the kit. Context management is how Elastic keeps it bounded.</p>
         </div>
         <a
           href="https://www.elastic.co/search-labs/blog/elastic-agent-builder-ai-agents-context-management"
@@ -89,9 +65,9 @@ export function TradeoffPanel({ meta, toolCallCount }: Props) {
             <RunStat Icon={Coins} label="Tokens"
                      value={meta.inputTokens != null ? `${(meta.inputTokens / 1000).toFixed(0)}k in · ${(meta.outputTokens ?? 0).toLocaleString()} out` : "—"}
                      sub={meta.model || ""} />
-            <RunStat Icon={Coins} label="Bedrock spend (this answer)"
-                     value={cost > 0 ? `$${cost.toFixed(3)}` : "—"}
-                     sub={cost > 0 ? `${px.label} · $${px.input}/M in · $${px.output}/M out` : ""} />
+            <RunStat Icon={ShieldCheck} label="Cloud spend (this answer)"
+                     value="None"
+                     sub="answered on the DGX Spark, inside the case" />
           </div>
         </div>
 
@@ -111,71 +87,12 @@ export function TradeoffPanel({ meta, toolCallCount }: Props) {
               Earlier turns summarized rather than truncated — sustains <span className="text-[var(--color-elastic)] font-mono">30+ turn</span> conversations.
             </Bullet>
             <Bullet label="Combined">
-              <span className="text-[var(--color-elastic)] font-mono">up to 40%</span> total cost reduction without sacrificing answer quality.
+              <span className="text-[var(--color-elastic)] font-mono">up to 40%</span> combined token reduction without sacrificing answer quality.
             </Bullet>
           </ul>
 
-          <div className="mt-4 pt-3 border-t border-slate-700/40">
-            <div className="text-[10px] uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
-              <TrendingDown size={10} className="text-[var(--color-elastic)]" /> Projected annual savings · 40% reduction
-            </div>
-
-            {/* Queries/day slider */}
-            <div className="space-y-2">
-              <div className="flex items-baseline justify-between">
-                <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-slate-500">
-                  <Users size={11} /> queries / day
-                </span>
-                <span className="text-base font-mono font-bold text-slate-100">{qpd.toLocaleString()}</span>
-              </div>
-              <input
-                type="range"
-                min={Math.log10(50)}
-                max={Math.log10(500_000)}
-                step={0.01}
-                value={Math.log10(qpd)}
-                onChange={(e) => setQpd(Math.max(10, Math.round(Math.pow(10, Number(e.target.value)))))}
-                className="w-full accent-[var(--color-elastic)]"
-              />
-              <div className="flex justify-between">
-                {QPD_PRESETS.map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setQpd(n)}
-                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
-                      qpd === n
-                        ? "bg-[var(--color-elastic)]/20 text-[var(--color-elastic)]"
-                        : "text-slate-500 hover:text-slate-300"
-                    }`}
-                  >
-                    {n >= 1000 ? `${n/1000}k` : n}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Outputs */}
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="rounded-md border border-slate-700/40 bg-slate-950/40 px-2.5 py-1.5">
-                <div className="text-[9px] uppercase tracking-wider text-slate-500">Baseline / yr</div>
-                <div className="text-base font-mono font-semibold text-slate-200">${shortMoney(annualBaseline)}</div>
-              </div>
-              <div className="rounded-md border border-[var(--color-elastic)]/30 bg-[var(--color-elastic)]/[0.06] px-2.5 py-1.5">
-                <div className="text-[9px] uppercase tracking-wider text-[var(--color-elastic)]/80">With Elastic / yr</div>
-                <div className="text-base font-mono font-semibold text-[var(--color-elastic)]">${shortMoney(annualOptimized)}</div>
-              </div>
-              <div className="col-span-2 rounded-md border border-[var(--color-elastic)]/30 bg-[var(--color-elastic)]/[0.04] px-2.5 py-1.5 flex items-baseline gap-2">
-                <span className="text-[9px] uppercase tracking-wider text-slate-400">Annual savings</span>
-                <span className="text-xl font-mono font-bold text-[var(--color-elastic)]">${shortMoney(annualSavings)}</span>
-                <span className="text-[10px] text-slate-500 ml-auto">@ ~${TYPICAL_COST_PER_ANSWER.toFixed(2)}/answer typical</span>
-              </div>
-            </div>
-
-            {cost > 0 && (
-              <div className="text-[10px] text-slate-500 mt-2 leading-snug">
-                Latest measured run: <span className="font-mono text-slate-400">${cost.toFixed(2)}</span> — a single data point. The annual model uses our typical cost across the question mix.
-              </div>
-            )}
+          <div className="mt-4 pt-3 border-t border-slate-700/40 text-[11px] text-slate-400 leading-snug">
+            <span className="font-semibold text-slate-200">On the kit,</span> fewer tokens means faster answers and more headroom on the DGX Spark GPU. There is no per-token bill to shrink: the model runs inside the case.
           </div>
         </div>
       </div>
@@ -194,12 +111,6 @@ function RunStat({ Icon, label, value, sub }: { Icon: typeof Clock; label: strin
       </div>
     </div>
   );
-}
-
-function shortMoney(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k`;
-  return n.toFixed(0);
 }
 
 function Bullet({ label, children }: { label: string; children: React.ReactNode }) {

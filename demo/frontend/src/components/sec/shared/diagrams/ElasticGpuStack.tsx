@@ -37,14 +37,14 @@ export function ElasticGpuStack({ compact = false }: { compact?: boolean }) {
           <div className="col-span-2 space-y-2">
             <Layer label="cuvs-java" tone="java" />
             <Layer label="cuVS"      tone="cuvs" />
-            <Layer label="GPU"       sublabel="NVIDIA L4 · CUDA 12" tone="gpu" />
+            <Layer label="GPU"       sublabel="NVIDIA GB10 · DGX Spark" tone="gpu" />
           </div>
-          <Layer label="CPU" sublabel="AMD EPYC" tone="cpu" />
+          <Layer label="CPU" sublabel="Arm · aarch64" tone="cpu" />
         </div>
       </div>
       {!compact && (
         <p className="text-[10px] text-slate-500 text-center mt-2 italic">
-          Elastic GPU Stack — bundled in Elasticsearch 9.4.2
+          Elastic GPU Stack, bundled in Elasticsearch 9.5.6
         </p>
       )}
     </div>

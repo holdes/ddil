@@ -1,0 +1,204 @@
+<!-- ============ PAGE 1: COVER ============ -->
+<div class="page cover">
+  <div class="top">
+    <div class="eyebrow">DDIL demo kit · Scenario runbook · 04</div>
+    <h1>SEC Findings. <span class="hl">An Elastic agent on the edge.</span></h1>
+    <p class="sub">Presenter runbook for the SEC Findings deck: audience, story, pre-show checks, a timed click path through all chapters, exact prompts, likely questions, failure recovery and reset.</p>
+    <div class="meta">
+      <span class="chip">Suggested length 15 to 20 minutes</span>
+      <span class="chip">Status as of 13 Nov 2026</span>
+      <span class="chip">Code basis: commit 5114c3a</span>
+    </div>
+
+    <div class="cols2 mt2">
+      <div class="card">
+        <div class="ch">Audience and outcome</div>
+        <div class="cb">
+          <div class="tr"></div>
+          <p><b>For</b> analysts, research teams and AI platform owners who want agentic search over large document sets without sending documents or prompts to a cloud model.</p>
+          <p><b>They leave knowing</b> that semantic search and an Elastic Agent Builder agent with ES|QL tools run on the kit, answer comparative questions across S&amp;P 500 10-K filings, and cite their sources.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch tl">The story in three sentences</div>
+        <div class="cb">
+          <div class="tr"></div>
+          <p>Risk disclosures in annual 10-K filings take an analyst hours to read and compare.</p>
+          <p>On the kit, Elasticsearch searches the filings by meaning, and an Agent Builder agent uses ES|QL tools to compare companies and sectors, with NVIDIA Nemotron 3.5 Lightning as its model.</p>
+          <p>The opening chapters race the kit's two nodes, GPU against CPU, as the reason the approach scales; the race is a simulation, and nothing in the deck carries a cloud bill.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="band">
+    <div>
+      <div class="k">Keyboard</div>
+      <p>Right arrow or PageDown: next. Left arrow or PageUp: previous. Digits 0 to 5 jump to chapters 00 to 05. The two segues are reachable only by arrows or a chip click. Esc exits to the chooser. In Chapter 04, Cmd+Enter or Ctrl+Enter sends.</p>
+    </div>
+    <div>
+      <div class="k">The live core</div>
+      <p>Chapters 03 and 04 carry the proof. Spend most of the session there. Move through 00 to 02 briskly and label them illustrative.</p>
+      <img src="../assets/logos/elastic-horizontal-white.svg" alt="Elastic" width="120" height="40">
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2: PREREQS ============ -->
+<div class="page">
+  <div class="rh"><span>04 · SEC Findings</span><span>Prerequisites and pre-show checks</span></div>
+  <div class="eyebrow">Before the audience arrives</div>
+  <h2>Local embeddings, <span class="hl">a provisioned agent, a warm model.</span></h2>
+  <p>Complete the kit health checks in runbook 02, pages 6 and 7, then run these. Allow 15 minutes.</p>
+  <table class="t">
+    <tr><th style="width:30px">#</th><th>Check</th><th style="width:220px">Pass condition</th></tr>
+    <tr><td class="k">1</td><td><code>GET http://192.168.1.10:8000/api/finance/agent/state</code></td><td><code>agent_id</code> <code>finance-analyst</code>, <code>connector_id</code> <code>finance-ollama-llm</code>, <code>llm_model</code> <code>nemotron-3.5-lightning</code>, <code>embed_model</code> <code>jina-embeddings-v5-omni-small</code>, <code>embed_backend</code> <code>jina</code>, <code>sec_index</code> <code>sec_10k_2026</code>.</td></tr>
+    <tr><td class="k">2</td><td><code>_cat/indices/sec_10k_2026?v</code> and <code>GET sec_10k_2026/_mapping</code></td><td>Index has documents and <code>emb</code> <code>dims</code> 768. The committed corpus is 1536-d; re-embed it with Jina v5 Omni on the kit first (runbook 02, K9). STAGED, confirm on kit.</td></tr>
+    <tr><td class="k">3</td><td><code>GET http://192.168.1.10:8000/api/finance/sectors</code></td><td>Returns sector buckets with counts.</td></tr>
+    <tr><td class="k">4</td><td>Kibana: Agent Builder lists <code>finance-analyst</code>; Discover opens <code>sec-10k-data-view</code>; dashboard <code>sec-10k-overview</code> opens.</td><td>All three present. If not, re-run <code>provision-agent-local.sh</code> or <code>provision-kibana-local.sh</code>.</td></tr>
+    <tr><td class="k">5</td><td>Warm Nemotron 3.5 Lightning (runbook 02, page 6).</td><td>Reply returns.</td></tr>
+    <tr><td class="k">6</td><td>Chapter 03: run "Cybersecurity incident response".</td><td>Hits and a <code>took_ms</code> value appear.</td></tr>
+    <tr><td class="k">7</td><td>Chapter 04: run one example question to completion. Press "Reset conversation".</td><td>Tool calls appear in the timeline and an answer with citations completes.</td></tr>
+    <tr><td class="k">8</td><td>Optional: count filings with ES|QL in Kibana: <code>FROM sec_10k_2026 | STATS filings = COUNT_DISTINCT(accession)</code></td><td>Record the number. Quote this, not the "503" on screen.</td></tr>
+  </table>
+
+  <div class="warn card mt">
+    <div class="ch">Disconnected-kit traps in this deck</div>
+    <div class="cb">
+      <ul>
+        <li>If the Jina server on <code>:8081</code> is down, Chapter 03 returns 502 "Query embed failed". If the index is still 1536-d, the kNN query fails on dims. Checks 1 and 2 catch both.</li>
+        <li>Chapter 05 links (Search Labs blog, GitHub, build.nvidia.com) need the internet. Do not click them on a disconnected kit.</li>
+        <li>Workflows "Open in Kibana" and "Trigger now" return 404. The workflow is not provisioned.</li>
+      </ul>
+    </div>
+  </div>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 3: CLICK PATH 1 ============ -->
+<div class="page">
+  <div class="rh"><span>04 · SEC Findings</span><span>Click path · 1 of 2</span></div>
+  <div class="eyebrow">Timed click path · framing chapters</div>
+  <h2>Set up the problem, <span class="hl">label the illustrations.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:44px">Time</th><th style="width:72px">Screen</th><th style="width:110px">Action</th><th>What to say</th><th style="width:98px">Proof point</th><th style="width:58px">Status</th></tr>
+    <tr><td class="k">0:00</td><td>Chooser</td><td>Click the "SEC Findings" card.</td><td>"This deck asks a financial question of public filings. The search and the agent run on this kit."</td><td>None</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">0:30</td><td>00 Setup</td><td>Summarise in one sentence.</td><td>"These are the two nodes in this case: a DGX Spark with a GB10 GPU and a Framework Desktop on CPU, one Elasticsearch 9.5.6 cluster. One setting differs."</td><td><code>vectors.indexing.use_gpu</code></td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">1:30</td><td>01 Speed</td><td>Say the simulation line, then "Start Race". Use the presenter tabs only if asked.</td><td>"This is a timed simulation of GPU against CPU vector indexing. It shows the shape. The numbers are scripted, so I will not quote them."</td><td>None. Do not quote speedup or TCO.</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">3:30</td><td>02 Side-by-Side</td><td>Show the Architecture tab (cuVS stack), then the kit economics panel.</td><td>"Inference and embeddings run on the DGX Spark. There is no per-hour or per-token bill, and nothing leaves the case."</td><td>Kit economics panel</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">5:00</td><td>Elastic segue</td><td>Right arrow.</td><td>"One index serves analysts, developers, dashboards and agents. On this kit, the filings were embedded locally with Jina Embeddings v5 Omni at 768 dimensions."</td><td>None</td><td><span class="tag staged">Staged</span></td></tr>
+  </table>
+
+  <div class="card mt">
+    <div class="ch or">Cost on the kit</div>
+    <div class="cb">
+      <p>Chapters 00 to 02 show no cloud prices: the kit has no per-hour or per-token bill. The presenter panel in Chapter 01 still cites 78 % and a scale projection from an enterprise cost model. Neither is measured on the kit. Quote neither. If the customer presses, say the cost case depends on their volumes and offer a follow-up.</p>
+    </div>
+  </div>
+    <h3 class="mt2">Chapter map</h3>
+  <table class="t tight">
+    <tr><th style="width:70px">Key</th><th style="width:120px">Chip</th><th>Content</th><th style="width:66px">Status</th></tr>
+    <tr><td class="k">0</td><td>00 Setup</td><td>The Hardware Face-Off (kit nodes)</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">1</td><td>01 Speed</td><td>Indexing race and presenter panel</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">2</td><td>02 Side-by-Side</td><td>Race chart, workflow, cuVS stack, kit economics</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">arrow</td><td>Elastic</td><td>Segue: platform, pipeline</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">3</td><td>03 Interface</td><td>Semantic search, code panel, Kibana links</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">4</td><td>04 Agentic</td><td>Agent Builder chat with tool timeline</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">arrow</td><td>Workflows</td><td>Daily 10-K AI-Risk Digest YAML</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">5</td><td>05 The Stack</td><td>Recap and external links</td><td><span class="tag doc">Doc-only</span></td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 4: CLICK PATH 2 ============ -->
+<div class="page">
+  <div class="rh"><span>04 · SEC Findings</span><span>Click path · 2 of 2</span></div>
+  <div class="eyebrow">Timed click path · the live core</div>
+  <h2>Search, then <span class="hl">an agent that cites its sources.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:44px">Time</th><th style="width:72px">Screen</th><th style="width:110px">Action</th><th>What to say</th><th style="width:98px">Proof point</th><th style="width:58px">Status</th></tr>
+    <tr><td class="k">6:00</td><td>03 Interface</td><td>Click "AI model risk and governance disclosures". Then a sector chip. Then the cURL or Python tab.</td><td>"The query was embedded on the DGX Spark and searched on the kit. The timing is real." On the code panel: "On the kit the vector is 768 dimensions from Jina Embeddings v5 Omni."</td><td><code>took_ms</code>, hit count, sector counts</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">8:00</td><td>03 Interface</td><td>Optional: "Discover" Kibana button to show raw documents.</td><td>"Same index, same documents, opened in Kibana."</td><td><code>sec-10k-data-view</code></td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">9:00</td><td>04 Agentic</td><td>Click "Which financial-sector filings flag commercial real estate exposure as a material risk?" Send.</td><td>"This is Elastic Agent Builder running on the kit, with NVIDIA Nemotron 3.5 Lightning on the DGX Spark. Watch the timeline: it chooses ES|QL tools, runs them against the index and cites ticker and accession."</td><td>Tool calls in the timeline; citations</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">12:00</td><td>04 Agentic</td><td>Read the answer. Open one citation in Kibana if asked.</td><td>"Every claim is tied to a filing you can open."</td><td>Ticker and accession numbers</td><td><span class="tag live">Live</span></td></tr>
+    <tr><td class="k">13:00</td><td>04 Agentic</td><td>Point at the AgentConfigCard.</td><td>"The model is Nemotron 3.5 Lightning on the DGX Spark through a local connector. The embedder is Jina v5 Omni on the same box."</td><td>LLM and embedder rows</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">14:00</td><td>Workflows segue</td><td>Right arrow. Do not click the links.</td><td>"This is an example workflow definition: a daily digest that calls the same agent. It is not deployed on this kit."</td><td>None</td><td><span class="tag staged">Staged</span></td></tr>
+    <tr><td class="k">15:00</td><td>05 The Stack</td><td>Recap. Do not click the links.</td><td>"Everything you saw ran in this case." Then close on the live chapters.</td><td>None</td><td><span class="tag doc">Doc-only</span></td></tr>
+    <tr><td class="k">close</td><td>Any</td><td>Chapter 04 "Reset conversation", then Esc.</td><td>"Search, agent and model ran here. Nothing left the case."</td><td>Returns to the chooser</td><td><span class="tag live">Live</span></td></tr>
+  </table>
+  <p class="small">Agent run time is not measured on the kit. The "26 to 3 LLM calls, 220 s to 77 s" claim in the provisioning script is a comment only. Choose a shorter question if the room is tight on time.</p>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 5: PROMPTS AND QUESTIONS ============ -->
+<div class="page">
+  <div class="rh"><span>04 · SEC Findings</span><span>Prompts and questions</span></div>
+  <div class="eyebrow">Suggested prompts, quoted from the UI</div>
+  <h2>Click the examples. <span class="hl">Do not improvise.</span></h2>
+  <div class="cols2">
+    <div>
+      <h3 style="margin-top:0">Chapter 03 search examples</h3>
+      <ul>
+        <li class="q">AI model risk and governance disclosures</li>
+        <li class="q">Commercial real estate exposure</li>
+        <li class="q">Supply chain disruption risk in semiconductors</li>
+        <li class="q">Climate-related transition risk</li>
+        <li class="q">Cybersecurity incident response</li>
+      </ul>
+      <p class="small">Placeholder text: "Search 503 S&amp;P 500 10-K filings semantically…". The 503 is static.</p>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Chapter 04 agent examples</h3>
+      <ul>
+        <li class="q">Compare AI risk disclosures across AAPL, MSFT, GOOGL and META, what do they agree on, where do they differ?</li>
+        <li class="q">Which financial-sector filings flag commercial real estate exposure as a material risk?</li>
+        <li class="q">What climate-transition risks does the Energy sector disclose in its 10-Ks?</li>
+        <li class="q">Across the S&amp;P 500, which sector has the most filings citing supply-chain disruption?</li>
+        <li class="q">Show me three healthcare 10-Ks that talk about generative AI in clinical workflows.</li>
+      </ul>
+      <p class="small">In the UI the first example joins its two clauses with a dash instead of the comma shown here. Click the example rather than typing it.</p>
+    </div>
+  </div>
+
+  <div class="eyebrow mt">Likely questions</div>
+  <table class="t sm">
+    <tr><th style="width:170px">Question</th><th>Accurate answer</th></tr>
+    <tr><td class="k">Which model is the agent using?</td><td>NVIDIA Nemotron 3.5 Lightning on Ollama on the DGX Spark, through the Kibana connector <code>finance-ollama-llm</code>. The config card reads the model name from the backend.</td></tr>
+    <tr><td class="k">How are the filings embedded?</td><td>On the kit, with Jina Embeddings v5 Omni at 768 dimensions, cosine HNSW, on the DGX Spark. Jina is part of Elastic.</td></tr>
+    <tr><td class="k">What tools does the agent have?</td><td>Three ES|QL tools: <code>finance.company_disclosures</code>, <code>finance.compare_companies</code>, <code>finance.sector_breakdown</code>. Plus seven platform tools such as search, <code>execute_esql</code> and <code>generate_esql</code>. Instructions cap it at six tool calls and require ticker and accession citations.</td></tr>
+    <tr><td class="k">How many filings?</td><td>Quote the count from pre-show check 8. The "503" and "93,541 chunks" on screen are static text.</td></tr>
+    <tr><td class="k">Can it hallucinate?</td><td>The answer is model output and should be checked. The agent retrieves with ES|QL over the index and cites ticker and accession, so every claim can be opened in Kibana.</td></tr>
+    <tr><td class="k">Was the GPU race real? What is the TCO?</td><td>The race is a simulation and the cost figures are illustrative models. Offer a follow-up with published GPU indexing material and a cost model built on their volumes.</td></tr>
+    <tr><td class="k">Is the workflow running?</td><td>No. It is an example definition shown as YAML.</td></tr>
+    <tr><td class="k">Does this need the internet?</td><td>Not for search or the agent: Jina v5 Omni and Nemotron 3.5 Lightning run on the DGX Spark. Chapter 05 links do.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 6: RECOVERY AND RESET ============ -->
+<div class="page">
+  <div class="rh"><span>04 · SEC Findings</span><span>Failure recovery and reset</span></div>
+  <div class="eyebrow or">Failure recovery per step</div>
+  <h2>What breaks, <span class="hl">and what to do on stage.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:96px">Step</th><th style="width:180px">Symptom</th><th>Recovery on stage</th></tr>
+    <tr><td class="k">01 Speed</td><td>Race does not start</td><td>Press Reset, then Start Race. If it still fails, move on; the chapter carries no proof.</td></tr>
+    <tr><td class="k">03 Interface</td><td>502 "Query embed failed"</td><td>The backend cannot reach Jina v5 Omni on <code>:8081</code>. Skip to Chapter 04, which does not use the backend embed path. After the session, check <code>GET :8081/health</code> (runbook 02).</td></tr>
+    <tr><td class="k">03 Interface</td><td>Sector chips missing or an error</td><td>The sectors call failed against ES. Run a search without a sector filter. If search also fails, move to Kibana Discover.</td></tr>
+    <tr><td class="k">03 Interface</td><td>Kibana buttons open a blank or error page</td><td>Kibana or its data view is not ready. Stay in the app.</td></tr>
+    <tr><td class="k">04 Agentic</td><td>No response for a long time</td><td>The call has no read timeout. Press "Reset conversation", reload, and send a shorter example. Check the model with the warm-up command afterwards.</td></tr>
+    <tr><td class="k">04 Agentic</td><td>Error or malformed events</td><td>Agent Builder API or connector error. Open Agent Builder in Kibana and run the same question there if it works; otherwise close on Chapter 03.</td></tr>
+    <tr><td class="k">Workflows</td><td>Link clicked, 404</td><td>"This workflow is an example and is not deployed here." Press Back.</td></tr>
+    <tr><td class="k">05 The Stack</td><td>Link clicked, no page</td><td>"That link needs the internet, which this kit does not have." Press Back.</td></tr>
+  </table>
+
+  <div class="eyebrow mt2">Reset</div>
+  <h3>Between audiences</h3>
+  <ol>
+    <li>In Chapter 04, press "Reset conversation".</li>
+    <li>If the Chapter 01 race ran, press Reset on that chapter.</li>
+    <li>Press Esc to return to the chooser and reload the browser tab.</li>
+    <li>Warm the model again if the next session is more than a few minutes away.</li>
+  </ol>
+  <!--foot-->
+</div>

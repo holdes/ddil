@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DDIL Demo Kit</title>
+<style>
+@font-face{font-family:'IBM Plex Mono';font-weight:400;font-style:normal;font-display:swap;src:url(../brand/fonts/IBMPlexMono-400.woff2) format('woff2');}@font-face{font-family:'IBM Plex Mono';font-weight:500;font-style:normal;font-display:swap;src:url(../brand/fonts/IBMPlexMono-500.woff2) format('woff2');}@font-face{font-family:'IBM Plex Mono';font-weight:600;font-style:normal;font-display:swap;src:url(../brand/fonts/IBMPlexMono-600.woff2) format('woff2');}@font-face{font-family:'IBM Plex Mono';font-weight:700;font-style:normal;font-display:swap;src:url(../brand/fonts/IBMPlexMono-700.woff2) format('woff2');}@font-face{font-family:'Inter';font-weight:300;font-style:normal;font-display:swap;src:url(../brand/fonts/Inter-300.woff2) format('woff2');}@font-face{font-family:'Inter';font-weight:400;font-style:normal;font-display:swap;src:url(../brand/fonts/Inter-400.woff2) format('woff2');}@font-face{font-family:'Inter';font-weight:500;font-style:normal;font-display:swap;src:url(../brand/fonts/Inter-500.woff2) format('woff2');}@font-face{font-family:'Inter';font-weight:600;font-style:normal;font-display:swap;src:url(../brand/fonts/Inter-600.woff2) format('woff2');}@font-face{font-family:'Inter';font-weight:700;font-style:normal;font-display:swap;src:url(../brand/fonts/Inter-700.woff2) format('woff2');}
+:root{
+  --blue:#0B64DD; --blue-l:#D9E8FF; --teal:#02BCB7; --pink:#F04E98; --orange:#FF7E62;
+  --ink:#1D1E24; --char:#343741; --grey:#69707D; --grey-l:#98A2B3; --line:#D3DAE6; --bg:#F5F7FA;
+  --sans:'Inter',-apple-system,system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#22242C}
+#deck{position:absolute;width:1280px;height:720px;transform-origin:0 0}
+.slide{position:absolute;inset:0;width:1280px;height:720px;overflow:hidden;background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:64px 72px;display:none}
+.slide.on{display:block}
+.slide.soft{background:var(--bg)}
+canvas.fx,svg.fx{position:absolute;z-index:1}
+.z{position:relative;z-index:2}
+.eyebrow{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:8px;height:8px;background:var(--blue)}
+.eyebrow.pk::before{background:var(--pink)}
+h1{font-weight:600;font-size:56px;line-height:1.04;letter-spacing:-2px;margin-top:16px;max-width:1100px}
+.b{color:var(--blue)} .p{color:var(--pink)} .t{color:var(--teal)}
+.sub{font-size:21px;line-height:1.45;color:var(--char);max-width:760px;margin-top:16px}
+.how{position:absolute;left:72px;bottom:58px;z-index:3;font:500 12px var(--mono);letter-spacing:.04em;color:var(--grey-l)}
+.how b{color:var(--grey);font-weight:600}
+.foot{position:absolute;left:72px;right:72px;bottom:24px;height:22px;display:flex;align-items:center;justify-content:space-between;z-index:5;font:500 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey-l)}
+.foot .lg{display:flex;align-items:center;gap:8px;color:var(--ink);font:600 13px var(--sans);letter-spacing:-.2px;text-transform:none}
+.foot .lg svg{width:18px;height:18px}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.in1{animation:in .6s cubic-bezier(.2,.7,.2,1) .05s both}
+.in2{animation:in .6s cubic-bezier(.2,.7,.2,1) .15s both}
+.in3{animation:in .6s cubic-bezier(.2,.7,.2,1) .35s both}
+.in4{animation:in .6s cubic-bezier(.2,.7,.2,1) .6s both}
+.lat{opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.lat.on{opacity:1;transform:none}
+body.static .in1,body.static .in2,body.static .in3,body.static .in4{animation:none!important}
+body.static .lat{transition:none}
+
+.big{font:500 140px/1 var(--sans);letter-spacing:-6px}
+.lbl{font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.stat{font:500 52px/1 var(--sans);letter-spacing:-2px}
+
+/* step flow */
+.step{position:absolute;z-index:2;width:330px;border:1px solid var(--ink);background:#fff;padding:18px 20px;box-shadow:12px 12px 0 rgba(29,30,36,.05)}
+.step .n{font:600 12px var(--mono);letter-spacing:.08em;color:var(--blue)}
+.step .h{font:600 24px/1.15 var(--sans);letter-spacing:-.6px;margin-top:6px}
+.step .d{font-size:15px;line-height:1.45;color:var(--char);margin-top:8px;min-height:44px}
+.step.person{border-color:var(--pink)}
+.step.person .n{color:var(--pink)}
+.btns{display:flex;gap:8px;margin-top:12px}
+.btn{font:600 14px var(--sans);padding:8px 16px;border:1px solid var(--ink);background:#fff;transition:all .3s}
+.btn.go{background:var(--teal);border-color:var(--teal);color:#fff}
+
+/* before / after */
+.panel{position:absolute;z-index:2;top:236px;width:540px;height:370px;border:1px solid var(--ink);background:#fff;overflow:hidden}
+.panel .ph{height:44px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:10px;background:var(--bg)}
+.panel .ph b{font:600 13px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.panel .ph span{margin-left:auto;font:600 13px var(--mono)}
+.casef{padding:18px 22px}
+.cf{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.35}
+.cf .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);padding-top:3px}
+
+/* toggles */
+.tg{display:grid;grid-template-columns:1fr 420px;align-items:center;height:96px;border-bottom:1px solid var(--line)}
+.tg:first-child{border-top:1px solid var(--ink)}
+.tg .a{font:500 26px/1.2 var(--sans);letter-spacing:-.6px}
+.tg .a small{display:block;font:400 15px var(--sans);color:var(--grey);letter-spacing:0;margin-top:4px}
+.sw{position:relative;height:52px;border:1px solid var(--ink);display:grid;grid-template-columns:1fr 1fr;font:600 13px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.sw span{display:grid;place-items:center;position:relative;z-index:2;color:var(--grey-l);transition:color .3s}
+.sw em{position:absolute;top:0;bottom:0;width:50%;left:0;z-index:1;background:#E9EDF3;transition:left .6s cubic-bezier(.2,.7,.2,1),background .4s}
+
+/* model chain */
+.chain{position:absolute;left:72px;right:72px;top:300px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;z-index:2}
+.lk{border:1px solid var(--ink);background:#fff;padding:18px;min-height:132px;opacity:.2;transition:opacity .4s,border-color .3s,background .3s}
+.lk.on{opacity:1}
+.lk .n{font:600 12px var(--mono);letter-spacing:.08em;color:var(--grey)}
+.lk .h{font:600 21px/1.2 var(--sans);letter-spacing:-.4px;margin-top:6px}
+.lk .m{display:inline-block;margin-top:14px;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:var(--grey);transition:all .3s}
+.lk.bad{border-color:var(--orange);background:#FFF4F1}
+.lk .m.no{background:var(--orange);border-color:var(--orange);color:#fff}
+.lk .m.ow{border-color:var(--pink);color:var(--pink)}
+.lk.done .n{color:var(--teal)}
+
+/* trace */
+.tr{position:absolute;z-index:2;top:270px;width:250px;border:1px solid var(--ink);background:#fff;padding:16px 18px;min-height:190px}
+.tr .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.tr .h{font:600 20px/1.2 var(--sans);letter-spacing:-.4px;margin-top:8px}
+.tr .d{font:500 13px/1.5 var(--mono);color:var(--grey);margin-top:10px}
+.tr.ctl{border:2px solid var(--teal)}
+.tr.ctl .k{color:var(--teal)}
+
+.ws{display:flex;gap:10px;margin-top:14px}
+.chip{display:inline-flex;align-items:center;font:500 13px var(--mono);letter-spacing:.04em;color:var(--char);border:1px solid var(--line);background:#fff;padding:6px 12px}
+
+
+.card{border:1px solid var(--ink);background:#fff;box-shadow:12px 12px 0 rgba(29,30,36,.05)}
+.card .ch{height:36px;border-bottom:1px solid var(--line);background:var(--bg);display:flex;align-items:center;padding:0 14px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);gap:8px}
+.card .ch b{margin-left:auto;color:var(--ink)}
+.pa{display:grid;grid-template-columns:100px 1fr auto;align-items:center;gap:10px;height:46px;border-bottom:1px solid var(--line);font-size:15.5px;color:var(--char)}
+.pa:last-child{border-bottom:none}
+.pa .g{font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.pa .s{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--orange);color:var(--orange)}
+.pa .s.ok{border-color:var(--teal);color:var(--teal)}
+.statS{display:block;font:500 34px/1 var(--sans);letter-spacing:-1px;color:var(--ink);margin-bottom:6px;text-transform:none}
+.ag{display:grid;grid-template-columns:60px 1fr;align-items:center;height:52px;border-bottom:1px solid var(--line);font:500 24px var(--sans);letter-spacing:-.5px}
+.ag:first-child{border-top:1px solid var(--ink)}
+.ag i{font:600 13px var(--mono);font-style:normal;color:var(--blue)}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:rgba(16,18,24,.96);color:#E6EBF2;font:400 15px/1.55 var(--sans);padding:16px 28px;display:none;z-index:50}
+#notes b{color:#48EFCF;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px}
+#sorter{position:fixed;inset:0;z-index:200;background:#F5F7FA;display:none;flex-direction:column;font-family:var(--sans);color:var(--ink)}
+#sorter.open{display:flex}
+#sorter .sh{display:flex;align-items:center;gap:12px;padding:16px 28px;border-bottom:1px solid var(--line);background:#fff}
+#sorter .sh h2{font:600 18px var(--sans);letter-spacing:-.3px;margin:0}
+#sorter .sh .hint{font:500 12px var(--mono);color:var(--grey);margin-right:auto}
+#sorter .sh button{font:600 13px var(--sans);padding:8px 14px;border:1px solid var(--ink);background:#fff;cursor:pointer}
+#sorter .sh button.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+#sorter .sg{flex:1;overflow:auto;padding:24px 28px 60px;display:grid;grid-template-columns:repeat(auto-fill,258px);gap:22px 18px;align-content:start}
+.srC{position:relative;width:258px;cursor:grab;user-select:none}
+.srC .srT{position:relative;width:256px;height:144px;overflow:hidden;border:1px solid var(--line);background:#fff;transition:box-shadow .15s,border-color .15s}
+.srC:hover .srT{border-color:var(--grey-l);box-shadow:0 4px 14px rgba(29,30,36,.12)}
+.srC.srK .srT{border:2px solid var(--blue)}
+.srC .srT>.slide{display:block!important;position:absolute;left:0;top:0;transform:scale(.2);transform-origin:0 0;pointer-events:none}
+.srC .srT *{animation:none!important;transition:none!important}
+.srC .srM{display:flex;align-items:baseline;gap:8px;margin-top:7px}
+.srC .srN{font:600 12px var(--mono);color:var(--blue);min-width:22px}
+.srC .srX{font:500 12.5px/1.3 var(--sans);color:var(--char);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:1}
+.srC .srB{position:absolute;top:6px;right:6px;display:none;gap:4px}
+.srC:hover .srB{display:flex}
+.srC .srB button{font:600 11px var(--mono);padding:3px 7px;border:1px solid var(--ink);background:#fff;cursor:pointer}
+.srC.srH .srT{opacity:.35}
+.srC.srH .srN{color:var(--grey-l)}
+.srC.srH::after{content:'HIDDEN';position:absolute;left:8px;top:8px;font:600 10px var(--mono);letter-spacing:.08em;background:var(--ink);color:#fff;padding:3px 6px}
+.srC.srD{opacity:.35}
+.srC.srIb::before,.srC.srIa::before{content:'';position:absolute;top:0;width:4px;height:144px;background:var(--pink)}
+.srC.srIb::before{left:-12px}.srC.srIa::before{right:-12px}
+#hud{position:fixed;right:14px;bottom:10px;font:500 11px var(--mono);color:rgba(255,255,255,.35);z-index:40;transition:opacity 1s}
+body.static #hud{display:none}
+.bb{display:grid;grid-template-columns:44px 300px 1fr 1fr;align-items:center;gap:18px;height:62px;border:1px solid var(--ink);background:#fff;margin-top:-1px;padding:0 20px 0 0;opacity:0;transform:translateY(-14px);transition:opacity .45s,transform .45s}
+.bb.on{opacity:1;transform:none}
+.bb .bn{height:100%;display:grid;place-items:center;font:600 12px var(--mono);color:#fff}
+.bb .bh{font:600 19px/1.15 var(--sans);letter-spacing:-.4px}
+.bb .bh small{display:block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey);margin-top:3px}
+.bb .bj{font-size:15px;line-height:1.35;color:var(--char)}
+.bb .bc{font-size:15px;line-height:1.35;color:var(--ink);border-left:2px solid var(--line);padding-left:14px}
+.bbh{display:grid;grid-template-columns:44px 300px 1fr 1fr;gap:18px;padding:0 20px 8px 0;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.sbh{position:absolute;top:258px;width:330px;height:300px;border:1px solid var(--ink);background:#fff;padding:22px 24px;box-shadow:12px 12px 0 rgba(29,30,36,.05);opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.sbh.on{opacity:1;transform:none}
+.sbh .k{font:600 12px var(--mono);letter-spacing:.1em;display:flex;align-items:center;gap:10px}
+.sbh .k svg{width:34px;height:34px}
+.sbh .h{font:600 25px/1.15 var(--sans);letter-spacing:-.6px;margin-top:14px}
+.sbh .d{font-size:16px;line-height:1.45;color:var(--char);margin-top:10px}
+.sbh .q{position:absolute;left:24px;right:24px;bottom:20px;border-top:1px solid var(--line);padding-top:12px;font:500 14px/1.4 var(--sans);color:var(--ink)}
+.def{border-left:2px solid var(--ink);padding:4px 0 4px 14px;margin-bottom:22px;font-size:17px;line-height:1.4;color:var(--char)}
+.def b{display:block;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+.sl{display:grid;grid-template-columns:34px 1fr;align-items:center;height:48px;border-bottom:1px solid var(--line);font-size:17px;color:var(--ink)}
+.sl i{font:600 13px var(--mono);font-style:normal;color:var(--blue)}
+.chainbar{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line)}
+.chainbar span{font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:10px 4px;color:var(--grey-l);border-right:1px solid var(--line);transition:all .3s}
+.chainbar span:last-child{border-right:none}
+.chainbar span.lit{background:var(--blue);color:#fff}
+.code2{background:var(--ink);color:#E6EBF2;font:400 14px/1.7 var(--mono);padding:14px 16px;min-height:230px;white-space:pre}
+.code2 .q{color:#48EFCF}
+.wst{display:grid;grid-template-columns:48px 1fr 150px;align-items:center;gap:14px;height:78px;border-bottom:1px solid var(--line)}
+.wst:first-child{border-top:1px solid var(--ink)}
+.wst b{display:block;font:600 21px var(--sans);letter-spacing:-.4px}
+.wst small{display:block;font-size:14.5px;color:var(--grey);margin-top:3px}
+.wi{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--ink);font:600 13px var(--mono);color:var(--grey-l);transition:all .3s}
+.wi.ai{border-color:var(--pink);color:var(--pink)}
+.wst.done .wi{background:var(--teal);border-color:var(--teal);color:#fff}
+.wst.done .wi.ai{background:var(--pink);border-color:var(--pink);color:#fff}
+.wt{justify-self:end;font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey)}
+.wst:nth-child(2) .wt{color:var(--pink)}
+.rl{display:grid;grid-template-columns:30px 1fr;align-items:center;height:52px;border-bottom:1px solid var(--line)}
+.rl .ck{width:20px;height:20px;display:grid;place-items:center;background:var(--teal);color:#fff;font-size:12px}
+.rl b{display:block;font:600 16px var(--sans)}
+.rl small{display:block;font:500 12.5px var(--mono);color:var(--grey);margin-top:2px}
+.nzr{display:grid;grid-template-columns:400px 150px 1fr;align-items:center;gap:18px;height:58px;border-bottom:1px solid var(--line);transition:opacity .6s}
+.nzr:first-child{border-top:1px solid var(--ink)}
+.nzr.faded{opacity:.45}
+.nzh{font-size:17px}
+.nzs{justify-self:start;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border:1px solid var(--line);color:var(--grey);transition:all .3s}
+.nzs.cl{background:var(--teal);border-color:var(--teal);color:#fff}
+.nzs.op{background:var(--pink);border-color:var(--pink);color:#fff}
+.nzn{font:500 14px var(--mono);color:var(--char)}
+.recap{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+.rc{font:600 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border:1px solid var(--line);color:var(--grey-l);transition:all .4s}
+.rc.on{border-color:var(--ink);color:var(--ink)}
+.ra{color:var(--grey-l);font-family:var(--mono)}
+.nc{position:absolute;z-index:2;top:262px;width:326px;border:1px solid var(--ink);background:#fff;padding:18px 20px;min-height:186px}
+.nc .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.nc .h{font:600 22px/1.2 var(--sans);letter-spacing:-.5px;margin-top:8px}
+.nc .d{font-size:15px;line-height:1.5;color:var(--char);margin-top:10px}
+.nc.tri{border:2px solid var(--pink)} .nc.tri .k{color:var(--pink)}
+.tagc{display:inline-block;font:600 11px var(--mono);letter-spacing:.04em;padding:3px 8px;border:1px solid var(--blue);color:var(--blue);margin:0 6px 6px 0}
+.fam{display:inline-flex;align-items:center;gap:8px;font:600 12px var(--mono);letter-spacing:.04em;padding:7px 12px;border:1px solid var(--line);background:#fff;margin:0 8px 8px 0;color:var(--char)}
+.fam b{color:var(--blue)}
+
+.lp-bar{position:relative;height:4px;background:var(--line);margin:30px 0 30px}
+.lp-bar em{position:absolute;top:-10px;width:24px;height:24px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 8px rgba(11,100,221,.15);transform:translateX(-50%);transition:left .9s cubic-bezier(.2,.7,.2,1)}
+.lp{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.lpc{border:1px solid var(--line);background:#fff;padding:22px;min-height:250px;transition:all .4s}
+.lpc .k{font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.lpc .h{font:600 28px var(--sans);letter-spacing:-.8px;margin-top:8px}
+.lpc .x{font-size:16px;line-height:1.5;color:var(--char);margin-top:12px}
+.lpc .v{font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-top:16px;color:var(--grey)}
+.lpc.on{border:2px solid var(--blue);box-shadow:12px 12px 0 rgba(11,100,221,.08)}
+.lpc.on .k,.lpc.on .v{color:var(--blue)}
+.lpc.dim{opacity:.55}
+.nh{display:grid;grid-template-columns:1fr 340px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);padding-bottom:8px;border-bottom:1px solid var(--ink)}
+.nr{display:grid;grid-template-columns:1fr 340px;align-items:center;height:41px;border-bottom:1px solid var(--line);opacity:.15;transition:opacity .4s,background .4s}
+.nr.on{opacity:1}
+.nw{font-size:16px;color:var(--ink)}
+.nq{font-size:15px;color:var(--grey-l);transition:color .4s}
+.nq b{display:inline-block;min-width:66px;font:600 13px var(--mono);color:var(--grey-l);transition:color .4s}
+.nq i{font:500 12px var(--mono);font-style:normal;float:right;padding-right:8px;line-height:22px}
+.nr.hit .nq{color:var(--char)} .nr.hit .nq b{color:var(--pink)}
+.nr.pick{background:rgba(240,78,152,.07);box-shadow:inset 3px 0 0 var(--pink)}
+.cpl{position:absolute;left:72px;z-index:3;font:600 20px var(--sans);letter-spacing:-.4px;color:var(--ink);width:140px}
+.cpl small{display:block;font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);margin-top:4px}
+.cpb{position:absolute;z-index:3;width:170px;height:64px;border:1px solid var(--ink);background:#fff;padding:10px 12px;font:600 15px/1.2 var(--sans);color:var(--ink)}
+.cpb small{display:block;font:500 11px/1.3 var(--mono);color:var(--grey);margin-top:5px;letter-spacing:.02em}
+.cpb.pk{border:2px solid var(--pink)} .cpb.dk{background:var(--ink);color:#fff} .cpb.dk small{color:rgba(255,255,255,.7)}
+.cpw{position:absolute;z-index:3;width:170px;height:32px;border:1px solid var(--ink);background:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;font:600 13px var(--sans);transition:box-shadow .3s}
+.cpw i{width:8px;height:8px;display:inline-block}
+.cpw.busy,.cpb.busy{box-shadow:0 0 0 5px rgba(11,100,221,.18);border-color:var(--blue)}
+.cpb{transition:box-shadow .3s,border-color .3s}
+.cptag{position:absolute;left:230px;top:546px;z-index:3;font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--orange)}
+.cpd{border-top:2px solid var(--ink);padding-top:10px;font-size:15px;line-height:1.4;color:var(--char)}
+.cpd b{display:block;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
+.cpd s{color:var(--grey-l)} .cpd em{font-style:normal;color:var(--blue);font-weight:600}
+.agr{display:grid;grid-template-columns:70px 240px 1fr 90px;align-items:center;height:78px;border-bottom:1px solid var(--line)}
+.agr:first-child{border-top:1px solid var(--ink)}
+.agr i{font:600 14px var(--mono);font-style:normal;color:var(--blue)} .agr b{font:600 28px var(--sans);letter-spacing:-.8px}
+.agr span{font-size:17px;color:var(--char)} .agr em{font:600 12px var(--mono);font-style:normal;color:var(--grey);justify-self:end}
+.tlbar{height:2px;background:var(--line);position:relative;margin:8px 0 26px} .tlbar em{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+.tlp{position:relative} .tlp .dot{position:absolute;top:-33px;left:0;width:12px;height:12px;border-radius:50%;background:var(--ink)} .tlp .dot.pk{background:var(--pink);box-shadow:0 0 0 6px rgba(240,78,152,.2)}
+.tlp .d{font:600 13px var(--mono);color:var(--grey)} .tlp .h{font:600 22px/1.2 var(--sans);letter-spacing:-.5px;margin-top:8px}
+.tlp .x{font-size:15.5px;line-height:1.45;color:var(--char);margin-top:10px} .tlp .s{font:500 12px var(--mono);color:var(--grey-l);margin-top:12px}
+.hfr{display:grid;grid-template-columns:170px 1fr 170px;align-items:center;height:56px;border-bottom:1px solid var(--line)}
+.hfr:first-child{border-top:1px solid var(--ink)} .hfr .d{font:600 13px var(--mono);color:var(--grey)} .hfr .h{font-size:19px;color:var(--ink)}
+.hfr .fl{justify-self:end;font:600 11px var(--mono);letter-spacing:.06em;color:#fff;background:var(--pink);padding:5px 10px}
+.lc{border:1px solid var(--ink);background:#fff;padding:22px;min-height:330px}
+.lc .n{font:500 56px/1 var(--sans);color:var(--blue);letter-spacing:-2px} .lc .h{font:600 22px/1.2 var(--sans);letter-spacing:-.5px;margin-top:14px}
+.lc .x{font-size:15px;line-height:1.5;color:var(--grey);margin-top:12px} .lc .a{font-size:16px;line-height:1.45;color:var(--ink);margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-weight:500}
+.mt{border-top:2px solid var(--ink);padding:14px 2px 0;font-size:16px;line-height:1.5;color:var(--char);min-height:150px} .mt b{display:block;font:600 21px var(--sans);letter-spacing:-.4px;color:var(--ink);margin-bottom:8px}
+.tx{display:grid;grid-template-columns:230px 1fr 1fr;align-items:center;gap:20px;height:70px;border-bottom:1px solid var(--line)} .tx0{height:34px;border-bottom:1px solid var(--ink)}
+.tx b{font:600 20px var(--sans);letter-spacing:-.4px} .tx .was{font-size:17px;color:var(--char);position:relative;transition:color .4s}
+.tx .was::after{content:'';position:absolute;left:0;top:50%;height:2px;width:0;background:var(--pink);transition:width .5s}
+.tx .was.struck{color:var(--grey-l)} .tx .was.struck::after{width:100%} .tx .now{font:600 17px var(--sans);color:var(--teal)}
+.wc{border:1px solid var(--ink);background:#fff;padding:24px;min-height:300px} .wc .h{font:600 40px var(--sans);letter-spacing:-1.4px;color:var(--blue)}
+.wc .d{font:600 20px/1.25 var(--sans);margin-top:12px} .wc .x{font-size:16px;line-height:1.5;color:var(--char);margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.sc{border-top:1px solid var(--ink)} .sc-row{display:grid;grid-template-columns:40px 150px 1fr 260px;align-items:center;border-bottom:1px solid var(--line);height:58px}
+.sc-n{font:500 12px var(--mono);color:var(--grey)} .sc-k{font:600 12px var(--mono);letter-spacing:.08em;color:var(--blue)} .sc-q{font-size:17px;color:var(--ink)}
+.sc-s{justify-self:end;font:600 10.5px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--grey-l);border:1px solid var(--line);padding:5px 9px;transition:all .35s}
+.sc-s.done{color:#fff;background:var(--teal);border-color:var(--teal)}
+.sc-s.ask{color:var(--orange);border-color:var(--orange)}
+/* ── Agent collective deck additions ── */
+.ac-card{border:1px solid var(--ink);background:#fff;padding:20px 22px;box-shadow:10px 10px 0 rgba(29,30,36,.05)}
+.ac-k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.ac-n{font:600 54px/1 var(--sans);letter-spacing:-2px;margin-top:10px;font-variant-numeric:tabular-nums}
+.ac-l{font-size:15px;line-height:1.4;color:var(--char);margin-top:10px}
+.ac-src{font:500 10.5px var(--mono);letter-spacing:.04em;color:var(--grey-l);margin-top:10px}
+.ac-grid{display:grid;gap:18px}
+.ac-g3{grid-template-columns:repeat(3,1fr)}
+.ac-g2{grid-template-columns:repeat(2,1fr)}
+.ac-term{background:#14161C;color:#E6EDF7;border:1px solid #14161C;padding:18px 20px;font:500 13px/1.75 var(--mono);box-shadow:10px 10px 0 rgba(29,30,36,.08);min-height:290px;white-space:pre-wrap;overflow-wrap:anywhere}
+.ac-term .m{color:#7DD3FC}.ac-term .z{color:#F9A8D4}.ac-term .g{color:#6EE7B7}.ac-term .d{color:#8A9BB8}
+.ac-li{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.4;color:var(--char)}
+.ac-li:first-child{border-top:1px solid var(--ink)}
+.ac-li b{font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.ac-li.pk b{color:var(--pink)}
+.ac-dt{position:relative;height:330px}
+.ac-line{position:absolute;left:0;right:0;top:160px;height:3px;background:var(--line)}
+.ac-line i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--pink))}
+.ac-nd{position:absolute;width:0;opacity:0;transition:opacity .5s}
+.ac-nd.on{opacity:1}
+.ac-nd i{position:absolute;left:-8px;top:152px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--blue)}
+.ac-nd.hot i{border-color:var(--pink)}
+.ac-nd s{position:absolute;left:-60px;width:120px;text-align:center;text-decoration:none;font:600 12px var(--mono);letter-spacing:.04em;color:var(--blue)}
+.ac-nd.hot s{color:var(--pink)}
+.ac-nd p{position:absolute;left:-76px;width:152px;text-align:center;font-size:14px;line-height:1.35;color:var(--char)}
+.ac-nd.up s{top:96px}.ac-nd.up p{bottom:200px}
+.ac-nd.dn s{top:192px}.ac-nd.dn p{top:218px}
+.ac-flow{display:flex;align-items:stretch;gap:0}
+.ac-box{flex:1;border:1px solid var(--ink);background:#fff;padding:16px 14px;min-height:150px;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s,border-color .4s,box-shadow .4s}
+.ac-box.on{opacity:1;transform:none}
+.ac-box .k{font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.ac-box .h{font:600 21px var(--sans);letter-spacing:-.5px;margin-top:8px;line-height:1.15}
+.ac-box .x{font-size:13.5px;line-height:1.4;color:var(--char);margin-top:8px}
+.ac-box.ai{border-color:var(--blue);box-shadow:0 0 0 3px rgba(11,100,221,.12)}
+.ac-box.ai .k{color:var(--blue)}
+.ac-box.hum{border-color:var(--pink);box-shadow:0 0 0 3px rgba(240,78,152,.14)}
+.ac-box.hum .k{color:var(--pink)}
+.ac-box.chk{border-color:var(--teal);box-shadow:0 0 0 3px rgba(2,188,183,.15)}
+.ac-box.chk .k{color:var(--teal)}
+.ac-ar{width:26px;display:flex;align-items:center;justify-content:center;color:var(--grey-l);font:600 18px var(--mono);opacity:0;transition:opacity .5s}
+.ac-ar.on{opacity:1}
+.ac-chipbar{display:flex;flex-wrap:wrap;gap:8px}
+.ac-chip{font:600 12px var(--mono);letter-spacing:.03em;border:1px solid var(--ink);background:#fff;padding:7px 10px;opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s,background .4s}
+.ac-chip.on{opacity:1;transform:none}
+.ac-chip small{display:block;font:500 9.5px var(--mono);color:var(--grey);margin-bottom:3px;letter-spacing:.06em;text-transform:uppercase}
+.ac-raw{font:500 13px/1.6 var(--mono);background:#14161C;color:#E6EDF7;padding:14px 18px;word-break:break-all}
+.ac-bar{display:grid;grid-template-columns:230px 1fr 60px;gap:14px;align-items:center;margin:15px 0;font-size:15px;color:var(--char)}
+.ac-tr{height:16px;background:#E9EDF3;position:relative}
+.ac-tr i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--c,var(--blue))}
+.ac-bar .v{font:600 15px var(--mono);text-align:right;color:var(--ink)}
+.ac-fld{font:500 12.5px/1.5 var(--mono);color:var(--char);display:grid;grid-template-columns:150px 1fr;gap:2px 12px;padding:3px 0}
+.ac-fld b{font-weight:600;color:var(--grey)}
+.ac-fld.no b,.ac-fld.no span{color:var(--pink)}
+.ac-pane{border:1px solid var(--ink);background:#fff;padding:16px 18px;min-height:360px}
+.ac-pane .ph2{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.ac-pane.bad .ph2{color:var(--pink)}.ac-pane.good .ph2{color:var(--teal)}
+.ac-res{border-top:1px solid var(--line);margin-top:12px;padding-top:10px;font-size:14px;line-height:1.5;color:var(--char)}
+.ac-shot{border:1px solid var(--ink);background:#fff;box-shadow:10px 10px 0 rgba(29,30,36,.06);opacity:0;transform:translateY(10px);transition:opacity .6s,transform .6s}
+.ac-shot.on{opacity:1;transform:none}
+.ac-shot img{display:block;width:100%}
+.ac-cap{font:500 11px var(--mono);letter-spacing:.04em;color:var(--grey);margin-top:8px}
+.ac-sw{position:relative;width:132px;height:34px;border:1px solid var(--ink);background:#E9EDF3;font:600 11px/32px var(--mono);letter-spacing:.04em;text-align:center}
+.ac-sw em{position:absolute;top:0;bottom:0;left:0;width:50%;background:#98A2B3;transition:left .5s,background .5s}
+.ac-sw span{position:relative;display:inline-block;width:49%;color:var(--ink)}
+.ac-fwc{border:1px solid var(--ink);background:#fff;padding:16px 18px;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.ac-fwc.on{opacity:1;transform:none}
+.ac-fwc .h{font:600 22px var(--sans);letter-spacing:-.5px}
+.ac-fwc .n{font:600 34px/1 var(--sans);letter-spacing:-1px;margin-top:10px;color:var(--blue)}
+.ac-fwc .x{font-size:13.5px;line-height:1.4;color:var(--char);margin-top:8px}
+.ac-fwc .st{display:inline-block;font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-top:10px;padding:4px 8px;border:1px solid var(--line);color:var(--grey)}
+.ac-fwc .st.done{background:var(--teal);border-color:var(--teal);color:#fff}
+.ac-fwc .st.part{border-color:var(--blue);color:var(--blue)}
+.ac-src2{font:500 12px/1.7 var(--mono);color:var(--char);word-break:break-all}
+.ac-src2 b{color:var(--blue)}
+
+/* kit figures: the setup-guide rendering and the kit photo */
+.kitfig{margin:0;display:flex;flex-direction:column;align-items:center}
+.kitfig img{display:block;height:calc(100% - 26px);width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 14px 18px rgba(29,30,36,.14))}
+.kitfig.kitph img{border:1px solid var(--ink);filter:none;box-shadow:12px 12px 0 rgba(29,30,36,.06)}
+.kitfig figcaption{font:500 10.5px var(--mono);letter-spacing:.04em;color:var(--grey-l);margin-top:10px;text-align:center}
+#kfig{display:block}
+#kfig img{height:100%;margin:0 auto}
+#kmk{position:absolute;inset:0}
+.kmk{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--ink);color:#fff;font:600 12px/26px var(--mono);text-align:center;box-shadow:0 0 0 3px #fff;opacity:0;transform:scale(.6);transition:opacity .4s,transform .4s,background .4s}
+.kmk.on{opacity:1;transform:none}
+.kmk.hot{background:var(--blue);box-shadow:0 0 0 3px #fff,0 0 0 7px rgba(11,100,221,.25)}
+.klr{display:grid;grid-template-columns:34px 1fr;gap:0 12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);opacity:.25;transition:opacity .4s}
+.klr:first-child{border-top:1px solid var(--ink)}
+.klr.on{opacity:1}
+.klr i{font:600 12px var(--mono);font-style:normal;color:var(--grey)}
+.klr.hot i{color:var(--blue)}
+.klr b{font:600 15px var(--sans);letter-spacing:-.2px;color:var(--ink)}
+.klr span{font:500 11px var(--mono);color:var(--grey);margin-left:10px}
+/* architecture: flat two-host layout, one cluster across both */
+.ahd{position:absolute;top:0;height:54px;border:1px solid var(--ink);background:#fff;padding:9px 16px;box-shadow:8px 8px 0 rgba(29,30,36,.05)}
+.ahd b{display:block;font:600 18px var(--sans);letter-spacing:-.3px}
+.ahd span{font:500 11px var(--mono);color:var(--grey)}
+.ahd.sp{border-top:4px solid #FEC514}
+.ahd.fw{border-top:4px solid var(--grey-l)}
+.acl{position:absolute;left:0;right:0;top:72px;height:104px;border:2px dashed var(--blue);background:rgba(217,232,255,.35)}
+.acl .lb{position:absolute;left:12px;top:-9px;background:var(--bg);padding:0 8px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.slide:not(.soft) .acl .lb{background:#fff}
+.acl .xp{position:absolute;left:520px;width:96px;top:30px;text-align:center;font:600 10.5px/1.4 var(--mono);color:var(--blue)}
+.acl .xp:before{content:'';display:block;height:2px;background:var(--blue);margin:0 6px 6px}
+.atl{position:absolute;border:1px solid var(--ink);background:#fff;padding:9px 14px 9px 16px;border-left:5px solid var(--c,var(--blue))}
+.atl b{display:block;font:600 15px var(--sans);letter-spacing:-.2px;color:var(--ink)}
+.atl small{display:block;font:500 11px/1.45 var(--mono);color:var(--grey);margin-top:2px}
+.atl em{position:absolute;right:12px;top:10px;font:600 11px var(--mono);font-style:normal;color:var(--blue)}
+.anet{position:absolute;left:0;right:0;top:340px;height:48px;border:1px solid var(--ink);background:#14161C;color:#E6EDF7;display:flex;align-items:center;gap:28px;padding:0 18px;font:500 12px var(--mono)}
+.anet b{font-weight:600;color:#fff}
+.anet .k{color:#7DD3FC;letter-spacing:.08em;text-transform:uppercase;font-size:10.5px}
+.avl{position:absolute;top:320px;width:2px;height:20px;background:var(--ink)}
+/* estate: five indices, flat */
+.eix{display:grid;grid-template-columns:1fr;gap:0;padding:11px 0;border-bottom:1px solid var(--line)}
+.eix:first-child{border-top:1px solid var(--ink)}
+.eix .ezh{display:flex;align-items:baseline;gap:10px}
+.eix .ezh b{font:600 12.5px var(--mono);letter-spacing:.04em;color:var(--ink)}
+.eix .ezh em{margin-left:auto;font:600 15px var(--mono);font-style:normal;color:var(--ink);font-variant-numeric:tabular-nums}
+.eix .ezx{font:500 10.5px var(--mono);color:var(--grey);margin-top:2px}
+.eix .ezb{height:10px;background:#E9EDF3;margin-top:8px;position:relative}
+.eix .ezb i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--c);transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.foot .lg svg{width:auto;height:20px}
+.ac-nd{top:0;height:330px}
+.ac-nd.up s{top:126px}.ac-nd.up p{bottom:210px}
+.ac-pane{min-height:200px}
+.ac-src2{overflow-wrap:anywhere;word-break:normal}
+/* geo-merge */
+.dep{border:1px solid var(--ink);background:#fff;padding:22px 24px;min-height:196px;box-shadow:12px 12px 0 rgba(29,30,36,.05)}
+.dep .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.dep .h{font:600 28px var(--sans);letter-spacing:-.8px;margin-top:8px}
+.dep .x{font-size:16px;line-height:1.5;color:var(--char);margin-top:12px}
+.rtr{display:grid;grid-template-columns:150px 1fr;align-items:center;height:40px;border-bottom:1px solid var(--line);font-size:15px;color:var(--char)}
+.rtr:first-child{border-top:1px solid var(--ink)}
+.rtr b{font:600 12px var(--mono);letter-spacing:.04em;color:var(--blue)}
+.dfc{border:1px solid var(--ink);background:#fff;padding:22px 24px;min-height:300px;border-top:6px solid var(--c);box-shadow:12px 12px 0 rgba(29,30,36,.05)}
+.dfc .k{font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.dfc .h{font:600 25px var(--sans);letter-spacing:-.6px;margin-top:8px}
+.dfc ul{list-style:none;margin-top:14px}
+.dfc li{font-size:16px;color:var(--char);padding:7px 0;border-bottom:1px solid var(--line)}
+.dfc li:last-child{border-bottom:none}
+.fdr{display:grid;grid-template-columns:230px 1fr 300px;align-items:center;gap:20px;min-height:76px;border-bottom:1px solid var(--line);opacity:0;transform:translateY(8px);transition:opacity .45s,transform .45s}
+.fdr:first-child{border-top:1px solid var(--ink)}
+.fdr.on{opacity:1;transform:none}
+.fdr .k{font:600 14px var(--mono);color:var(--blue)}
+.fdr .h{font-size:17px;line-height:1.4;color:var(--char)}
+.fdr .h b{color:var(--ink)}
+.fdr .e{font:500 12.5px/1.4 var(--mono);color:var(--grey);border-left:2px solid var(--line);padding-left:12px}
+.gq{min-height:196px;font-size:13.5px;line-height:1.65}
+.gq .k{color:#48EFCF}.gq .s{color:#FFC7DB}.gq .c{color:#98A2B3}
+.gres{border-top:1px solid var(--line);padding:12px 16px;min-height:96px;font:500 13px/1.6 var(--mono);color:var(--char);opacity:0;transition:opacity .5s}
+.gres.on{opacity:1}
+.gres .h{font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:4px}
+.gres table{border-collapse:collapse;width:100%}
+.gres td,.gres th{text-align:left;padding:2px 12px 2px 0;font-weight:500}
+.gres th{color:var(--grey);font-weight:600;font-size:11px;letter-spacing:.04em}
+.bal{margin-top:22px;border:2px solid var(--pink);background:#fff;padding:14px 18px;box-shadow:10px 10px 0 rgba(240,78,152,.1)}
+.bal .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--pink)}
+.bal .h{font:600 21px var(--sans);letter-spacing:-.4px;margin-top:6px}
+.bal .x{font:500 13px var(--mono);color:var(--grey);margin-top:6px}
+.slide .rtr{grid-template-columns:150px 1fr;height:48px}
+.fc{border:1px solid var(--ink);background:#fff;padding:14px 18px;box-shadow:10px 10px 0 rgba(29,30,36,.05)}
+.fc b{display:block;font:600 20px var(--sans);letter-spacing:-.4px}
+.fc span{display:block;font-size:14.5px;color:var(--char);margin-top:4px}
+.fc.cur{border-color:var(--blue);box-shadow:0 0 0 3px rgba(11,100,221,.12)}
+.sq{display:flex;align-items:center;gap:14px;height:62px;border:2px solid var(--ink);background:#fff;padding:0 18px;font:500 22px var(--sans);letter-spacing:-.3px}
+.sqk{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--blue);padding:5px 9px}
+.sqf{margin-left:auto;font:600 12px var(--mono);letter-spacing:.04em;color:var(--teal);border:1px solid var(--teal);padding:6px 10px;white-space:nowrap}
+.sr{display:grid;grid-template-columns:70px 1fr 170px 110px;align-items:center;gap:16px;height:58px;border-bottom:1px solid var(--line);background:#fff;padding:0 16px;opacity:0;transform:translateY(8px);transition:opacity .45s,transform .45s,background .4s}
+.sr:first-child{border-top:1px solid var(--ink)}
+.sr.on{opacity:1;transform:none}
+.sr .v{font:600 13px var(--mono);color:var(--blue)}
+.sr .d{font-size:16px;color:var(--ink)}
+.sr .l{font:500 12.5px var(--mono);color:var(--grey)}
+.sr .s{justify-self:end;font:600 11px var(--mono);letter-spacing:.04em;padding:4px 8px;border:1px solid var(--teal);color:var(--teal)}
+.sr.out{background:#FAFBFC}
+.sr.out .d,.sr.out .v{color:var(--grey-l);text-decoration:line-through}
+.sr.out .s{border-color:var(--orange);color:var(--orange)}
+body.static .sr,body.static .gres{transition:none}
+.slide .rtr span{font-size:14.5px}
+.slide .dfc{min-height:236px}
+/* FS deck */
+.ac-shot{position:relative}
+.bdg{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--pink);color:#fff;font:600 13px/26px var(--mono);text-align:center;font-style:normal;box-shadow:0 0 0 3px rgba(255,255,255,.9);opacity:0;transform:scale(.6);transition:opacity .4s,transform .4s}
+.bdg.on{opacity:1;transform:none}
+#cm .bdg{opacity:1;transform:none}
+.cl{border:1px solid var(--ink);background:#fff;padding:12px 14px;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s;position:relative}
+.cl.on{opacity:1;transform:none}
+.cl .bdg{left:-10px;top:-10px;opacity:1;transform:none}
+.cl .sub2{font:500 10.5px var(--mono);color:var(--grey);margin-top:2px}
+.cl .nd{border:1px solid var(--line);padding:7px 9px;margin-top:8px;font-size:12px;line-height:1.35}
+.cl .nd b{display:block;font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.cl .nd.l b{color:var(--ink)}
+.lk{display:flex;align-items:center;justify-content:center;font:600 10px var(--mono);letter-spacing:.06em;color:var(--blue);text-align:center;opacity:0;transition:opacity .5s}
+.lk.on{opacity:1}
+.ck2{display:inline-block;color:var(--teal);font-weight:700;margin-right:6px}
+.cl{padding:18px 16px}.cl .nd{padding:12px 13px;font-size:13px;margin-top:10px}
+#cc{flex-wrap:nowrap;gap:6px}#cc .ac-chip{font-size:11px;padding:6px 8px;white-space:nowrap}
+/* ── DDIL deck ── */
+.win{border:1px solid var(--ink);background:#fff;box-shadow:12px 12px 0 rgba(29,30,36,.06);overflow:hidden}
+.win .wb{height:36px;border-bottom:1px solid var(--line);background:var(--bg);display:flex;align-items:center;gap:6px;padding:0 14px;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.win .wb i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block}
+.win .wb span{margin-left:8px}
+.win .wb b{margin-left:auto;font-weight:500;color:var(--grey);text-transform:none;letter-spacing:.02em}
+.stamp{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--pink);border:2px solid var(--pink);padding:7px 12px;background:#fff}
+.q1{display:flex;align-items:center;gap:10px;border:1px solid var(--line);padding:10px 12px;font-size:15px;color:var(--ink);min-height:44px}
+.qk{font:600 10.5px var(--mono);letter-spacing:.06em;color:#fff;background:var(--orange);padding:3px 7px}
+.ph{display:grid;grid-template-columns:28px 1fr 64px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);opacity:.25;transition:opacity .4s}
+.ph.on{opacity:1}
+.ph .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:600 11px var(--mono);color:var(--grey)}
+.ph.run .dot{border-color:var(--blue);border-top-color:transparent;animation:spin 1s linear infinite}
+.ph.done .dot{background:var(--teal);border-color:var(--teal);color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ph .h{font:600 15px var(--sans);letter-spacing:-.2px}
+.ph .h small{display:block;font:500 11.5px/1.4 var(--mono);color:var(--grey);margin-top:2px;letter-spacing:0}
+.ph .t{justify-self:end;font:600 10px var(--mono);letter-spacing:.06em;padding:3px 7px;border:1px solid var(--blue);color:var(--blue)}
+.ph .t.llm{border-color:#153385;background:#153385;color:#fff}
+.sse{margin-top:12px;background:#14161C;color:#8A9BB8;font:500 11.5px/1.6 var(--mono);padding:8px 12px;height:62px;overflow:hidden;white-space:pre}
+.sse .g{color:#6EE7B7}.sse .m{color:#7DD3FC}
+.sbx{display:flex;align-items:center;gap:10px;height:46px;border:2px solid var(--ink);padding:0 14px;font:500 16px var(--sans);color:var(--ink)}
+.sic{font-size:18px;color:var(--grey);transform:rotate(-45deg)}
+.cur{display:inline-block;width:2px;height:20px;background:var(--blue);margin-left:-6px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.chp{font:600 11px var(--mono);letter-spacing:.03em;padding:5px 9px;border:1px solid var(--line);color:var(--grey);background:#fff}
+.chp.on{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.skr{display:grid;grid-template-columns:72px 1fr 64px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
+.skr.on{opacity:1;transform:none}
+.skr .tk{font:600 11px var(--mono);color:var(--blue)}
+.skr .bar{height:8px;background:#E9EDF3;border-radius:2px}
+.skr .bar+.bar{margin-top:6px;width:70%}
+.skr .scr{justify-self:end;font:500 11px var(--mono);color:var(--grey)}
+.mtag{font:600 10.5px var(--mono);letter-spacing:.04em;padding:4px 8px;border:1px solid var(--teal);color:#027D7A;background:#F0FCFB}
+.code3{background:#14161C;color:#E6EDF7;font:500 12.5px/1.6 var(--mono);padding:14px 16px;white-space:pre;box-shadow:10px 10px 0 rgba(29,30,36,.08)}
+.code3 .k{color:#7DD3FC}.code3 .s{color:#F9A8D4}.code3 .c{color:#8A9BB8}.code3 .g{color:#6EE7B7}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.35;color:var(--char)}
+.kv b{font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey);padding-top:2px}
+.tl{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:7px 0;opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
+.tl.on{opacity:1;transform:none}
+.tl i{width:12px;height:12px;border-radius:50%;margin-top:4px;background:var(--blue)}
+.tl .h{font:600 13.5px var(--sans)}
+.tl .x{font:500 11.5px/1.5 var(--mono);color:var(--grey);margin-top:2px}
+.tile{position:relative;aspect-ratio:1.45;border:1px solid var(--line);background:#fff;display:grid;place-items:center;opacity:0;transform:scale(.92);transition:opacity .4s,transform .4s,border-color .4s}
+.tile.on{opacity:1;transform:none}
+.tile.top{border:2px solid var(--blue)}
+.tile em{position:absolute;left:6px;top:5px;font:600 10px var(--mono);font-style:normal;color:var(--grey)}
+.pc{border:1px solid var(--line);background:#fff;padding:9px 12px;margin-bottom:8px;transition:border-color .3s,box-shadow .3s,opacity .3s;opacity:.55}
+.pc.on{border-color:var(--blue);box-shadow:0 0 0 3px rgba(11,100,221,.12);opacity:1}
+.pc .n{font:600 15px var(--sans);letter-spacing:-.2px}
+.pc .l{font:500 10.5px var(--mono);color:var(--grey);margin-top:3px}
+.dc{aspect-ratio:1;border-radius:2px;display:grid;place-items:center;font:600 8px var(--mono);color:#fff;transition:opacity .35s,transform .35s,filter .35s}
+.dc.off{opacity:.12;transform:scale(.8);filter:grayscale(1)}
+.cbar{display:grid;grid-template-columns:96px 1fr 36px;gap:10px;align-items:center;margin:9px 0;font:500 12px var(--mono);color:var(--char)}
+.cbar .ctr{height:12px;background:#E9EDF3;position:relative;overflow:hidden}
+.cbar .ctr i{position:absolute;left:0;top:0;bottom:0;background:var(--blue);transition:width .6s}
+.cbar b{text-align:right;font-weight:600}
+.host{border:1px solid var(--ink);background:#fff;box-shadow:10px 10px 0 rgba(29,30,36,.05);opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.host.on{opacity:1;transform:none}
+.host .hh{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:10px}
+.host .hh b{font:600 18px var(--sans);letter-spacing:-.3px}
+.host .hh span{font:500 11px var(--mono);color:var(--grey)}
+.svc{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink);opacity:.2;transition:opacity .4s}
+.svc.on{opacity:1}
+.svc small{display:block;font:500 11px var(--mono);color:var(--grey);margin-top:1px}
+.svc em{font:600 11px var(--mono);font-style:normal;color:var(--blue)}
+.st{display:grid;grid-template-columns:180px 1fr 1fr;border-bottom:1px solid var(--line);opacity:0;transform:translateY(6px);transition:opacity .45s,transform .45s}
+.st.on{opacity:1;transform:none}
+.st>div{padding:10px 14px;font-size:12.5px;line-height:1.45;color:var(--char)}
+.st .a{font:600 16px var(--sans);letter-spacing:-.3px;color:var(--ink)}
+.st .a small{display:block;font:500 10.5px var(--mono);color:var(--grey);margin-top:3px;letter-spacing:.02em}
+.st .lv{border-left:3px solid var(--teal);background:#F4FCFB}
+.st .sg{border-left:3px solid var(--pink);background:#FEF6FA}
+.sth{display:grid;grid-template-columns:180px 1fr 1fr;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--ink)}
+.sth>div{padding:6px 14px}
+.req{border:1px solid var(--line);background:#fff;padding:14px 16px;min-height:170px;opacity:0;transform:translateY(8px);transition:opacity .45s,transform .45s}
+.req.on{opacity:1;transform:none}
+.req .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);display:flex;align-items:center;gap:8px}
+.req .k i{font-style:normal;color:#fff;background:var(--teal);width:18px;height:18px;display:grid;place-items:center;font-size:11px;opacity:0;transition:opacity .3s}
+.req.ok .k i{opacity:1}
+.req .h{font:600 19px/1.2 var(--sans);letter-spacing:-.4px;margin-top:8px}
+.req .x{font-size:13.5px;line-height:1.45;color:var(--char);margin-top:8px}
+.req .x code{font:500 12px var(--mono);color:var(--blue)}
+.dlane{display:grid;grid-template-columns:230px 1fr;gap:20px;align-items:center;height:96px;border-bottom:1px solid var(--line);opacity:0;transform:translateY(6px);transition:opacity .45s,transform .45s}
+.dlane:first-child{border-top:1px solid var(--ink)}
+.dlane.on{opacity:1;transform:none}
+.dlane .w{font:600 30px var(--sans);letter-spacing:-1px}
+.dlane .w b{color:var(--blue);font-weight:600}
+.dlane .w small{display:block;font:400 13px/1.35 var(--sans);letter-spacing:0;color:var(--char);margin-top:3px}
+.dlane canvas{width:100%;height:80px;display:block}
+.dfc2{border:1px solid var(--ink);background:#fff;border-top:6px solid var(--c);box-shadow:10px 10px 0 rgba(29,30,36,.05);padding:16px 18px;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.dfc2.on{opacity:1;transform:none}
+.dfc2 .k{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.dfc2 .h{font:600 22px var(--sans);letter-spacing:-.5px;margin-top:6px}
+.dfc2 ul{list-style:none;margin-top:10px}
+.dfc2 li{font-size:13px;line-height:1.4;color:var(--char);padding:6.5px 0;border-bottom:1px solid var(--line)}
+.dfc2 li:last-child{border-bottom:none}
+.dfc2 li code{font:500 11.5px var(--mono);color:var(--blue)}
+.dfc2 li b{font-weight:600;color:var(--ink)}
+.slide .rtr{height:44px}
+body.static .slide *{transition:none!important}
+.mtag{white-space:nowrap}
+#msw{background:#fff}#msw em{background:var(--blue)}#msw span{position:relative;z-index:1;transition:color .5s}
+.ph{padding:6px 0}
+
+/* 6 · three demos */
+.dmc .win img{display:block;width:100%;height:196px;object-fit:cover;object-position:top left}
+.dmc .win .wb{height:30px}
+.dmc .tt{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.dmc .tt span{font:600 11px var(--mono);letter-spacing:.04em;padding:4px 8px;border:1px solid var(--line);color:var(--char);background:#fff}
+.dmc .tt span.t{border-color:var(--blue);color:var(--blue)}
+.dmc .ld{font-size:14.5px;line-height:1.45;color:var(--ink);margin-top:12px;border-left:3px solid var(--blue);padding-left:10px;min-height:42px}
+.dmc .kv{grid-template-columns:70px 1fr;font-size:12.5px}
+/* Recap: the kit's full-turn rendering (animated WebP from the 16-frame rotation) */
+.kitfig img.kit-rot{height:calc(100% - 26px);width:auto;max-width:100%;filter:drop-shadow(0 16px 20px rgba(29,30,36,.16))}
+
+</style>
+</head>
+<body>
+<div id="deck">
+<!-- 1 cover -->
+<section class="slide" data-fx="cover" data-foot="DDIL demo kit · SA enablement"
+ data-notes="Open with the object, not the slides. This is one case with two computers, a small network and a touchscreen on the front of the rack. Everything the three demos need runs inside it: Elasticsearch, Kibana and Agent Builder, the models and the apps. No call leaves the case while a demo runs. The talk track for the next forty minutes: what DDIL means, what the kit is, how a question moves through it, the three adventures, and what is live versus staged. Be exact about that last part; technical buyers will check.">
+  <div class="z" style="width:470px">
+    <div class="eyebrow in1">DDIL demo kit · SA enablement</div>
+    <h1 class="in2" style="font-size:50px;letter-spacing:-2px;margin-top:26px">Sovereign AI in one case. <span class="b">No cloud required.</span></h1>
+    <div class="sub in3" style="font-size:18px;margin-top:16px;max-width:440px">Search, vector retrieval, agents and NVIDIA Nemotron on two machines that work when the link is gone.</div>
+    <div class="in4" style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
+      <span class="tagc" style="width:max-content">Vineyard Intelligence</span><span class="tagc" style="width:max-content">SEC Findings</span><span class="tagc" style="width:max-content">Multimodal and need-to-know</span>
+    </div>
+  </div>
+  <figure class="z kitfig lat" id="cvfig" style="position:absolute;left:640px;width:470px;top:60px;height:610px">
+    <img src="img/kit-front.webp" alt="Front of the DDIL kit: touchscreen, blank panels over the Framework, the DGX Spark, network shelf and PDU">
+    <figcaption>Illustration of the kit front, from the setup guide</figcaption>
+  </figure>
+</section>
+
+<!-- 2 the DDIL problem -->
+<section class="slide soft" data-fx="ddil" data-foot="The DDIL problem"
+ data-notes="DDIL is the condition most forward users plan for: disconnected, denied, intermittent, limited. Walk the four lanes. Disconnected means no link at all. Denied means someone is taking the link away from you. Intermittent means it comes and goes. Limited means it exists but is thin. The point for the buyer: an AI capability that needs a round trip to a cloud API fails in all four. The kit is designed to need none of them. There are no measured link numbers on this slide on purpose; the lanes are a picture of the condition, not data.">
+  <div class="z">
+    <div class="eyebrow in1">The DDIL problem</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">The link fails four ways. <span class="b">The mission keeps going.</span></h1>
+  </div>
+  <div class="z" id="dl" style="position:absolute;left:72px;right:72px;top:190px"></div>
+  <div class="z ac-cap lat" id="dcap" style="position:absolute;left:72px;right:72px;top:612px;font-size:13px;color:var(--char)">An AI service that needs a round trip to a cloud API fails in all four lanes. Everything the kit uses to answer a question sits inside the case.</div>
+</section>
+
+<!-- 3 what sovereign AI at the edge requires -->
+<section class="slide" data-fx="needs" data-foot="What sovereign AI at the edge requires"
+ data-notes="Six requirements, each paired with what the kit uses today. Models: NVIDIA Nemotron 3.5 Lightning in Ollama on the Spark, and Jina Embeddings v5 Omni on port 8081 for text and images in one vector space. Jina is part of Elastic. Data and retrieval: one Elasticsearch cluster across both machines. Agents: Kibana Agent Builder with a connector that points at the local Ollama endpoint. Access: the need-to-know demo applies clearance rules in the backend; it is an application-side filter, not Elasticsearch document-level security, so do not sell it as DLS. Names: the .ddil names were added in the latest commit and have not been verified on the box yet.">
+  <div class="z">
+    <div class="eyebrow in1">Requirements</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Sovereign means every piece <span class="b">is inside the case.</span></h1>
+  </div>
+  <div class="z ac-grid ac-g3" id="nd" style="position:absolute;left:72px;right:72px;top:196px;gap:16px"></div>
+  <div class="z lat" id="ncut" style="position:absolute;left:72px;right:72px;top:590px;display:flex;align-items:center;gap:16px">
+    <span class="sqk" style="background:var(--ink)">Outbound</span><span style="font:600 15px var(--sans);color:var(--ink)">Nothing in the request path needs the internet.</span><span style="font:500 12px var(--mono);color:var(--grey)">Pre-show: confirm the kit config points at Nemotron 3.5 Lightning and Jina v5 Omni.</span>
+  </div>
+</section>
+
+<!-- 4 the kit -->
+<section class="slide soft" data-fx="kit" data-foot="The kit"
+ data-notes="Build the kit piece by piece. The DGX Spark at .20 is the GPU node: GB10 Blackwell, 128 GB unified memory, aarch64. It runs the GPU Elasticsearch node, Ollama and the Jina embedding server. The Framework Desktop at .10 is x86_64 with a Ryzen AI Max+ 395 and 64 GB. It runs the CPU Elasticsearch node, Kibana, the backend and the frontend. A UniFi Express 7 is the gateway at .1, with a Switch Flex Mini for the wired ports. The touchscreen runs a separate kiosk app on port 3100; by default it shows mock health, so flip the MOCK flag before you point at it. Case weight and the touchscreen model are not in the fact base; do not quote them.">
+  <div class="z">
+    <div class="eyebrow in1">The kit</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Two computers, one network, <span class="b">one case.</span></h1>
+  </div>
+  <figure class="z kitfig" id="kfig" style="position:absolute;left:96px;width:392px;top:150px;height:490px"><img src="img/kit-front.webp" alt="Front of the DDIL kit"><div id="kmk"></div></figure>
+  <div class="z" id="klg" style="position:absolute;left:560px;right:72px;top:160px"></div>
+  <div class="z" id="kitc" style="position:absolute;left:560px;right:72px;top:530px;height:110px"></div>
+</section>
+
+<!-- 5 architecture -->
+<section class="slide" data-fx="arch" data-foot="Architecture"
+ data-notes="One Elasticsearch cluster, ddil-vineyard, spans an aarch64 node and an x86_64 node. The GPU node is built from the Elasticsearch 9.5.6 image plus the aarch64 cuVS jar, with GPU vector indexing on. The CPU node and Kibana run stock 9.5.6. Inference stays on the Spark: Nemotron 3.5 Lightning in Ollama and Jina Embeddings v5 Omni on port 8081. Kibana and the apps run on the Framework. Pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni.">
+  <div class="z">
+    <div class="eyebrow in1">Architecture</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">One cluster across two architectures. <span class="b">Inference on the box.</span></h1>
+  </div>
+  <div class="z" id="arx" style="position:absolute;left:72px;right:72px;top:160px;height:388px"></div>
+  <div class="z" id="archc" style="position:absolute;left:72px;right:72px;top:560px;height:100px"></div>
+</section>
+
+<!-- 6 three demos at a glance -->
+<section class="slide soft" data-fx="demos" data-foot="The three demos at a glance"
+ data-notes="Thirty seconds on the three demos before you run them. Every demo starts from the chooser on the kit frontend at port 3000. Run them in this order. Vineyard first: an agronomist pipeline reads sensor data in Elasticsearch on the kit and reasons with Nemotron 3.5 Lightning on the Spark; practice target nine and a quarter minutes. SEC second: semantic search over 10-K filings, then an Elastic Agent Builder agent with ES|QL tools that compares filings and cites them; nine and three quarters. Multimodal last: Jina Embeddings v5 Omni puts words and pictures in one vector space, and the same question returns different documents and answers depending on who asks; eight and a quarter. Practice targets come from the mock. The race in Vineyard is staged, and the need-to-know filter is application side; say both out loud.">
+  <div class="z">
+    <div class="eyebrow in1">The three demos</div>
+    <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Three demos. <span class="b">One case.</span></h1>
+  </div>
+  <div class="z" id="dmo" style="position:absolute;left:72px;right:72px;top:168px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+    <div class="dmc lat" id="dm0"><div class="win"><div class="wb"><i></i><i></i><i></i><span>01 · Vineyard Intelligence</span></div><img src="img/shot-vineyard.webp" alt="Vineyard Intelligence screen"></div>
+      <div class="tt"><span class="t">Practice 9:15</span><span>Race is staged</span></div><div class="ld">An agronomist reads eight years of estate data and plans the fix for Block C.</div>
+      <div class="kv"><b>Pattern</b><span>Sensor analytics plus a five-phase agent pipeline</span></div><div class="kv"><b>Models</b><span>Nemotron 3.5 Lightning</span></div></div>
+    <div class="dmc lat" id="dm1"><div class="win"><div class="wb"><i></i><i></i><i></i><span>02 · SEC Findings</span></div><img src="img/shot-sec.webp" alt="SEC Findings screen"></div>
+      <div class="tt"><span class="t">Practice 9:45</span><span>Chapters 03 and 04 live</span></div><div class="ld">Ask 10-K filings in plain words, then let an agent count and compare them.</div>
+      <div class="kv"><b>Pattern</b><span>Semantic search plus an Agent Builder agent over filings</span></div><div class="kv"><b>Models</b><span>Nemotron 3.5 Lightning · Jina Embeddings v5 Omni</span></div></div>
+    <div class="dmc lat" id="dm2"><div class="win"><div class="wb"><i></i><i></i><i></i><span>03 · Multimodal Intelligence</span></div><img src="img/shot-mm.webp" alt="Multimodal Intelligence screen"></div>
+      <div class="tt"><span class="t">Practice 8:15</span><span>Filter is application side</span></div><div class="ld">Type words, get pictures. Four analysts ask one question and see four answers.</div>
+      <div class="kv"><b>Pattern</b><span>Text and image search with Jina v5 Omni plus need-to-know filtering</span></div><div class="kv"><b>Models</b><span>Jina Embeddings v5 Omni · Nemotron 3.5 Lightning</span></div></div>
+  </div>
+  <div class="z ac-cap lat" id="dmcap" style="position:absolute;left:72px;right:72px;top:640px;font-size:11px">Every demo starts at the kit chooser on :3000. Practice targets from the mock. Screens are kit frontend captures.</div>
+</section>
+
+<!-- 7 divider: vineyard -->
+<section class="slide" data-fx="vdiv" data-foot="Adventure 1 · Vineyard Intelligence"
+ data-notes="First adventure. A fictional estate in the Walla Walla AVA with six blocks and eight years of synthetic sensor data from one causal model. The story the data tells: Block C, La Rivière, has a drainage failure that starts in June 2022 and drags its potassium down. The agronomist is supposed to find it.">
+  <div class="z" style="width:420px">
+    <div class="eyebrow in1">Adventure 1</div>
+    <div class="in2" style="font:500 120px/1 var(--sans);letter-spacing:-6px;color:var(--blue);margin-top:26px">01</div>
+    <h1 class="in2" style="font-size:44px;letter-spacing:-1.6px;margin-top:10px">Vineyard <span class="b">Intelligence.</span></h1>
+    <div class="sub in3" style="font-size:17px;max-width:400px">Six blocks, five indices, an agronomist that reads them, and a staged GPU race.</div>
+  </div>
+  <div class="z win lat" id="dvvin" style="position:absolute;left:520px;right:72px;top:150px">
+    <div class="wb"><i></i><i></i><i></i><span>Kit frontend · Vineyard dashboard</span><b>:3000</b></div>
+    <img src="img/shot-vineyard.webp" alt="Vineyard Intelligence dashboard: KPI tiles and six block status cards" style="display:block;width:100%">
+  </div>
+  <div class="z ac-cap lat" id="dcvin" style="position:absolute;left:520px;right:72px;top:578px;font-size:11px">Screenshot of the kit frontend with no Elasticsearch behind it. The tiles show UI fallback values and the alerts are staged in the UI.</div>
+</section>
+
+<!-- 8 estate and sensor data -->
+<section class="slide soft" data-fx="estate" data-foot="Vineyard · estate and sensor data"
+ data-notes="Left, the map screen in schematic form: six blocks colored by health. Block C is the critical one. The alerts on the dashboard are hardcoded in the UI, so they show even if Elasticsearch is down. Right, the five indices. The counts are the values the UI falls back to; when Elasticsearch answers, the dashboard reads the live count. Two cautions: the imagery index is not loaded by the bulk script, and its mapping is 768 dimensions even though the UI says 2048. If the backend has no Elasticsearch credentials, the dashboard silently shows these fallback numbers.">
+  <div class="z">
+    <div class="eyebrow in1">Vineyard · estate and sensor data</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Eight years of one estate, <span class="b">indexed on the box.</span></h1>
+  </div>
+  <div class="z win lat" id="emap" style="position:absolute;left:72px;width:560px;top:176px;height:420px">
+    <div class="wb"><i></i><i></i><i></i><span>Vineyard map · health mode</span><b>Domaine de la Côte Cachée</b></div>
+    <svg id="emsvg" viewBox="0 0 560 384" style="display:block;width:560px;height:384px"></svg>
+  </div>
+  <div class="z" id="eix" style="position:absolute;left:672px;right:72px;top:182px"></div>
+  <div class="z ac-cap lat" id="ecap" style="position:absolute;left:672px;right:72px;top:584px;font-size:11px">Counts are the UI fallback values in code. The live dashboard reads _count when Elasticsearch answers. Bar length is log scale.</div>
+</section>
+
+<!-- 9 agronomist pipeline -->
+<section class="slide" data-fx="agro" data-foot="Vineyard · the AI agronomist"
+ data-notes="The agronomist streams five phases over server-sent events. Phase 0 reads the latest soil and NPK documents for the block from Elasticsearch, no model. Phase 1 builds an 8-dimension query vector and runs kNN for similar history, then asks the model. Phases 2 to 4 are three more model calls: risk, recommendation, action plan. They run one after another, even though the stream text says parallel. Each call has a 120 second timeout, so a cold model can stall the screen. Typed questions send no block id, so start from the map or the dashboard Investigate buttons to ground the answer on the block you mean. The pipeline is Python plus Ollama; it does not call Agent Builder, whatever the chooser card says.">
+  <div class="z">
+    <div class="eyebrow in1">Vineyard · the AI agronomist</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Five phases, streamed live. <span class="b">Search first, then reason.</span></h1>
+  </div>
+  <div class="z win lat" id="aw" style="position:absolute;left:72px;width:600px;top:172px;height:460px">
+    <div class="wb"><i></i><i></i><i></i><span>AI Agronomist</span><b>POST /api/chat/agent/stream</b></div>
+    <div style="padding:16px 18px">
+      <div class="q1" id="aq"><span class="qk">BLK-C</span><span id="aqt"></span></div>
+      <div id="aph" style="margin-top:14px"></div>
+      <div class="sse" id="asse"></div>
+    </div>
+  </div>
+  <div class="z" id="ar" style="position:absolute;left:704px;right:72px;top:176px"></div>
+</section>
+
+<!-- 10 the race: staged -->
+<section class="slide soft" data-fx="race" data-foot="Vineyard · the indexing race (staged)"
+ data-notes="Say this out loud: the race on the kit is a staged simulation. It never touches Elasticsearch. The durations are constants in indexer.py, 15 seconds for the GPU lane and 55 for the CPU lane over 841,536 documents, and the throughput shown during the run is a target times a ramp times noise. Recall is hardcoded. So use it to explain the idea, GPU-built HNSW with cuVS on the Spark node, and do not quote any speedup from it. The 12x, 24x and 50x figures elsewhere in the UI are not measurements of this kit. The GPU node configuration itself is real: the cuVS jar is in the image and GPU vector indexing is on. A real comparison needs a measured run.">
+  <div class="z">
+    <div class="eyebrow in1">Vineyard · the indexing race</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px;margin-top:22px">The race explains GPU indexing. <span class="b">It does not measure it.</span></h1>
+  </div>
+  <div class="z stamp lat" id="rst" style="position:absolute;right:72px;top:64px">Illustrative · staged visualization · not a measurement</div>
+  <div class="z win lat" id="rw" style="position:absolute;left:72px;width:620px;top:196px;height:410px">
+    <div class="wb"><i></i><i></i><i></i><span>Indexing race</span><b>simulated by indexer.py</b></div>
+    <div style="padding:18px 22px" id="rl"></div>
+  </div>
+  <div class="z" id="rr" style="position:absolute;left:724px;right:72px;top:196px"></div>
+</section>
+
+<!-- 11 divider: SEC -->
+<section class="slide" data-fx="sdiv" data-foot="Adventure 2 · SEC Findings"
+ data-notes="Second adventure. Annual 10-K filings embedded on the kit with Jina Embeddings v5 Omni, one index, and an Agent Builder agent that answers analyst questions with ES|QL tools and a local model.">
+  <div class="z" style="width:420px">
+    <div class="eyebrow in1">Adventure 2</div>
+    <div class="in2" style="font:500 120px/1 var(--sans);letter-spacing:-6px;color:var(--blue);margin-top:26px">02</div>
+    <h1 class="in2" style="font-size:44px;letter-spacing:-1.6px;margin-top:10px">SEC <span class="b">Findings.</span></h1>
+    <div class="sub in3" style="font-size:17px;max-width:400px">Semantic search over 10-K filings, then an agent that plans its own queries.</div>
+  </div>
+  <div class="z win lat" id="dvsec" style="position:absolute;left:520px;right:72px;top:160px">
+    <div class="wb"><i></i><i></i><i></i><span>Kit frontend · SEC chapter 03</span><b>:3000</b></div>
+    <img src="img/shot-sec.webp" alt="SEC Findings chapter 03 data interface with the semantic search box" style="display:block;width:100%">
+  </div>
+  <div class="z ac-cap lat" id="dcsec" style="position:absolute;left:520px;right:72px;top:559px;font-size:11px">Screenshot of chapter 03 before a query. The 503 filings in the search box is UI text, not a live count.</div>
+</section>
+
+<!-- 12 SEC corpus and semantic search -->
+<section class="slide soft" data-fx="secs" data-foot="SEC Findings · semantic search"
+ data-notes="Chapter 03 of the SEC deck is live. The query is embedded, then a kNN search runs on the emb field with k of 8, with an optional sector filter from a live terms aggregation. The latency, hit count and dimensions on screen are measured from the real query. The 503 filings and 93,541 chunks figures are text in the UI and the agent prompt, not live counts. The local index is 768-d, embedded with Jina Embeddings v5 Omni on the Spark. Before the show, confirm the index was re-embedded on the kit with Jina Embeddings v5 Omni at 768 dimensions and that the backend reports embed_backend jina. The show-the-call panel names Jina v5 Omni. The earlier chapters race the kit's own two nodes: the race is staged, and the kit economics panel carries no prices because there is no cloud bill.">
+  <div class="z">
+    <div class="eyebrow in1">SEC Findings · semantic retrieval</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Ask in plain words. <span class="b">Show the query behind it.</span></h1>
+  </div>
+  <div class="z win lat" id="sw" style="position:absolute;left:72px;width:620px;top:176px;height:430px">
+    <div class="wb"><i></i><i></i><i></i><span>Chapter 03 · Interface</span><b>POST /api/finance/search</b></div>
+    <div style="padding:16px 18px">
+      <div class="sbx"><span class="sic">&#9906;</span><span id="sq"></span><i class="cur"></i></div>
+      <div id="schips" style="margin-top:12px;display:flex;gap:8px"></div>
+      <div id="sres" style="margin-top:14px"></div>
+      <div id="smeta" class="lat" style="margin-top:10px;display:flex;gap:10px"></div>
+    </div>
+  </div>
+  <div class="z lat" id="scode" style="position:absolute;left:720px;right:72px;top:176px"></div>
+</section>
+
+<!-- 13 SEC agentic RAG -->
+<section class="slide" data-fx="seca" data-foot="SEC Findings · Agent Builder"
+ data-notes="Chapter 04 is live. The backend streams from Kibana's Agent Builder converse API. The agent is finance-analyst, provisioned by script with three custom ES|QL tools plus seven platform tools, and a connector named finance-ollama-llm that points at Nemotron 3.5 Lightning on the Spark. Semantic RAG on the previous slide retrieves passages for one query. Here the agent plans: it picks a tool, writes the ES|QL parameters, reads results and decides whether it needs another call, up to six. Caveat: the chat has no read timeout, so a hung model hangs the screen. The workflow chapter after this one links to a workflow nobody provisions.">
+  <div class="z">
+    <div class="eyebrow in1">SEC Findings · agentic retrieval</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">The agent picks the tool. <span class="b">ES|QL does the counting.</span></h1>
+  </div>
+  <div class="z card lat" id="acfg" style="position:absolute;left:72px;width:340px;top:176px">
+    <div class="ch">Agent · finance-analyst <b>Agent Builder</b></div>
+    <div style="padding:12px 16px" id="acl"></div>
+  </div>
+  <div class="z win lat" id="aconv" style="position:absolute;left:436px;right:72px;top:176px;height:430px">
+    <div class="wb"><i></i><i></i><i></i><span>Chapter 04 · Agentic</span><b>/api/agent_builder/converse/async</b></div>
+    <div style="padding:14px 18px" id="atl"></div>
+  </div>
+</section>
+
+<!-- 14 divider: multimodal -->
+<section class="slide" data-fx="mdiv" data-foot="Adventure 3 · Multimodal and need-to-know"
+ data-notes="Third adventure. One embedding model for text and pictures, served on the Spark, and a research corpus where four personas see four different slices of the same index.">
+  <div class="z" style="width:420px">
+    <div class="eyebrow in1">Adventure 3</div>
+    <div class="in2" style="font:500 120px/1 var(--sans);letter-spacing:-6px;color:var(--blue);margin-top:26px">03</div>
+    <h1 class="in2" style="font-size:44px;letter-spacing:-1.6px;margin-top:10px">Multimodal and <span class="b">need-to-know.</span></h1>
+    <div class="sub in3" style="font-size:17px;max-width:400px">Type words, get pictures. Ask a question, get only what your clearance allows.</div>
+  </div>
+  <div class="z win lat" id="dvmm" style="position:absolute;left:520px;right:72px;top:180px">
+    <div class="wb"><i></i><i></i><i></i><span>Kit frontend · Need-to-know</span><b>:3000</b></div>
+    <img src="img/shot-mm.webp" alt="Need-to-know scene: research corpus header and the analyst question box" style="display:block;width:100%">
+  </div>
+  <div class="z ac-cap lat" id="dcmm" style="position:absolute;left:520px;right:72px;top:502px;font-size:11px">Screenshot of the need-to-know scene. The 509 papers on screen is hardcoded text. The kit corpus is 198 papers and 9,636 text chunks.</div>
+</section>
+
+<!-- 15 text to image -->
+<section class="slide soft" data-fx="mms" data-foot="Multimodal · search by image"
+ data-notes="Search by Image runs over a small synthetic shapes track of ten documents. The index stores two 768-d vectors per document: image_vector, embedded by the Jina server when the data is ingested, and caption_vector, embedded inside Elasticsearch by the jina-embed-caption ingest pipeline through the jina-omni-text inference endpoint. At query time Elasticsearch embeds the words itself with query_vector_builder and runs kNN with k of 6. The toggle switches which vector space you search. The tiles on this slide are a mock of the screen. The model is Jina Embeddings v5 Omni, jina-embeddings-v5-omni-small, served on the Spark at port 8081. The newer local build drops this scene from navigation; the committed build has it.">
+  <div class="z">
+    <div class="eyebrow in1">Multimodal · search by image</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Type words. <span class="b">Get pictures.</span></h1>
+  </div>
+  <div class="z win lat" id="mw" style="position:absolute;left:72px;width:640px;top:176px;height:420px">
+    <div class="wb"><i></i><i></i><i></i><span>Search by Image</span><b>GET /api/jina/multimodal/search</b></div>
+    <div style="padding:16px 18px">
+      <div style="display:flex;gap:12px;align-items:center"><div class="sbx" style="flex:1"><span class="sic">&#9906;</span><span id="mq"></span><i class="cur"></i></div><div class="ac-sw" id="msw" style="width:230px"><em id="mswe"></em><span>Image vectors</span><span>Caption vectors</span></div></div>
+      <div id="mgrid" style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
+    </div>
+  </div>
+  <div class="z" id="mr" style="position:absolute;left:744px;right:72px;top:176px"></div>
+  <div class="z ac-cap lat" id="mcap" style="position:absolute;left:72px;top:604px;font-size:11px">Mock of the screen. Result order is illustrative.</div>
+</section>
+
+<!-- 16 need to know -->
+<section class="slide" data-fx="ntk" data-foot="Multimodal · need-to-know"
+ data-notes="Four personas, one index. The backend adds three filter clauses to every query: the document's classification must be at or below the analyst's clearance, the analyst must hold every compartment on the document, and NOFORN documents are excluded unless the analyst is NOFORN-cleared. The same filter applies to the facets, the hits, the figure strip and the passages handed to the model, so the generated answer cannot cite what the analyst cannot see. The grid here is illustrative, drawn with the same marking mix the ingest script uses. Be precise: this is an application-side query filter. There are no Elasticsearch roles or document-level security behind it, so anyone with Elasticsearch credentials sees everything. The 509 total on the screen is hardcoded text; the accessible count above it is measured. The kit corpus is 198 papers and 9,636 text chunks.">
+  <div class="z">
+    <div class="eyebrow in1">Multimodal · need-to-know</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">One index, four analysts. <span class="b">Each sees a different corpus.</span></h1>
+  </div>
+  <div class="z" id="np" style="position:absolute;left:72px;width:300px;top:176px"></div>
+  <div class="z" id="ngw" style="position:absolute;left:396px;width:470px;top:176px">
+    <div class="ac-k" id="nlab" style="margin-bottom:8px">Signed in as</div>
+    <div id="ng" style="display:grid;grid-template-columns:repeat(12,1fr);gap:5px"></div>
+    <div id="nleg" style="margin-top:10px;display:flex;gap:12px;font:500 11px var(--mono);color:var(--grey)"></div>
+  </div>
+  <div class="z" id="nr" style="position:absolute;left:892px;right:72px;top:176px"></div>
+  <div class="z bal lat" id="nwarn" style="position:absolute;left:72px;right:72px;top:500px;margin:0;padding:10px 16px;box-shadow:none"><div class="k">Application-side filter</div><div class="x" style="font-size:12.5px;margin-top:4px;color:var(--char)">The backend writes the filter into every query (jina_dls.py). There is no Elasticsearch role or document-level security behind it. Grid is illustrative, drawn with the ingest marking mix: U 40 · CUI 25 · C 15 · S 13 · TS 7 %.</div></div>
+</section>
+
+<!-- 17 what runs where -->
+<section class="slide soft" data-fx="where" data-foot="What runs where"
+ data-notes="Every service in the request path, by host and port. All of it is on the kit LAN. The models are NVIDIA Nemotron 3.5 Lightning in Ollama and Jina Embeddings v5 Omni on port 8081, both on the Spark. SEC query embedding defaults to Jina v5 Omni; the backend config carries no cloud model settings. Because the backend container never reads the .env file, set the model and embedder settings in the compose environment, not in .env. The newer local build adds an option to run the multimodal adventure against Elastic Cloud; that is not the kit configuration.">
+  <div class="z">
+    <div class="eyebrow in1">What runs where</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Every model, index and app <span class="b">on the kit network.</span></h1>
+  </div>
+  <div class="z" id="wh" style="position:absolute;left:72px;right:72px;top:178px;display:grid;grid-template-columns:1fr 1fr 300px;gap:18px"></div>
+</section>
+
+<!-- 18 deployment and operations -->
+<section class="slide" data-fx="ops" data-foot="Deployment and operations"
+ data-notes="Three stages. Bring-up: compose on each host, Ollama with Nemotron 3.5 Lightning pulled, the Jina v5 Omni server started by hand in its conda environment, and the .ddil names resolving. Before going dark: the backend and frontend images run pip and npm install at build time, so build them while you still have a network, and stage the data that is not in git. On stage: know the reset paths and the two checks that matter most. One, the backend container gets no Elasticsearch credentials, so every call returns 401 and the vineyard screens quietly show fallback numbers. Two, run the pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. Do not run the troubleshooting guide's model unload step; it deletes the model from disk.">
+  <div class="z">
+    <div class="eyebrow in1">Deployment and operations</div>
+    <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Stage it connected. <span class="b">Run it dark.</span></h1>
+  </div>
+  <div class="z" id="op" style="position:absolute;left:72px;right:72px;top:176px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px"></div>
+</section>
+
+<!-- 19 close -->
+<section class="slide" data-fx="close" data-foot="Recap"
+ data-notes="Close on the case. One cluster across two architectures, the models on the box, three adventures that each show a different retrieval pattern: sensor analytics with an agent pipeline, semantic and agentic RAG over filings, and multimodal search with a need-to-know filter. Then hand over the appendix: what is live and what is staged, so nobody on the team over-claims.">
+  <div class="z" style="width:480px">
+    <div class="eyebrow in1">Recap</div>
+    <h1 class="in2" style="font-size:42px;letter-spacing:-1.6px;margin-top:20px">Bring the context <span class="b">to where the mission is.</span></h1>
+    <div class="in3" style="margin-top:22px">
+      <div class="rtr"><b>Search</b><span>One cluster on aarch64 and x86_64</span></div>
+      <div class="rtr"><b>Models</b><span>Nemotron 3.5 Lightning and Jina Embeddings v5 Omni on the Spark</span></div>
+      <div class="rtr"><b>Agents</b><span>Agent Builder with a local connector</span></div>
+      <div class="rtr"><b>Access</b><span>Clearance-scoped retrieval and answers</span></div>
+    </div>
+  </div>
+  <figure class="z kitfig lat" id="clfig" style="position:absolute;left:720px;width:440px;top:90px;height:560px">
+    <img class="kit-rot" src="img/kit-rotate.webp" alt="Illustration of the DDIL kit turning to show its front, side, back and other side">
+    <figcaption>The kit · front, side, back, side (illustration)</figcaption>
+  </figure>
+</section>
+
+<!-- 20 appendix: demo status -->
+<section class="slide soft" data-fx="status" data-foot="Appendix · demo status"
+ data-notes="Use this before every show. Live means the value comes from a real Elasticsearch query or a real model call when the stack is healthy. Staged means it is hardcoded or simulated in code. Everything live on this page depends on the checks at the bottom being done first; with them unfixed, the vineyard screens fall back to staged numbers without telling you.">
+  <div class="z">
+    <div class="eyebrow in1">Appendix · demo status</div>
+    <h1 class="in2" style="font-size:34px;letter-spacing:-1.2px">What is live, <span class="b">what is staged.</span></h1>
+  </div>
+  <div class="z" id="stt" style="position:absolute;left:72px;right:72px;top:150px"></div>
+</section>
+
+</div>
+<div id="notes"></div><div id="hud"></div>
+<div id="sorter"><div class="sh"><h2>Slide sorter</h2><span class="hint">Drag to reorder · click a slide to open it · Hide skips it when presenting · G or Esc to close</span><button id="srReset">Reset to original</button><button id="srSave">Download this order</button><button class="pri" id="srDone">Done</button></div><div class="sg" id="srGrid"></div></div>
+
+<script>
+(function(){
+const PRISTINE='<!doctype html>\n'+document.documentElement.outerHTML;
+const MARK='<svg viewBox="84.0 75.0 431.5 149.5" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M291.464 176.483L294.431 176.181L294.629 182.202C288.034 183.196 281.379 183.742 274.71 183.836C267.354 183.836 262.145 181.706 259.083 177.446C256.021 173.186 254.488 166.563 254.482 157.579C254.482 139.672 261.6 130.716 275.837 130.711C282.717 130.711 287.858 132.634 291.258 136.482C294.658 140.329 296.361 146.375 296.366 154.62L295.962 160.443H262.248C262.248 166.096 263.269 170.284 265.31 173.008C267.351 175.731 270.912 177.093 275.992 177.093C281.06 177.099 286.218 176.895 291.464 176.483ZM288.703 154.319C288.703 148.058 287.7 143.631 285.693 141.04C283.686 138.448 280.433 137.155 275.932 137.161C271.402 137.161 267.996 138.523 265.714 141.246C263.432 143.97 262.251 148.327 262.171 154.319H288.703Z" fill="#1C1E23"/> <path d="M307.048 183.449V116.141H314.711V183.449H307.048Z" fill="#1C1E23"/> <path d="M362.96 147.172V172.974C362.96 175.554 369.324 175.425 369.324 175.425L368.929 182.193C363.545 182.193 359.09 182.641 356.415 180.052C350.631 182.624 344.365 183.931 338.036 183.888C333.34 183.888 329.765 182.557 327.311 179.897C324.857 177.237 323.63 173.424 323.63 168.458C323.63 163.487 324.891 159.826 327.414 157.475C329.937 155.125 333.887 153.691 339.266 153.175L355.297 151.636V147.249C355.297 143.775 354.549 141.289 353.052 139.793C352.237 139.02 351.273 138.422 350.218 138.035C349.164 137.647 348.042 137.479 346.92 137.539H326.795V130.719H346.456C352.247 130.719 356.452 132.049 359.073 134.71C361.693 137.37 362.989 141.524 362.96 147.172ZM331.499 168.011C331.499 174.272 334.08 177.403 339.24 177.403C343.901 177.398 348.527 176.604 352.923 175.055L355.271 174.195V157.381L340.177 158.817C337.116 159.087 334.902 159.97 333.538 161.466C332.179 162.971 331.499 165.147 331.499 168.011Z" fill="#1C1E23"/> <path d="M392.898 137.565C385.479 137.565 381.766 140.145 381.761 145.306C381.761 147.685 382.621 149.371 384.341 150.363C386.061 151.355 389.923 152.387 395.926 153.459C401.992 154.52 406.292 156.002 408.827 157.905C411.361 159.809 412.619 163.384 412.602 168.63C412.602 173.877 410.919 177.724 407.554 180.172C404.188 182.62 399.266 183.847 392.787 183.853C388.564 183.853 374.476 182.288 374.476 182.288L374.88 175.648C382.982 176.431 388.839 177.007 392.787 177.007C396.734 177.007 399.753 176.379 401.826 175.115C403.898 173.851 404.948 171.744 404.948 168.785C404.948 165.826 404.088 163.814 402.29 162.765C400.493 161.715 396.631 160.709 390.645 159.754C384.659 158.8 380.393 157.398 377.873 155.566C375.353 153.734 374.098 150.32 374.098 145.349C374.098 140.378 375.818 136.696 379.353 134.314C382.887 131.932 387.239 130.736 392.486 130.736C396.631 130.736 411.045 131.794 411.045 131.794V138.477C403.443 138.116 397.199 137.565 392.898 137.565Z" fill="#1C1E23"/> <path d="M449.533 138.382H433.321V162.799C433.321 168.659 433.748 172.506 434.602 174.341C435.462 176.181 437.475 177.102 440.683 177.102L449.774 176.482L450.281 182.821C446.842 183.456 443.361 183.832 439.866 183.948C434.551 183.948 430.873 182.652 428.831 180.06C426.79 177.469 425.767 172.532 425.761 165.25V138.382H418.511V131.743H425.761V116.115H433.321V131.743H449.567L449.533 138.382Z" fill="#1C1E23"/> <path d="M460.18 125.215V116.33H467.843V125.215H460.18ZM460.18 183.449V131.743H467.843V183.449H460.18Z" fill="#1C1E23"/> <path d="M501.033 130.719C504.86 130.885 508.672 131.299 512.445 131.958L514.897 132.259L514.587 138.494C510.591 137.986 506.573 137.679 502.546 137.574C496.755 137.574 492.822 138.953 490.746 141.711C488.671 144.469 487.633 149.577 487.633 157.037C487.633 164.491 488.602 169.682 490.54 172.612C492.478 175.542 496.514 177.007 502.649 177.007L514.69 176.087L515 182.417C510.305 183.217 505.561 183.697 500.8 183.853C492.836 183.853 487.338 181.809 484.305 177.721C481.271 173.633 479.755 166.753 479.755 157.08C479.755 147.367 481.389 140.555 484.657 136.645C487.925 132.735 493.384 130.759 501.033 130.719Z" fill="#1C1E23"/> <path d="M233.264 153.459C233.28 147.447 231.438 141.577 227.991 136.651C224.545 131.725 219.661 127.983 214.008 125.937C214.522 123.314 214.781 120.647 214.782 117.973C214.802 109.104 212.007 100.458 206.797 93.2796C201.588 86.1017 194.234 80.763 185.796 78.0331C177.357 75.3031 168.27 75.3229 159.843 78.0896C151.417 80.8562 144.086 86.2268 138.908 93.4274C135.087 90.4666 130.405 88.8317 125.572 88.7706C120.738 88.7094 116.017 90.2252 112.122 93.0884C108.227 95.9515 105.372 100.006 103.988 104.638C102.605 109.269 102.768 114.226 104.454 118.756C98.7789 120.823 93.8723 124.578 90.3944 129.517C86.9165 134.456 85.034 140.341 85.0001 146.381C84.986 152.42 86.8419 158.315 90.313 163.257C93.7841 168.198 98.7 171.944 104.386 173.98C103.883 176.605 103.627 179.271 103.62 181.944C103.624 190.782 106.431 199.39 111.637 206.531C116.844 213.673 124.181 218.978 132.594 221.685C141.007 224.391 150.062 224.359 158.455 221.593C166.849 218.827 174.149 213.47 179.305 206.292C183.114 209.268 187.79 210.919 192.624 210.995C197.457 211.071 202.183 209.567 206.083 206.712C209.984 203.856 212.846 199.806 214.234 195.176C215.623 190.545 215.462 185.588 213.776 181.058C219.453 178.998 224.365 175.249 227.849 170.315C231.333 165.381 233.223 159.499 233.264 153.459ZM142.4 97.891C147.17 90.9399 154.193 85.8487 162.283 83.478C170.373 81.1073 179.034 81.6025 186.801 84.8798C194.568 88.1572 200.966 94.0157 204.912 101.465C208.859 108.915 210.112 117.498 208.46 125.765L175.736 154.448L143.286 139.698L136.956 126.135L142.4 97.891ZM125.964 94.253C129.808 94.2497 133.546 95.5098 136.603 97.8394L131.735 123.116L109.503 117.87C108.539 115.218 108.227 112.372 108.593 109.574C108.96 106.776 109.993 104.106 111.607 101.791C113.221 99.4758 115.367 97.5825 117.866 96.2706C120.365 94.9587 123.142 94.2667 125.964 94.253ZM90.7022 146.45C90.7405 141.295 92.387 136.281 95.4121 132.107C98.4371 127.934 102.69 124.808 107.576 123.168L131.976 128.93L137.704 141.169L106.501 169.361C101.862 167.589 97.8701 164.449 95.0549 160.358C92.2397 156.266 90.7338 151.416 90.7366 146.45H90.7022ZM175.976 201.94C171.565 208.428 165.19 213.331 157.787 215.928C150.384 218.526 142.343 218.681 134.845 216.372C127.347 214.062 120.787 209.41 116.128 203.097C111.469 196.784 108.957 189.144 108.961 181.299C108.958 178.847 109.197 176.402 109.675 173.997L141.626 145.168L174.196 160.013L181.412 173.773L175.976 201.94ZM192.266 205.561C188.434 205.551 184.713 204.279 181.678 201.94L186.512 176.749L208.727 181.909C209.691 184.562 210.003 187.407 209.637 190.206C209.27 193.004 208.237 195.673 206.623 197.988C205.009 200.304 202.863 202.197 200.364 203.509C197.865 204.821 195.088 205.513 192.266 205.526V205.561ZM210.688 176.68L186.228 170.961L179.735 158.55L211.72 130.496C216.364 132.252 220.363 135.379 223.186 139.462C226.01 143.546 227.524 148.391 227.528 153.356C227.502 158.514 225.865 163.535 222.846 167.717C219.827 171.899 215.576 175.033 210.688 176.68Z" fill="#1C1E23"/> </svg>';
+const ease=t=>t<=0?0:t>=1?1:1-Math.pow(1-t,3);
+const io=t=>t<=0?0:t>=1?1:t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const rand=s=>()=>(s=(s*16807)%2147483647)/2147483647;
+const NS='http://www.w3.org/2000/svg',$=id=>document.getElementById(id),on=(id,v)=>$(id).classList.toggle('on',v);
+const C={blue:'#0B64DD',pink:'#F04E98',teal:'#02BCB7',orange:'#FF7E62',ink:'#1D1E24',grey:'#69707D',gl:'#98A2B3',line:'#D3DAE6',sl:'#C5CCD8'};
+const slides=[...document.querySelectorAll('.slide')],deck=$('deck');
+slides.forEach(s=>{const f=document.createElement('div');f.className='foot';f.innerHTML=`<span class="lg">${MARK}</span><span>${s.dataset.foot||''}</span>`;s.appendChild(f);});
+function cv(slide,x,y,w,h){const c=document.createElement('canvas');c.className='fx';Object.assign(c.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});c.width=w*2;c.height=h*2;slide.appendChild(c);const g=c.getContext('2d');g.scale(2,2);return g;}
+function prep(c,w,h){c.width=w*2;c.height=h*2;const g=c.getContext('2d');g.setTransform(2,0,0,2,0,0);return g;}
+function el(p,n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;p.appendChild(e);return e;}
+
+const FX={};
+const mono=(g,w,z)=>g.font=`${w} ${z}px 'IBM Plex Mono', monospace`;
+
+
+/* ───────── slide animations: DDIL demo kit deck ───────── */
+/* step captions: step k starts at T[k]; onStep(k) sets the figure state for that step */
+const seqCap=(capId,T,caps,onStep)=>{let last=-2;
+  return t=>{let k=-1;T.forEach((x,i)=>{if(t>=x)k=i;});if(k!==last){last=k;onStep(k);const c=caps[Math.max(k,0)];
+    $(capId).innerHTML=k<0?'':`<div style="display:flex;gap:6px;margin-bottom:8px">${caps.map((_,i)=>`<i style="display:block;width:34px;height:4px;background:${i<=k?'var(--blue)':'var(--line)'}"></i>`).join('')}</div><div style="font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)">Step ${k+1} of ${caps.length} · ${c[0]}</div><div style="font-size:15.5px;line-height:1.45;color:var(--char);margin-top:6px;max-width:1110px">${c[1]}</div>`;}};};
+const STEPS=(n,g=2.4)=>Array.from({length:n},(_,i)=>.3+i*g);
+const cls=(id,c,v)=>$(id).classList.toggle(c,v);
+
+FX.cover=s=>t=>on('cvfig',t>.5);
+FX.close=s=>t=>on('clfig',t>.3);
+const shotDiv=k=>s=>t=>{on('dv'+k,t>.5);on('dc'+k,t>1.1);};
+FX.vdiv=shotDiv('vin');FX.sdiv=shotDiv('sec');FX.mdiv=shotDiv('mm');
+
+/* 2 · four ways the link fails, drawn live */
+FX.ddil=s=>{const L=[['Disconnected','No link at all. The team works on its own.'],['Denied','Someone jams or blocks the link.'],['Intermittent','The link drops and returns without warning.'],['Limited','A link exists, but it is thin and slow.']];
+  $('dl').innerHTML=L.map((l,i)=>`<div class="dlane" id="dln${i}"><div class="w"><b>${l[0][0]}</b>${l[0].slice(1)}<small>${l[1]}</small></div><canvas id="dcv${i}" width="1772" height="160"></canvas></div>`).join('');
+  const G=L.map((_,i)=>{const c=$('dcv'+i),g=c.getContext('2d');g.setTransform(2,0,0,2,0,0);return g;}),W=886,H=80,y=40,x0=70,x1=W-70;
+  const end=(g,x,lab,col)=>{g.fillStyle=col;g.fillRect(x-7,y-7,14,14);g.font="600 10px 'IBM Plex Mono'";g.fillStyle=C.grey;g.textAlign='center';g.fillText(lab,x,y+26);};
+  return t=>{L.forEach((_,i)=>on('dln'+i,t>.4+i*.35));on('dcap',t>2.4);
+    G.forEach((g,i)=>{g.clearRect(0,0,W,H);const a=ease((t-.6-i*.35)/.8);if(a<=0)return;g.globalAlpha=a;
+      end(g,x0,'THE KIT',C.blue);end(g,x1,'REACH-BACK',C.gl);
+      const mid=(x0+x1)/2;g.lineWidth=2;
+      if(i===0){g.strokeStyle=C.line;g.beginPath();g.moveTo(x0+10,y);g.lineTo(mid-40,y);g.moveTo(mid+40,y);g.lineTo(x1-10,y);g.stroke();
+        g.strokeStyle=C.pink;g.lineWidth=3;g.beginPath();g.moveTo(mid-10,y-10);g.lineTo(mid+10,y+10);g.moveTo(mid+10,y-10);g.lineTo(mid-10,y+10);g.stroke();
+        for(let k=0;k<3;k++){const p=((t*.35+k/3)%1);const x=x0+12+p*(mid-52-x0);g.fillStyle=C.blue;g.globalAlpha=a*(1-p*.6);g.fillRect(x-4,y-4,8,8);}g.globalAlpha=a;}
+      if(i===1){g.strokeStyle=C.line;g.beginPath();g.moveTo(x0+10,y);g.lineTo(x1-10,y);g.stroke();g.strokeStyle=C.pink;g.lineWidth=1.4;g.beginPath();
+        for(let x=mid-150;x<=mid+150;x+=3){const n=Math.sin(x*.21+t*19)*Math.sin(x*.05+t*7)*16;x===mid-150?g.moveTo(x,y+n):g.lineTo(x,y+n);}g.stroke();
+        for(let k=0;k<3;k++){const p=((t*.35+k/3)%1);const x=x0+12+p*(mid-160-x0);g.fillStyle=C.blue;g.fillRect(x-4,y-4,8,8);}}
+      if(i===2){const up=Math.sin(t*2.2)>-.1;g.strokeStyle=up?C.teal:C.line;g.setLineDash(up?[]:[4,6]);g.beginPath();g.moveTo(x0+10,y);g.lineTo(x1-10,y);g.stroke();g.setLineDash([]);
+        g.font="600 10px 'IBM Plex Mono'";g.textAlign='center';g.fillStyle=up?C.teal:C.pink;g.fillText(up?'LINK UP':'LINK DOWN',mid,y-12);
+        if(up)for(let k=0;k<4;k++){const p=((t*.3+k/4)%1);g.fillStyle=C.blue;g.fillRect(x0+12+p*(x1-x0-24)-4,y-4,8,8);}}
+      if(i===3){g.strokeStyle=C.sl;g.lineWidth=.8;g.beginPath();g.moveTo(x0+10,y);g.lineTo(x1-10,y);g.stroke();
+        const p=((t*.07)%1);g.fillStyle=C.blue;g.fillRect(x0+12+p*(x1-x0-24)-2.5,y-2.5,5,5);
+        g.font="600 10px 'IBM Plex Mono'";g.textAlign='center';g.fillStyle=C.grey;g.fillText('ONE PACKET AT A TIME',mid,y-12);}
+      g.globalAlpha=1;});};};
+
+/* 3 · requirements, each answered by what the kit uses */
+FX.needs=s=>{const R=[['Models','The model runs on the box','NVIDIA Nemotron 3.5 Lightning in Ollama on the Spark. Jina Embeddings v5 Omni on port 8081.'],
+  ['Data','The data lives on the box','One Elasticsearch cluster, <code>ddil-vineyard</code>, across the Spark and the Framework.'],
+  ['Retrieval','Search is local','BM25, kNN, hybrid RRF and ES|QL against local indices. GPU vector indexing on the Spark node.'],
+  ['Agents','Agents call local tools','Kibana Agent Builder with the <code>finance-ollama-llm</code> connector pointed at Ollama on the Spark.'],
+  ['Access','Answers respect clearance','Clearance, compartment and NOFORN rules applied to every query in the backend. Application side.'],
+  ['Names','Names resolve on the LAN','<code>es.ddil</code>, <code>ollama.ddil</code>, <code>jina.ddil</code>, <code>kibana.ddil</code>. Added in the latest commit, not yet verified on the box.']];
+  $('nd').innerHTML=R.map((r,i)=>`<div class="req" id="rq${i}"><div class="k"><i>&#10003;</i>${r[0]}</div><div class="h">${r[1]}</div><div class="x">${r[2]}</div></div>`).join('');
+  return t=>{R.forEach((_,i)=>{on('rq'+i,t>.4+i*.3);cls('rq'+i,'ok',t>2.6+i*.3);});on('ncut',t>4.8);};};
+
+/* 4 · the kit, piece by piece */
+/* markers sit on the setup-guide rendering at the hotspot positions in setup/src/hotspots.json (front set, % of the image box) */
+FX.kit=s=>{const P=[['F1',20,6,'Frame and handles','10 in mini rack, travels in a Pelican Air 1615'],['F2',34,26,'Touchscreen panel','1280x400 · kiosk app :3100'],
+    ['F3',50,42,'Framework Desktop','192.168.1.10 · behind blank panels'],['F4',50,58,'DGX Spark','192.168.1.20 · GB10 · 128 GB'],['F5',27.5,69,'JetKVM','remote console'],
+    ['F6',57,68,'UniFi Express 7','192.168.1.1 · gateway'],['F7',59.5,76.5,'Switch Flex Mini','5-port GbE'],['F8',29.5,86.5,'PDU','kit master power switch']];
+  const G=[[0,7],[3],[2],[5,6,4],[1]];
+  $('kmk').innerHTML=P.map((p,i)=>`<i class="kmk" id="km${i}" style="left:${p[1]}%;top:${p[2]}%">${i+1}</i>`).join('');
+  $('klg').innerHTML=P.map((p,i)=>`<div class="klr" id="kl${i}"><i>${String(i+1).padStart(2,'0')}</i><div><b>${p[3]}</b><span>${p[4]}</span></div></div>`).join('');
+  /* the rendering is drawn with object-fit:contain; pin the marker layer to the drawn image box */
+  const im=$('kfig').querySelector('img'),fit=()=>{const f=$('kfig'),W=f.clientWidth,H=f.clientHeight,r=1122/1402,w=Math.min(W,H*r),h=w/r;Object.assign($('kmk').style,{left:(W-w)/2+'px',top:(H-h)/2+'px',width:w+'px',height:h+'px',right:'auto',bottom:'auto'});};fit();
+  return seqCap('kitc',STEPS(5),[
+  ['The kit','A 10 in mini rack holds the whole kit: two compute nodes, a gateway, a switch, a PDU and a touchscreen panel. It travels in a Pelican Air 1615 case.'],
+  ['DGX Spark · 192.168.1.20','GB10 Blackwell, 128 GB unified memory, aarch64. It runs the GPU Elasticsearch node, Ollama and the Jina embedding server.'],
+  ['Framework Desktop · 192.168.1.10','Ryzen AI Max+ 395, 64 GB, x86_64, behind the blank panels. It runs the CPU Elasticsearch node, Kibana, the backend and the frontend, all in Docker.'],
+  ['The network','UniFi Express 7 is the gateway at 192.168.1.1 and a Switch Flex Mini carries the wired ports. A JetKVM gives a remote console. Services resolve by .ddil names on the kit LAN.'],
+  ['The touchscreen','A separate kiosk app on port 3100 shows branding and system health. Its health view is mock data until the MOCK flag is set to false.']],
+  k=>{const seen=G.slice(0,k+1).flat(),hot=k<0?[]:G[k];P.forEach((_,i)=>{const v=seen.includes(i),h=hot.includes(i);on('km'+i,v);cls('km'+i,'hot',h);on('kl'+i,v);cls('kl'+i,'hot',h);});});};
+
+/* 5 · architecture */
+FX.arch=s=>{const T=(id,x,y,w,h,c,b,em,sm)=>`<div class="atl lat" id="${id}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;--c:${c}"><b>${b}</b><em>${em}</em><small>${sm}</small></div>`;
+  $('arx').innerHTML=`<div class="ahd sp lat" id="ah0" style="left:0;width:520px"><b>DGX Spark</b><span>192.168.1.20 · aarch64 · GB10 GPU · 128 GB unified</span></div>`+
+    `<div class="ahd fw lat" id="ah1" style="left:616px;width:520px"><b>Framework Desktop</b><span>192.168.1.10 · x86_64 · Ryzen AI Max+ 395 · 64 GB</span></div>`+
+    `<div class="acl lat" id="acl"><span class="lb">One Elasticsearch cluster · ddil-vineyard</span><div class="xp">:9300<br>transport</div></div>`+
+    T('ae0',16,92,488,68,'var(--blue)','es-gpu · node spark-gpu',':9200','Elasticsearch 9.5.6 + cuVS · accel=gpu · GPU vector indexing')+
+    T('ae1',632,92,488,68,'var(--blue)','es-cpu · node framework-cpu',':9200','Elasticsearch 9.5.6 · accel=cpu · ML role')+
+    T('as0',0,194,254,126,'#1D2A5A','Ollama',':11434','Nemotron 3.5 Lightning<br>NVIDIA NeMo LLM<br>native, under systemd')+
+    T('as1',266,194,254,126,'var(--teal)','Jina v5 Omni server',':8081','Jina Embeddings v5 Omni<br>text and image embeddings<br>started by hand')+
+    T('af0',616,194,254,58,'var(--pink)','Kibana 9.5.6',':5601','Agent Builder')+T('af1',882,194,254,58,'var(--ink)','Backend',':8000','FastAPI · three adventures')+
+    T('af2',616,262,254,58,'var(--ink)','Frontend',':3000','React · Vite')+T('af3',882,262,254,58,'var(--grey-l)','Kiosk',':3100','touchscreen app')+
+    `<i class="avl lat" id="av0" style="left:259px"></i><i class="avl lat" id="av1" style="left:875px"></i>`+
+    `<div class="anet lat" id="anet"><span class="k">Kit LAN</span><span><b>UniFi Express 7</b> · 192.168.1.1 · gateway, DHCP, Wi-Fi</span><span><b>Switch Flex Mini</b> · 5-port GbE · links the gateway and both hosts</span></div>`;
+  const G=[['ah0','ah1','anet','av0','av1'],['acl','ae0','ae1'],['as0','as1'],['af0','af1','af2','af3']];
+  return seqCap('archc',STEPS(4),[
+  ['Two hosts','The DGX Spark is aarch64 with the GPU. The Framework is x86_64. Both sit on the same switch.'],
+  ['One cluster','One Elasticsearch cluster, ddil-vineyard, seeded at each other\'s port 9300. Nodes carry accel=gpu or accel=cpu. The ML role sits on the x86 node so ELSER can allocate there.'],
+  ['Inference on the Spark','Ollama serves Nemotron 3.5 Lightning on port 11434. Jina Embeddings v5 Omni answers on 8081. No request goes to a hosted model.'],
+  ['Kibana and the apps','Kibana and Agent Builder on 5601, the FastAPI backend on 8000 for all three adventures, the React frontend on 3000. Both Elasticsearch nodes and Kibana run 9.5.6.']],
+  k=>G.forEach((g,i)=>g.forEach(id=>on(id,i<=k))));};
+
+/* 6 · the three demos at a glance */
+FX.demos=s=>t=>{[0,1,2].forEach(i=>on('dm'+i,t>.4+i*.45));on('dmcap',t>2);};
+
+/* 8 · estate map (schematic) and the indices filling up */
+FX.estate=s=>{const IX=[['vineyard-soil',841536,'8-d reading_vector','var(--blue)'],['vineyard-imagery',17151,'768-d in the mapping · not loaded by the bulk script','#9DC7FF'],
+    ['vineyard-npk',10032,'7-d npk_vector','var(--teal)'],['vineyard-harvest',175,'structured','#FEC514'],['vineyard-wine',106,'structured','var(--pink)']];
+  $('eix').innerHTML=IX.map((r,i)=>`<div class="eix lat" id="ex${i}" style="--c:${r[3]}"><div class="ezh"><b>${r[0]}</b><em>${r[1].toLocaleString('en-US')}</em></div><div class="ezx">${r[2]}</div><div class="ezb"><i id="exb${i}"></i></div></div>`).join('');
+  const B=[['A','Les Pierres','Cabernet Sauvignon',4.2,'#48EFCF','healthy'],['B','Clos du Vent','Syrah',3.8,'#9DC7FF','drought watch'],['C','La Rivière','Merlot',5.1,'#FF957D','critical'],
+    ['D','Le Jardin','Chardonnay',3.5,'#FEC514','disease risk'],['E','Vieilles Vignes','Cabernet Franc',2.8,'#48EFCF','healthy'],['F','Le Plateau','Riesling',2.2,'#48EFCF','healthy']];
+  const poly=[[[18,20],[118,14],[124,112],[22,120]],[[128,14],[218,18],[214,104],[132,110]],[[226,18],[318,26],[312,150],[220,138]],[[22,128],[124,122],[128,232],[26,240]],[[132,118],[214,112],[218,206],[136,214]],[[220,146],[312,158],[306,238],[224,232]]];
+  const sv=$('emsvg');let h='<rect width="560" height="384" fill="#F3F5F2"/>';for(let i=0;i<14;i++)h+=`<path d="M${-40+i*45} 384 L${40+i*45} 0" stroke="#E3E8E1" stroke-width="1"/>`;
+  h+=`<g transform="translate(6,20)">`+B.map((b,i)=>`<g id="eb${i}" style="opacity:0;transition:opacity .4s"><polygon points="${poly[i].map(p=>p.join(',')).join(' ')}" fill="${b[4]}" fill-opacity=".55" stroke="${i===2?'#E5533A':'#1D1E24'}" stroke-width="${i===2?3:1}"/>`+
+    `<text x="${(poly[i][0][0]+poly[i][2][0])/2}" y="${(poly[i][0][1]+poly[i][2][1])/2-4}" text-anchor="middle" style="font:600 11px 'IBM Plex Mono'" fill="#1D1E24">BLK-${b[0]}</text><text x="${(poly[i][0][0]+poly[i][2][0])/2}" y="${(poly[i][0][1]+poly[i][2][1])/2+11}" text-anchor="middle" style="font:500 10px Inter" fill="#343741">${b[1]}</text></g>`).join('')+
+    `<circle id="epul" cx="272" cy="84" r="16" fill="none" stroke="#E5533A" stroke-width="2"/></g>`;
+  h+=`<g transform="translate(16,286)">`+[['#48EFCF','Healthy'],['#9DC7FF','Watch'],['#FEC514','Warning'],['#FF957D','Critical']].map((l,i)=>`<rect x="${i*76}" y="0" width="10" height="10" fill="${l[0]}"/><text x="${i*76+15}" y="9" style="font:500 10px 'IBM Plex Mono'" fill="#69707D">${l[1]}</text>`).join('')+
+    `<text x="0" y="34" style="font:500 10px 'IBM Plex Mono'" fill="#98A2B3">Schematic. Block shapes are not to scale.</text><text x="0" y="50" style="font:500 10px 'IBM Plex Mono'" fill="#98A2B3">Walla Walla AVA · 46.0150, -118.3800 · offline tiles</text></g>`;
+  h+=`<g id="edet" style="opacity:0;transition:opacity .5s"><rect x="340" y="14" width="208" height="356" fill="#fff" stroke="#1D1E24"/><text x="354" y="38" style="font:600 10px 'IBM Plex Mono'" fill="#E5533A" letter-spacing=".08em">BLK-C · CRITICAL</text><text x="354" y="60" style="font:600 18px Inter" fill="#1D1E24">La Rivière</text>`+
+    [['Variety','Merlot'],['Acres','5.1'],['Elevation','245 m · E'],['Soil','Alluvial clay'],['Story','Declining since 2022']].map((r,i)=>`<text x="354" y="${88+i*20}" style="font:500 10px 'IBM Plex Mono'" fill="#69707D">${r[0].toUpperCase()}</text><text x="440" y="${88+i*20}" style="font:500 11.5px Inter" fill="#343741">${r[1]}</text>`).join('')+
+    `<line x1="354" x2="534" y1="${88+5*20-4}" y2="${88+5*20-4}" stroke="#D3DAE6"/><text x="354" y="${212}" style="font:600 10px 'IBM Plex Mono'" fill="#69707D">ALERTS (STAGED IN UI)</text>`+
+    [['#E5533A','Potassium depletion','K 210 to 50 since mid-2022'],['#FEC514','Persistent high moisture','15 % above normal, 18 months']].map((a,i)=>`<rect x="354" y="${222+i*44}" width="4" height="34" fill="${a[0]}"/><text x="364" y="${236+i*44}" style="font:600 12px Inter" fill="#1D1E24">${a[1]}</text><text x="364" y="${251+i*44}" style="font:500 10px 'IBM Plex Mono'" fill="#69707D">${a[2]}</text>`).join('')+
+    `<rect id="ebtn" x="354" y="318" width="180" height="36" fill="#0B64DD"/><text x="444" y="341" text-anchor="middle" style="font:600 12.5px Inter" fill="#fff">Investigate with AI &#8594;</text></g>`;
+  sv.innerHTML=h;
+  return t=>{IX.forEach((r,i)=>{const v=t>.9+i*.35;on('ex'+i,v);$('exb'+i).style.width=v?(Math.log10(r[1])/6*100)+'%':'0';});on('emap',t>.2);B.forEach((_,i)=>$('eb'+i).style.opacity=t>.5+i*.15?1:0);const k=(t*1.2)%1;$('epul').setAttribute('r',16+k*26);$('epul').setAttribute('opacity',t>1.6?(1-k):0);
+    $('edet').style.opacity=t>2.2?1:0;on('ecap',t>4);};};
+
+/* 9 · the five-phase agronomist */
+FX.agro=s=>{const Q='Analyze the current status of block BLK-C and recommend actions';
+  const P=[['Sensor Snapshot','sensors · latest soil and NPK docs for the block','ES'],['Historical Context','historical · kNN k=5 on reading_vector, block filter','ES + LLM'],
+    ['Risk Analysis','risk · JSON from sensors, history and the question','LLM'],['Crop Recommendation','recommendation · variety-aware, Merlot for BLK-C','LLM'],['Action Plan','action_plan · tasks, assignee, deadline, cost','LLM']];
+  $('aph').innerHTML=P.map((p,i)=>`<div class="ph" id="ap${i}"><span class="dot">${i}</span><div class="h">${p[0]}<small>${p[1]}</small></div><span class="t${p[2]==='ES'?'':' llm'}">${p[2]}</span></div>`).join('');
+  const R=[['Phase 0','Reads Elasticsearch directly on the GPU node. No model call.'],['Phase 1','8-d query vector from moisture and temperature, kNN k=5 with 100 candidates.'],['Model','Four sequential calls to Nemotron 3.5 Lightning through Ollama. Temperature 0.1, 120 s timeout each.'],['Transport','Server-sent events from the FastAPI backend. Heartbeats every 3 s while the model works.'],['Grounding','Start from the map or an Investigate button. Typed questions send no block id.']];
+  $('ar').innerHTML=`<div class="card lat" id="arc"><div class="ch">How it runs <b>chat.py</b></div><div style="padding:6px 16px 10px">${R.map(r=>`<div class="kv"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div></div>`+
+    `<div class="bal lat" id="arb" style="margin-top:16px;box-shadow:none;padding:10px 14px"><div class="k">Say it straight</div><div class="x" style="font:500 13px/1.45 var(--sans);color:var(--char);margin-top:4px">This pipeline is Python plus Ollama. It does not call Agent Builder, whatever the chooser card says. Agent Builder is live in the SEC adventure.</div></div>`;
+  const T0=1.9,D=1.35;
+  return t=>{on('aw',t>.2);on('arc',t>1);on('arb',t>8.6);const n=Math.max(0,Math.min(Q.length,Math.floor((t-.5)*40)));$('aqt').textContent=Q.slice(0,n);
+    let log=[];P.forEach((p,i)=>{const a=T0+i*D,b=a+D*.85;on('ap'+i,t>a);cls('ap'+i,'run',t>a&&t<b);cls('ap'+i,'done',t>=b);if(t>a)log.push(`<span class="m">phase</span> ${p[1].split(' ')[0]} · running`);if(t>=b)log.push(`<span class="m">phase</span> ${p[1].split(' ')[0]} · <span class="g">complete</span>`);});
+    if(t>T0+5*D)log.push('<span class="g">job_complete</span> · model nemotron-3.5-lightning · phases_completed 5');$('asse').innerHTML=log.slice(-3).join('\n');};};
+
+/* 10 · the staged race */
+FX.race=s=>{const N=841536,L=[['GPU HNSW · cuVS','es-gpu · spark-gpu',15,'var(--blue)'],['CPU HNSW','es-cpu · framework-cpu',55,'var(--grey-l)']];
+  $('rl').innerHTML=`<div style="font:600 11px var(--mono);letter-spacing:.08em;color:var(--grey);text-transform:uppercase">Simulated clock · <span id="rclk">0</span> s of 55</div>`+
+    L.map((l,i)=>`<div style="margin-top:22px"><div style="display:flex;align-items:baseline;gap:10px"><b style="font:600 20px var(--sans);letter-spacing:-.4px">${l[0]}</b><span style="font:500 11px var(--mono);color:var(--grey)">${l[1]}</span><span id="rs${i}" style="margin-left:auto;font:600 11px var(--mono);color:var(--grey)">RUNNING</span></div>`+
+      `<div style="height:30px;background:#E9EDF3;margin-top:10px;position:relative"><i id="rb${i}" style="position:absolute;left:0;top:0;bottom:0;width:0;background:${l[3]}"></i></div><div style="display:flex;justify-content:space-between;margin-top:6px;font:500 12px var(--mono);color:var(--char)"><span><span id="rn${i}">0</span> / 841,536 docs</span><span>scripted finish: ${l[2]} s</span></div></div>`).join('')+
+    `<div style="margin-top:34px;border-top:1px solid var(--line);padding-top:12px;font:500 11.5px/1.6 var(--mono);color:var(--grey)">Progress rises linearly to a scripted finish time. The live screen also shows throughput, merge time and recall; those are simulated too, so they are left off this slide.</div>`;
+  const K=[['Touches ES','Never. run_race ignores the index name and data file.'],['Durations','Constants in indexer.py: 15 s and 55 s.'],['Throughput','On screen it is a target times a ramp times noise.'],['Recall','Hardcoded with a note that says computed post-race.']];
+  $('rr').innerHTML=`<div class="card lat" id="rc1"><div class="ch">What the simulator does <b>indexer.py</b></div><div style="padding:6px 16px 10px">${K.map(r=>`<div class="kv"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div></div>`+
+    `<div class="card lat" id="rc2" style="margin-top:16px"><div class="ch">What is real <b>es-gpu image</b></div><div style="padding:6px 16px 10px"><div class="kv"><b>cuVS</b><span>aarch64 cuVS Java jar in the 9.5.6 image</span></div><div class="kv"><b>Setting</b><span>vectors.indexing.use_gpu=true on spark-gpu</span></div></div></div>`;
+  return t=>{on('rst',t>.3);on('rw',t>.3);on('rc1',t>1.2);on('rc2',t>2.2);const sim=Math.max(0,Math.min(55,(t-1)*5.5));$('rclk').textContent=Math.floor(sim);
+    L.forEach((l,i)=>{const p=Math.min(1,sim/l[2]);$('rb'+i).style.width=(p*100)+'%';$('rn'+i).textContent=Math.round(N*p).toLocaleString('en-US');const d=p>=1;$('rs'+i).textContent=d?'COMPLETE':'RUNNING';$('rs'+i).style.color=d?'var(--teal)':'var(--grey)';});};};
+
+/* 12 · SEC semantic search */
+FX.secs=s=>{const Q='AI model risk and governance disclosures';
+  $('schips').innerHTML=['Commercial real estate exposure','Climate-related transition risk','Cybersecurity incident response'].map(c=>`<span class="chp">${c}</span>`).join('');
+  $('sres').innerHTML=Array.from({length:5},(_,i)=>`<div class="skr" id="sk${i}"><span class="tk">TICKER</span><div><div class="bar"></div><div class="bar"></div></div><span class="scr">_score</span></div>`).join('');
+  $('smeta').innerHTML=['took_ms · measured','hits · measured','embed_dims · 768'].map(m=>`<span class="mtag">${m}</span>`).join('')+'<span style="font:500 11px var(--mono);color:var(--grey);align-self:center">Rows are placeholders. On the kit they are live hits.</span>';
+  $('scode').innerHTML=`<div class="code3"><span class="c">// the query, as the screen shows it</span>
+<span class="k">POST</span> sec_10k_2026/_search
+{
+  <span class="s">"knn"</span>: {
+    <span class="s">"field"</span>: <span class="g">"emb"</span>,
+    <span class="s">"query_vector"</span>: [ <span class="c">768 floats, Jina v5 Omni</span> ],
+    <span class="s">"k"</span>: 8,
+    <span class="s">"num_candidates"</span>: 80,
+    <span class="s">"filter"</span>: <span class="c">optional sector filter</span>
+  }
+}</div><div class="card" style="margin-top:16px"><div style="padding:6px 16px 10px">
+<div class="kv"><b>Index</b><span>sec_10k_2026 · 768-d cosine HNSW</span></div><div class="kv"><b>Embedder</b><span>Jina Embeddings v5 Omni on the Spark, port 8081</span></div>
+<div class="kv"><b>Stated</b><span>503 filings and 93,541 chunks in UI text and the agent prompt. Not a live count.</span></div><div class="kv"><b>Check</b><span>Index re-embedded at 768-d on the kit; backend reports embed_backend jina.</span></div></div></div>`;
+  return t=>{on('sw',t>.2);const n=Math.max(0,Math.min(Q.length,Math.floor((t-.6)*30)));$('sq').textContent=Q.slice(0,n);
+    for(let i=0;i<5;i++)on('sk'+i,t>2.2+i*.18);on('smeta',t>3.3);on('scode',t>2.6);};};
+
+/* 13 · SEC agentic */
+FX.seca=s=>{const C1=[['Agent','finance-analyst · Financial Filings Analyst'],['Connector','finance-ollama-llm · .gen-ai to Nemotron 3.5 Lightning on the Spark'],['Custom tools','finance.company_disclosures · finance.compare_companies · finance.sector_breakdown'],['Platform','search · execute_esql · generate_esql · get_document_by_id · get_index_mapping · list_indices · index_explorer'],['Rules','At most 6 tool calls. Cite ticker and accession.']];
+  $('acl').innerHTML=C1.map(r=>`<div class="kv" style="grid-template-columns:86px 1fr;font-size:12.5px"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('');
+  const T=[['var(--ink)','Analyst','Across the S&amp;P 500, which sector has the most filings citing supply-chain disruption?'],['#6B4FD8','Reasoning','The question asks for a count by sector, so passages alone will not answer it.'],
+    ['var(--pink)','Tool call · finance.sector_breakdown','<span style="color:var(--ink)">FROM sec_10k_2026 | WHERE MATCH(text, ?topic)<br>| STATS filings = COUNT_DISTINCT(accession) BY sector</span><br>topic = "supply-chain disruption"'],
+    ['var(--teal)','Result','One row per sector with a distinct filing count, computed by ES|QL on the box.'],['var(--blue)','Answer','Ranks the sectors and cites ticker and accession for the filings it quotes. Streamed back to the screen.']];
+  $('atl').innerHTML=T.map((r,i)=>`<div class="tl" id="tl${i}"><i style="background:${r[0]}"></i><div><div class="h">${r[1]}</div><div class="x">${r[2]}</div></div></div>`).join('')+
+    `<div class="lat" id="tlx" style="margin-top:8px;border-top:1px solid var(--line);padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;line-height:1.4;color:var(--char)"><div><b style="font:600 10.5px var(--mono);letter-spacing:.06em;color:var(--blue)">SEMANTIC RAG</b><br>One query, one kNN search, passages to the model.</div><div><b style="font:600 10.5px var(--mono);letter-spacing:.06em;color:var(--pink)">AGENTIC RAG</b><br>The agent picks tools and parameters, reads results, and decides on the next call.</div></div>`;
+  return t=>{on('acfg',t>.3);on('aconv',t>.6);T.forEach((_,i)=>on('tl'+i,t>1.2+i*1.1));on('tlx',t>7);};};
+
+/* 15 · text to image */
+FX.mms=s=>{const Q='a red square';const sq=(c,shape,r=0)=>{const S={sq:`<rect x="22" y="12" width="46" height="46" fill="${c}" transform="rotate(${r} 45 35)"/>`,ci:`<circle cx="45" cy="35" r="24" fill="${c}"/>`,tr:`<polygon points="45,10 70,58 20,58" fill="${c}"/>`,st:[0,1,2,3].map(k=>`<rect x="18" y="${14+k*12}" width="54" height="6" fill="${c}"/>`).join('')};return `<svg viewBox="0 0 90 70" style="width:64%">${S[shape]}</svg>`;};
+  const A=[['#E5533A','sq'],['#E5533A','sq',20],['#FF957D','sq'],['#E5533A','ci'],['#0B64DD','sq'],['#E5533A','tr']];
+  $('mgrid').innerHTML=A.map((a,i)=>`<div class="tile${i?'':' top'}" id="mt${i}"><em>${i+1}</em>${sq(a[0],a[1],a[2]||0)}</div>`).join('');
+  const R=[['Track','Synthetic shapes, 10 documents'],['Index','jina-multimodal'],['image_vector','768-d, embedded by the Jina server at ingest'],['caption_vector','768-d, embedded inside ES by pipeline jina-embed-caption'],['Query','query_vector_builder with jina-omni-text, k=6'],['Model','Jina Embeddings v5 Omni on the Spark']];
+  $('mr').innerHTML=`<div class="card lat" id="mrc"><div class="ch">How it works <b>routers/jina.py</b></div><div style="padding:6px 16px 10px">${R.map(r=>`<div class="kv" style="grid-template-columns:104px 1fr"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div></div>`;
+  return t=>{on('mw',t>.2);on('mrc',t>1.4);on('mcap',t>4);const n=Math.max(0,Math.min(Q.length,Math.floor((t-.6)*14)));$('mq').textContent=Q.slice(0,n);
+    A.forEach((_,i)=>on('mt'+i,t>1.9+i*.16));const cap=t>6.5;$('mswe').style.left=cap?'50%':'0';const sp=$('msw').querySelectorAll('span');sp[0].style.color=cap?'var(--ink)':'#fff';sp[1].style.color=cap?'#fff':'var(--ink)';};};
+
+/* 16 · need to know: who sees what */
+FX.ntk=s=>{const LV=['U','CUI','C','S','TS'],COL={U:'#9AA5B8',CUI:'#7FB0F5',C:'#0B64DD',S:'#F04E98',TS:'#153385'};
+  const PER=[['Public User','U · no compartments · foreign',0,[],false],['Analyst A','SECRET · SI · US',3,['SI'],true],['Analyst B','TS/SCI · HCS · SI · US',4,['SCI','HCS','SI'],true],['Senior Analyst','TS/SCI · HCS · TK · SI · US',4,['SCI','HCS','TK','SI'],true]];
+  const r=rand(20261113),D=[];const pick=()=>{const x=r()*100;return x<40?0:x<65?1:x<80?2:x<93?3:4;};
+  for(let i=0;i<72;i++){const l=pick();let cp=[];if(l>=3){const pool=['SI','HCS','SCI','TK'],n=Math.floor(r()*(l===3?3:4));for(let k=0;k<n;k++){const c=pool[Math.floor(r()*4)];if(!cp.includes(c))cp.push(c);}}D.push({l,cp,nf:l>=2&&r()<.45});}
+  const sees=(p,d)=>d.l<=p[2]&&d.cp.every(c=>p[3].includes(c))&&(!d.nf||p[4]);
+  $('ng').innerHTML=D.map((d,i)=>`<div class="dc" id="dc${i}" style="background:${COL[LV[d.l]]};${d.nf?'box-shadow:inset 0 0 0 2px #FEC514':''}">${LV[d.l]}</div>`).join('');
+  $('nleg').innerHTML=LV.map(l=>`<span><i style="display:inline-block;width:9px;height:9px;background:${COL[l]};margin-right:5px"></i>${l}</span>`).join('')+`<span><i style="display:inline-block;width:9px;height:9px;box-shadow:inset 0 0 0 2px #FEC514;margin-right:5px"></i>NOFORN</span>`;
+  $('np').innerHTML=PER.map((p,i)=>`<div class="pc" id="pp${i}"><div class="n">${p[0]}</div><div class="l">${p[1]}</div></div>`).join('');
+  const cnt=PER.map(p=>D.filter(d=>sees(p,d)).length);
+  $('nr').innerHTML=`<div class="ac-k" style="margin-bottom:6px">Visible in this grid</div>`+PER.map((p,i)=>`<div class="cbar"><span>${p[0].replace('Analyst','An.')}</span><div class="ctr"><i id="nb${i}" style="width:0"></i></div><b id="nc${i}">&nbsp;</b></div>`).join('')+
+    `<div style="margin-top:14px;border-top:1px solid var(--ink);padding-top:8px">${[['1','Classification at or below clearance'],['2','Holds every compartment on the doc'],['3','NOFORN only if NOFORN-cleared']].map(x=>`<div class="kv" style="grid-template-columns:20px 1fr;font-size:12px"><b style="color:var(--blue)">${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div>`;
+  let last=-1;
+  return t=>{on('nwarn',t>1.2);const n=t<.8?-1:Math.floor((t-.8)/2.2),k=n<0?-1:n%4;if(k!==last){last=k;PER.forEach((_,i)=>on('pp'+i,i===k));
+      $('nlab').textContent=k<0?'Signed in as':'Signed in as '+PER[k][0]+' · '+PER[k][1];D.forEach((d,i)=>cls('dc'+i,'off',k>=0&&!sees(PER[k],d)));}
+    PER.forEach((_,i)=>{if(n>=i){$('nb'+i).style.width=(cnt[i]/72*100)+'%';$('nc'+i).textContent=cnt[i];}else{$('nb'+i).style.width='0';$('nc'+i).innerHTML='&nbsp;';}});};};
+
+/* 17 · what runs where */
+FX.where=s=>{const H=[['DGX Spark','192.168.1.20 · aarch64',[['es-gpu','Elasticsearch 9.5.6 + cuVS',':9200'],['Ollama','Nemotron 3.5 Lightning',':11434'],['Jina v5 Omni server','text and image embeddings',':8081']]],
+    ['Framework Desktop','192.168.1.10 · x86_64',[['es-cpu','Elasticsearch 9.5.6',':9200'],['Kibana','Agent Builder · connector to Ollama',':5601'],['Backend','FastAPI · three adventures',':8000'],['Frontend','React · Vite dev server',':3000'],['Kiosk','touchscreen app',':3100']]]];
+  let n=0;$('wh').innerHTML=H.map((h,j)=>`<div class="host" id="wh${j}"><div class="hh"><b>${h[0]}</b><span>${h[1]}</span></div>${h[2].map(s=>`<div class="svc" id="sv${n++}"><div>${s[0]}<small>${s[1]}</small></div><em>${s[2]}</em></div>`).join('')}</div>`).join('')+
+    `<div><div class="host" id="wh2"><div class="hh"><b>Kit LAN</b><span>UniFi Express 7 · .1</span></div><div style="padding:10px 16px;font:500 12px/1.75 var(--mono);color:var(--char)">spark.ddil · es.ddil<br>ollama.ddil · jina.ddil<br>framework.ddil · kibana.ddil<br><span style="color:var(--grey)">ES transport stays on raw IPs</span></div></div>`+
+    `<div class="bal lat" id="wh3" style="margin-top:16px;box-shadow:none;padding:12px 14px"><div class="k">Pre-show check</div><div class="x" style="font:500 12.5px/1.5 var(--sans);color:var(--char);margin-top:4px">All nodes and Kibana on 9.5.6, security settings matched. Kit config points at Nemotron 3.5 Lightning and Jina v5 Omni. Set it in the compose environment; the container never reads .env.</div></div></div>`;
+  return t=>{for(let j=0;j<3;j++)on('wh'+j,t>.3+j*.5);for(let i=0;i<n;i++)on('sv'+i,t>1+i*.3);on('wh3',t>4);};};
+
+/* 18 · deployment and operations */
+FX.ops=s=>{const O=[['var(--blue)','Bring-up','On each host',['Spark: <code>sg docker -c "docker compose up -d"</code>','Framework: <code>docker compose up -d</code>','Pull <code>nemotron-3.5-lightning</code> in Ollama; no repo script does it','Start the Jina v5 Omni server by hand on :8081','<code>vm.max_map_count=262144</code> on the Framework']],
+    ['var(--teal)','Before going dark','While a network exists',['Build backend and frontend images: pip and npm run at build time','Stage the data that is not in git: vineyard JSONL, SEC NDJSON, Jina media','SEC <code>run-all.sh</code>: re-embed, index, connector, agent, Kibana','es-gpu needs <code>ELASTIC_PASSWORD</code> and its transport cert','Give the backend ES credentials in the compose environment']],
+    ['var(--pink)','On stage','Reset and recover',['<b>Reset Demo</b> returns to the chooser; the race resets separately','SEC: Reset conversation in chapter 04. Esc exits SEC and Multimodal','<b>F1</b> backend has no ES credentials: 401s, silent fallbacks','<b>Check</b> all nodes and Kibana on 9.5.6, security matched; config on Nemotron 3.5 Lightning and Jina v5 Omni','Never run the guide\'s model unload; it deletes the model']]];
+  $('op').innerHTML=O.map((o,i)=>`<div class="dfc2" id="oc${i}" style="--c:${o[0]}"><div class="k">${i+1} · ${o[2]}</div><div class="h">${o[1]}</div><ul>${o[3].map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
+  return t=>{O.forEach((_,i)=>on('oc'+i,t>.4+i*.6));};};
+
+/* 20 · appendix: live vs staged */
+FX.status=s=>{const S=[['Vineyard Intelligence','click path: chooser, architecture, race, app','Dashboard KPIs and per-block map when ES answers · agronomist phases 0 and 1 on ES · four Nemotron 3.5 Lightning calls','Race (simulator) · architecture and system screens · dashboard alerts · Crop Health scanner · Search hybrid and semantic (fall back to mock) · silent fallbacks when ES fails'],
+    ['SEC Findings','eight chapters, Esc exits','Chapter 03 search and sector facets · chapter 04 Agent Builder chat · took_ms, hits, sector counts','Chapter 00 kit hardware text · chapter 01 race and presenter TCO figures · 503 and 93,541 text · workflows chapter (not provisioned)'],
+    ['Multimodal and need-to-know','two scenes, Esc exits','Search by Image kNN · need-to-know hybrid search · accessible docs and chunks · analyst answer from Nemotron 3.5 Lightning','509 total in the corpus meter (kit corpus: 198 papers, 9,636 chunks) · personas and markings are a fictional model · the filter is application side']];
+  $('stt').innerHTML=`<div class="sth"><div>Adventure</div><div style="color:var(--teal)">Live when the stack is healthy</div><div style="color:var(--pink)">Staged or canned</div></div>`+
+    S.map((r,i)=>`<div class="st" id="st${i}"><div class="a">${r[0]}<small>${r[1]}</small></div><div class="lv">${r[2]}</div><div class="sg">${r[3]}</div></div>`).join('')+
+    `<div class="bal lat" id="stb" style="margin-top:16px;box-shadow:none;padding:10px 16px"><div class="k">Check first, or nothing above is live</div><div class="x" style="font:500 12.5px/1.5 var(--sans);color:var(--char);margin-top:4px">F1 give the backend container ES credentials · all nodes and Kibana on 9.5.6, security settings matched · kit config on Nemotron 3.5 Lightning and Jina v5 Omni. The .ddil names are not yet verified on the box.</div></div>`;
+  return t=>{S.forEach((_,i)=>on('st'+i,t>.4+i*.4));on('stb',t>1.8);};};
+
+/* nav */
+let cur=0,frame=null,t0=0;const ST=parseFloat(new URLSearchParams(location.search).get('t'));if(ST>=0)document.body.classList.add('static');
+function go(i){i=Math.max(0,Math.min(slides.length-1,i));slides[cur].classList.remove('on');cur=i;const s=slides[i];
+  s.querySelectorAll('canvas.fx').forEach(c=>c.remove());s.querySelectorAll('.lat').forEach(e=>e.classList.remove('on'));
+  s.classList.remove('on');void s.offsetWidth;s.classList.add('on');
+  const f=FX[s.dataset.fx];frame=f?f(s):null;t0=performance.now()-(ST>=0?ST*1000:0);if(ST>=0&&frame)for(let k=0;k<ST;k+=1/30)frame(k);
+  $('notes').innerHTML=`<b>Slide ${i+1} of ${slides.length}</b>${s.dataset.notes||''}`;
+  const hd=$('hud');hd.textContent=`${i+1} / ${slides.length}  ·  N notes  ·  R replay  ·  F fullscreen  ·  G slides`;hd.style.opacity=1;clearTimeout(go.h);go.h=setTimeout(()=>hd.style.opacity=0,2500);
+  history.replaceState(null,'',location.search+'#'+(i+1));}
+(function loop(now){requestAnimationFrame(loop);if(!frame)return;try{frame((now-t0)/1000);}catch(err){console.error('slide animation error',err);frame=null;}})(performance.now());
+// Coming back to the deck (for example from the live demo in another window) replays the current slide
+// instead of showing an animation that finished while the window was hidden.
+let hiddenAt=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=performance.now();else if(performance.now()-hiddenAt>300)go(cur);});
+addEventListener('focus',()=>{if(hiddenAt&&performance.now()-hiddenAt>300){hiddenAt=0;go(cur);}});
+addEventListener('blur',()=>{hiddenAt=performance.now();});
+addEventListener('keydown',e=>{if(SR.open||e.metaKey||e.ctrlKey||e.altKey)return;if(e.key==='g'||e.key==='G'){e.stopImmediatePropagation();SR.show();return;}if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();go(cur+1);}
+  else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(cur-1);}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='n'||e.key==='N'){const n=$('notes');n.style.display=n.style.display==='block'?'none':'block';}
+  else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  else if(e.key==='r'||e.key==='R')go(cur);});
+addEventListener('click',e=>{if(SR.open||e.target.closest('#notes')||e.target.closest('#sorter'))return;go(cur+(e.clientX<innerWidth/4?-1:1));});
+function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);deck.style.transform=`scale(${s})`;deck.style.left=(innerWidth-1280*s)/2+'px';deck.style.top=(innerHeight-720*s)/2+'px';}
+addEventListener('resize',fit);fit();const TGT=(parseInt(location.hash.slice(1))||1)-1;
+/* slide sorter: order and hidden slides persist per deck in this browser; Download writes a reordered copy */
+const SR=(()=>{const ALL=slides.slice(),by={},fx=x=>x.dataset.fx;ALL.forEach(x=>by[fx(x)]=x);
+  const KEY='deck-order:'+location.pathname.split('/').pop().replace(/-(bundle|share)(?=\.html$)/,'');
+  const dflt=()=>({order:ALL.map(fx),hidden:ALL.filter(x=>x.dataset.hidden==='1').map(fx)});
+  let st;try{st=JSON.parse(localStorage.getItem(KEY))||dflt();}catch(e){st=dflt();}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}};
+  function arrange(){const ord=st.order.filter(k=>by[k]);
+    ALL.forEach((x,i)=>{const k=fx(x);if(ord.includes(k))return;const prev=i?fx(ALL[i-1]):null;ord.splice(prev?ord.indexOf(prev)+1:0,0,k);});
+    st.order=ord;st.hidden=st.hidden.filter(k=>by[k]);if(st.hidden.length>=ord.length)st.hidden=[];
+    ord.forEach(k=>deck.appendChild(by[k]));slides.splice(0,slides.length,...ord.filter(k=>!st.hidden.includes(k)).map(k=>by[k]));}
+  arrange();
+  const el$=$('sorter'),grid=$('srGrid'),thumbs={};let curEl=null,dragK=null;
+  function thumb(k){if(thumbs[k])return thumbs[k];const x=by[k];
+    x.querySelectorAll('canvas.fx').forEach(c=>c.remove());x.querySelectorAll('.lat').forEach(e=>e.classList.remove('on'));
+    try{const f=FX[x.dataset.fx],fr=f?f(x):null;if(fr)for(let t=0;t<12;t+=1/10)fr(t);}catch(e){}
+    const c=x.cloneNode(true);c.classList.add('on');c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));c.removeAttribute('id');
+    const src=x.querySelectorAll('canvas'),dst=c.querySelectorAll('canvas');src.forEach((cv,i)=>{try{dst[i].getContext('2d').drawImage(cv,0,0);}catch(e){}});
+    return thumbs[k]=c;}
+  function render(){grid.innerHTML='';let n=0;
+    st.order.forEach(k=>{const x=by[k],hid=st.hidden.includes(k);if(!hid)n++;
+      const d=document.createElement('div');d.className='srC'+(hid?' srH':'')+(x===curEl?' srK':'');d.draggable=true;d.dataset.k=k;
+      const h=x.querySelector('h1'),hc=h&&h.cloneNode(true);if(hc)hc.querySelectorAll('br').forEach(b=>b.replaceWith(' '));const title=(hc?hc.textContent:x.dataset.foot||k).replace(/\s+/g,' ').trim();
+      d.innerHTML=`<div class="srT"></div><div class="srM"><span class="srN">${hid?'–':n}</span><span class="srX"></span></div><div class="srB"><button data-a="l" title="Move earlier">◀</button><button data-a="r" title="Move later">▶</button><button data-a="h">${hid?'Show':'Hide'}</button></div>`;
+      d.querySelector('.srX').textContent=title;d.querySelector('.srT').appendChild(thumb(k));grid.appendChild(d);});}
+  function commit(){arrange();save();render();}
+  function move(k,to){const o=st.order,i=o.indexOf(k);o.splice(i,1);o.splice(Math.max(0,Math.min(o.length,to)),0,k);commit();}
+  grid.addEventListener('click',e=>{const d=e.target.closest('.srC');if(!d)return;const k=d.dataset.k,b=e.target.closest('button');
+    if(b){const a=b.dataset.a,i=st.order.indexOf(k);if(a==='l')move(k,i-1);else if(a==='r')move(k,i+1);
+      else{const h=st.hidden;if(h.includes(k))h.splice(h.indexOf(k),1);else if(h.length<st.order.length-1)h.push(k);commit();}return;}
+    if(st.hidden.includes(k))return;close(slides.indexOf(by[k]));});
+  grid.addEventListener('dragstart',e=>{const d=e.target.closest('.srC');if(!d)return;dragK=d.dataset.k;d.classList.add('srD');e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',dragK);}catch(_){}});
+  const clr=()=>grid.querySelectorAll('.srIb,.srIa,.srD').forEach(x=>x.classList.remove('srIb','srIa','srD'));
+  grid.addEventListener('dragend',clr);
+  grid.addEventListener('dragover',e=>{const d=e.target.closest('.srC');if(!d||!dragK)return;e.preventDefault();const r=d.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;
+    grid.querySelectorAll('.srIb,.srIa').forEach(x=>x.classList.remove('srIb','srIa'));if(d.dataset.k!==dragK)d.classList.add(after?'srIa':'srIb');});
+  grid.addEventListener('drop',e=>{e.preventDefault();const d=e.target.closest('.srC');if(!d||!dragK||d.dataset.k===dragK){clr();dragK=null;return;}
+    const r=d.getBoundingClientRect(),after=e.clientX>r.left+r.width/2,o=st.order;o.splice(o.indexOf(dragK),1);let to=o.indexOf(d.dataset.k)+(after?1:0);o.splice(to,0,dragK);dragK=null;commit();});
+  function show(){if(SR.open)return;SR.open=true;curEl=slides[cur];frame=null;el$.classList.add('open');render();
+    // painting thumbnails animates other slides off screen; the current one is replayed on close
+  }
+  function close(to){SR.open=false;el$.classList.remove('open');document.querySelectorAll('.slide.on').forEach(x=>x.classList.remove('on'));
+    let i=to!=null?to:slides.indexOf(curEl);if(i<0)i=Math.min(cur,slides.length-1);cur=Math.min(cur,slides.length-1);go(i);}
+  function download(){const doc=new DOMParser().parseFromString(PRISTINE,'text/html'),dk=doc.getElementById('deck'),secs={};
+    const cm={};dk.querySelectorAll(':scope>section.slide').forEach(x=>{secs[x.dataset.fx]=x;let p=x.previousSibling;while(p&&p.nodeType===3&&!p.textContent.trim())p=p.previousSibling;if(p&&p.nodeType===8)cm[x.dataset.fx]=p;});
+    const anchor=doc.createComment(' end of slides ');dk.insertBefore(anchor,dk.querySelector(':scope>section.slide'));
+    Object.keys(secs).forEach(k=>{secs[k].remove();if(cm[k])cm[k].remove();});
+    [...dk.childNodes].forEach(n=>{if(n.nodeType===3&&!n.textContent.trim())n.remove();});
+    st.order.forEach(k=>{const x=secs[k];if(!x)return;if(st.hidden.includes(k))x.setAttribute('data-hidden','1');else x.removeAttribute('data-hidden');
+      dk.insertBefore(doc.createTextNode('\n'),anchor);if(cm[k]){dk.insertBefore(cm[k],anchor);dk.insertBefore(doc.createTextNode('\n'),anchor);}dk.insertBefore(x,anchor);dk.insertBefore(doc.createTextNode('\n'),anchor);});
+    anchor.remove();
+    const html='<!doctype html>\n'+doc.documentElement.outerHTML,a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+    a.download=location.pathname.split('/').pop()||'deck.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+  $('srDone').onclick=()=>close();$('srSave').onclick=download;
+  $('srReset').onclick=()=>{st={order:ALL.map(fx),hidden:[]};commit();};
+  addEventListener('keydown',e=>{if(!SR.open)return;if(e.key==='Escape'||e.key==='g'||e.key==='G'){e.preventDefault();close();}});
+  return {open:false,show};})();
+if(new URLSearchParams(location.search).has('walk')){for(let w=0;w<slides.length;w++){go(w);if(frame)for(let k=0;k<12;k+=1/10)frame(k);}
+  const ids={};document.querySelectorAll('[id]').forEach(e=>ids[e.id]=(ids[e.id]||0)+1);const d=Object.keys(ids).filter(k=>ids[k]>1);document.title='DUPES:'+d.join(',');}
+go(TGT);
+})();
+
+</script>
+</body>
+</html>

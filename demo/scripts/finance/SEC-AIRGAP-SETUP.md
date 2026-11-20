@@ -1,40 +1,55 @@
-# SEC Findings — Airgapped Setup (run on the box)
+# SEC Findings: Airgapped Setup (run on the kit)
 
-How to stand up the **SEC Findings** adventure fully airgapped on the DDIL kit:
-local Elasticsearch + Kibana + Ollama, no Bedrock, no AWS, no internet.
+How to stand up the **SEC Findings** adventure on the DDIL kit. Everything runs
+inside the case: Elasticsearch 9.5.6 and Kibana 9.5.6, Jina Embeddings v5 Omni
+and NVIDIA Nemotron 3.5 Lightning on the DGX Spark. No cloud service, no internet.
 
-The frontend deck (the 8-chapter SEC slide deck) and the backend `finance`
-router are already wired into the app. This guide builds the **data + Kibana
-objects** the deck queries, and points the backend at local inference.
+The frontend deck (the 8-chapter SEC deck) and the backend `finance` router are
+already wired into the app. This guide builds the **data and Kibana objects** the
+deck queries and points the backend at the kit's models.
 
-## What changes vs. the bench
+## What runs where
 
-| Piece            | Bench (connected)                | Airgapped (this guide)               |
-|------------------|----------------------------------|--------------------------------------|
-| Query embedding  | Bedrock Cohere Embed v4 (1536-d) | Ollama `nomic-embed-text` (768-d)    |
-| `sec_10k_2026`   | on AWS GPU box, 1536-d           | local GPU node (Spark), 768-d cosine |
-| Agent LLM        | Bedrock Claude (Kibana connector)| Ollama `gpt-oss:120b` (Kibana connector) |
-| Kibana space     | `nvidia` on AWS                  | local Kibana, `default` space        |
+| Piece             | On the kit                                                                 |
+|-------------------|----------------------------------------------------------------------------|
+| Query embedding   | Jina Embeddings v5 Omni (`jina-embeddings-v5-omni-small`), `:8081` on the Spark, `EMBED_BACKEND=jina` |
+| Corpus embedding  | Same model, same endpoint, same dims (`reembed-local.py --backend jina`)   |
+| `sec_10k_2026`    | ES GPU node on the Spark, `SEC_EMBED_DIMS` (768) cosine HNSW               |
+| Agent LLM         | Nemotron 3.5 Lightning via Ollama on the Spark, through the Kibana connector `finance-ollama-llm` |
+| Kibana space      | kit Kibana on the Framework, `default` space                               |
+| Fallback embedder | Ollama `/api/embed` (`EMBED_BACKEND=ollama`); the index must then be re-embedded with that model |
 
-The corpus is **re-embedded** because Bedrock isn't reachable airgapped. The
-agent's `finance.*` ES|QL tools use BM25 `MATCH`, so they're unaffected by the
-dims change — only Chapter 03's kNN search needs the 768-d index.
+## Dimension: one value, sourced from config
+
+The committed `sec_10k_2026` corpus carries **1536-d** vectors from an earlier
+connected build. Jina v5 Omni on the kit is served at **768-d**, the same size as
+the kit's `jina-omni-text` ES inference endpoint. The index **must be re-embedded
+with Jina v5 Omni on the kit before the demo.**
+
+- `demo/backend/app/config.py` `SEC_EMBED_DIMS = 768` is the single source.
+- `run-all.sh` reads that value and passes it to `reembed-local.py --dims` and
+  `setup-index-local.sh` (`DIMS`).
+- The backend sends the same `dimensions` on every query embed and labels the
+  vector in the "show the call" body with it.
+- `reembed-local.py` stops if the server returns a different size.
+
+Status: **STAGED, confirm on kit.** Confirm the Jina server serves v5 Omni at
+768 (`GET :8081/health`, then one `POST /v1/embeddings` with `"dimensions": 768`).
 
 ## Prerequisites
 
-1. **Local cluster up** (one-cluster topology): ES GPU node on `192.168.1.20:9200`,
-   Kibana on `192.168.1.10:5601`. (`demo/docker-compose.yml` / `docker/`.)
-2. **Ollama models pulled** on the Spark (`192.168.1.20:11434`):
+1. **Cluster up.** ES GPU node on `192.168.1.20:9200`, Kibana on `192.168.1.10:5601`,
+   all on 9.5.6.
+2. **Jina Embeddings v5 Omni server** on the Spark, `:8081`
+   (see `demo/scripts/jina/JINA-SETUP.md`).
+3. **Ollama model pulled** on the Spark while connected:
    ```
-   docker exec ollama ollama pull nomic-embed-text
-   docker exec ollama ollama pull gpt-oss:120b
+   ollama pull nemotron-3.5-lightning
    ```
-   `gpt-oss:120b` must support tool calling (it does) — Agent Builder needs it.
-3. **Corpus text on the box.** Copy the chunked corpus NDJSON from the bench
-   build (`bench-aws/finance/sec_10k_bulk.ndjson`, ~2.3 GB) to the box, e.g.
-   `/data/sec/sec_10k_bulk.ndjson`. Only its `text` field is used; the old
-   Cohere `emb` is dropped and replaced. (Alternatively re-chunk from the raw
-   `filings/` `.txt` — not required.)
+   Agent Builder needs tool calling through the connector. Confirm on kit.
+4. **Corpus text on the kit**, e.g. `/data/sec/sec_10k_bulk.ndjson` (staged
+   with `demo/scripts/data-transfer/`). Only the `text` field is used; the old
+   1536-d `emb` is dropped and replaced.
 
 ## Run it
 
@@ -46,14 +61,15 @@ EP="<elastic-password>" SRC=/data/sec/sec_10k_bulk.ndjson bash run-all.sh
 
 Or step by step:
 ```bash
-# 1. Re-embed locally → sec_10k_local.ndjson (768-d)
+# 1. Re-embed on the kit with Jina v5 Omni (768-d)
 python3 reembed-local.py --src /data/sec/sec_10k_bulk.ndjson --out ./sec_10k_local.ndjson \
-        --ollama http://192.168.1.20:11434 --model nomic-embed-text
+        --backend jina --jina http://192.168.1.20:8081 \
+        --model jina-embeddings-v5-omni-small --dims 768
 
 # 2. Create + bulk-load the 768-d index on the GPU node
 DIMS=768 ES_URL=http://192.168.1.20:9200 bash setup-index-local.sh ./sec_10k_local.ndjson
 
-# 3. Local Ollama LLM connector in Kibana (prints the connector id)
+# 3. Kibana connector to Nemotron 3.5 Lightning on the Spark's Ollama
 EP="<pw>" bash provision-connector-local.sh
 
 # 4. Agent Builder finance.* tools + finance-analyst agent
@@ -63,28 +79,29 @@ EP="<pw>" bash provision-agent-local.sh
 EP="<pw>" bash provision-kibana-local.sh
 ```
 
-If ES security is on, also export `ES_USER`/`ES_PASSWORD` for steps 1–2.
+If ES security is on, also export `ES_USER`/`ES_PASSWORD` for steps 1 and 2.
+Step 2 drops and recreates only `sec_10k_2026`. Never run `docker compose down -v`.
 
-## Point the backend at local
+## Point the backend at the kit
 
-```bash
-cp demo/backend/.env.airgapped demo/backend/.env
-# set VINEYARD_AGENT_BUILDER_CONNECTOR_ID to the id from step 3 (default: finance-ollama-llm)
-# restart the backend
-```
+The backend container reads its `environment` block in `demo/docker-compose.yml`,
+which sets `VINEYARD_EMBED_BACKEND=jina`, `VINEYARD_JINA_OMNI_URL`,
+`VINEYARD_SEC_EMBED_DIMS` and `VINEYARD_SEC_AGENT_LLM_MODEL`. For a run outside
+compose, copy `demo/backend/.env.airgapped` to `demo/backend/.env`. Set
+`VINEYARD_AGENT_BUILDER_CONNECTOR_ID` to the id from step 3
+(default `finance-ollama-llm`) and restart the backend.
 
-The backend exposes the active config at `GET /api/finance/agent/state`; the
-deck reads it so every Kibana deep-link and "show the call" host string is
-correct for the box. Verify:
+Verify:
 ```bash
 curl -s localhost:8000/api/finance/agent/state | python3 -m json.tool
-# expect embed_backend=ollama, es_url=...192.168.1.20:9200, kibana_url=...192.168.1.10:5601
+# expect embed_backend=jina, embed_model=jina-embeddings-v5-omni-small,
+#        llm_model=nemotron-3.5-lightning, es_url=...:9200, kibana_url=...:5601
 ```
 
 ## Smoke test
 
 ```bash
-# kNN search (Chapter 03)
+# kNN search (Chapter 03); embed_dims must be 768
 curl -s localhost:8000/api/finance/search -H 'Content-Type: application/json' \
      -d '{"query":"AI model risk and governance","size":5}' | python3 -m json.tool
 # sectors (filter chips)
@@ -94,14 +111,13 @@ curl -s localhost:8000/api/finance/sectors | python3 -m json.tool
 Then in the app: **SEC Findings → Chapter 03** (semantic search) and
 **Chapter 04** (agent chat). `Esc` exits to the chooser.
 
-## Notes / caveats
+## Notes
 
-- **Embedding consistency:** docs and queries are both embedded with raw text
-  through the same Ollama model (no `search_document:`/`search_query:` prefix),
-  so they share one space. If you add prefixes, add them on both sides and
-  re-embed.
-- **Recall:** `nomic-embed-text` (768-d) is a smaller embedder than Cohere v4.
-  Retrieval is good for the demo; don't benchmark it against the bench numbers.
+- **Embedding consistency:** documents and queries go through the same Jina
+  endpoint, model and dims with raw text. If you switch to the Ollama fallback,
+  re-embed the corpus with `--backend ollama` and rebuild the index.
+- **No quoted numbers:** recall and latency on the kit are not measured yet.
+  Use the live `took_ms` the deck shows.
 - **Agent tool calling:** if Agent Builder errors on tool calls, confirm the
-  connector model (`gpt-oss:120b`) is tool-capable and the Ollama OpenAI-compat
-  endpoint (`/v1/chat/completions`) is reachable from Kibana.
+  connector model (`nemotron-3.5-lightning`) and that the Ollama
+  OpenAI-compatible endpoint (`/v1/chat/completions`) is reachable from Kibana.
