@@ -16,11 +16,24 @@ class Settings(BaseSettings):
     # ── DGX Spark — AI/ML powerhouse ──────────────────────────────────────────
     DGX_SPARK_HOST: str = "spark.ddil"                 # friendly DNS → 192.168.1.20
 
+    # ── Local LLM (airgapped) ─────────────────────────────────────────────────
+    # Which server answers services/llm.py (agent phases, RAG, Need-to-Know analyst):
+    #   "vllm"   → vLLM OpenAI-compatible /v1/chat/completions at VLLM_URL (default)
+    #              serving NVIDIA Nemotron 3.5 Lightning on the DGX Spark
+    #   "ollama" → Ollama native /api/chat at OLLAMA_LLM_URL (previous path)
+    LLM_BACKEND: str = "vllm"
+    VLLM_URL: str = "http://vllm.ddil:8000"            # friendly DNS → 192.168.1.20; port: confirm on kit
+    VLLM_API_KEY: str | None = None                    # only if vLLM runs with --api-key
+    # vllm: used when GET /v1/models lists it, else the first served id (cached).
+    # ollama: set VINEYARD_LLM_MODEL to the pulled Ollama tag.
+    LLM_MODEL: str = "nemotron-3.5-lightning"
+
     # ── Ollama — local inference (airgapped) ──────────────────────────────────
     OLLAMA_EMBED_URL: str = "http://ollama.ddil:11434"
     OLLAMA_LLM_URL: str = "http://ollama.ddil:11434"
+    # Vineyard text search still embeds with nomic via Ollama (services/embedder);
+    # switching it needs a re-embed of the Vineyard index. See enablement/FACTS.md.
     EMBED_MODEL: str = "nomic-embed-text"
-    LLM_MODEL: str = "gpt-oss:120b"
 
     # ── Data paths (container mount) ──────────────────────────────────────────
     DATA_DIR: str = "/data"

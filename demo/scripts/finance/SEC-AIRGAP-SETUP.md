@@ -15,7 +15,8 @@ deck queries and points the backend at the kit's models.
 | Query embedding   | Jina Embeddings v5 Omni (`jina-embeddings-v5-omni-small`), `:8081` on the Spark, `EMBED_BACKEND=jina` |
 | Corpus embedding  | Same model, same endpoint, same dims (`reembed-local.py --backend jina`)   |
 | `sec_10k_2026`    | ES GPU node on the Spark, `SEC_EMBED_DIMS` (768) cosine HNSW               |
-| Agent LLM         | Nemotron 3.5 Lightning via Ollama on the Spark, through the Kibana connector `finance-ollama-llm` |
+| Agent LLM         | Nemotron 3.5 Lightning 30B-A3B via vLLM on the Spark (`http://vllm.ddil:8000`, port: confirm on kit), through the Kibana connector `finance-ollama-llm` |
+| Fallback LLM      | Previous Ollama connector, id `finance-ollama-fallback` (`FALLBACK=ollama`) |
 | Kibana space      | kit Kibana on the Framework, `default` space                               |
 | Fallback embedder | Ollama `/api/embed` (`EMBED_BACKEND=ollama`); the index must then be re-embedded with that model |
 
@@ -42,12 +43,27 @@ Status: **STAGED, confirm on kit.** Confirm the Jina server serves v5 Omni at
    all on 9.5.6.
 2. **Jina Embeddings v5 Omni server** on the Spark, `:8081`
    (see `demo/scripts/jina/JINA-SETUP.md`).
-3. **Ollama model pulled** on the Spark while connected:
+3. **vLLM serving Nemotron 3.5 Lightning** on the Spark. The kit resolves
+   `vllm.ddil` to `192.168.1.20` (compose `extra_hosts`). The port defaults to
+   8000, vLLM's default: confirm on kit. Check the served model id:
    ```
-   ollama pull nemotron-3.5-lightning
+   curl -s http://vllm.ddil:8000/v1/models | python3 -m json.tool
    ```
+   The connector script uses the first id it returns unless `MODEL` is set.
    Agent Builder needs tool calling through the connector. Confirm on kit.
-4. **Corpus text on the kit**, e.g. `/data/sec/sec_10k_bulk.ndjson` (staged
+4. **Pre-show: apply the guidance-backend fix.** Open bug (GTC-DC-DEMO.md
+   item 8): the Lightning Agent Builder hang comes from the vLLM xgrammar FSM.
+   The fix is staged, not applied. Restart vLLM with the guidance
+   structured-output backend:
+   ```
+   --guided-decoding-backend guidance
+   ```
+   The exact flag name depends on the installed vLLM version: confirm on kit.
+   Newer vLLM releases take it through `--structured-outputs-config` or the
+   `guided_decoding_backend` setting. Keep the previous Ollama connector as a
+   fallback: run the connector script with `FALLBACK=ollama` to create it under
+   the id `finance-ollama-fallback`.
+5. **Corpus text on the kit**, e.g. `/data/sec/sec_10k_bulk.ndjson` (staged
    with `demo/scripts/data-transfer/`). Only the `text` field is used; the old
    1536-d `emb` is dropped and replaced.
 
@@ -57,6 +73,7 @@ One shot:
 ```bash
 cd demo/scripts/finance
 EP="<elastic-password>" SRC=/data/sec/sec_10k_bulk.ndjson bash run-all.sh
+# optional: VLLM=http://vllm.ddil:8000 MODEL=<served id> FALLBACK=ollama
 ```
 
 Or step by step:
@@ -69,8 +86,9 @@ python3 reembed-local.py --src /data/sec/sec_10k_bulk.ndjson --out ./sec_10k_loc
 # 2. Create + bulk-load the 768-d index on the GPU node
 DIMS=768 ES_URL=http://192.168.1.20:9200 bash setup-index-local.sh ./sec_10k_local.ndjson
 
-# 3. Kibana connector to Nemotron 3.5 Lightning on the Spark's Ollama
-EP="<pw>" bash provision-connector-local.sh
+# 3. Kibana connector to Nemotron 3.5 Lightning on the Spark's vLLM
+#    (model id from /v1/models; FALLBACK=ollama adds finance-ollama-fallback)
+EP="<pw>" VLLM=http://vllm.ddil:8000 bash provision-connector-local.sh
 
 # 4. Agent Builder finance.* tools + finance-analyst agent
 EP="<pw>" bash provision-agent-local.sh
@@ -86,7 +104,8 @@ Step 2 drops and recreates only `sec_10k_2026`. Never run `docker compose down -
 
 The backend container reads its `environment` block in `demo/docker-compose.yml`,
 which sets `VINEYARD_EMBED_BACKEND=jina`, `VINEYARD_JINA_OMNI_URL`,
-`VINEYARD_SEC_EMBED_DIMS` and `VINEYARD_SEC_AGENT_LLM_MODEL`. For a run outside
+`VINEYARD_SEC_EMBED_DIMS`, `VINEYARD_SEC_AGENT_LLM_MODEL`, `VINEYARD_LLM_BACKEND=vllm`
+and `VINEYARD_VLLM_URL`. For a run outside
 compose, copy `demo/backend/.env.airgapped` to `demo/backend/.env`. Set
 `VINEYARD_AGENT_BUILDER_CONNECTOR_ID` to the id from step 3
 (default `finance-ollama-llm`) and restart the backend.
@@ -119,5 +138,7 @@ Then in the app: **SEC Findings → Chapter 03** (semantic search) and
 - **No quoted numbers:** recall and latency on the kit are not measured yet.
   Use the live `took_ms` the deck shows.
 - **Agent tool calling:** if Agent Builder errors on tool calls, confirm the
-  connector model (`nemotron-3.5-lightning`) and that the Ollama
-  OpenAI-compatible endpoint (`/v1/chat/completions`) is reachable from Kibana.
+  connector model (the id from `GET /v1/models`), that the vLLM
+  OpenAI-compatible endpoint (`/v1/chat/completions`) is reachable from Kibana,
+  and that the guidance-backend fix is applied. If the agent still hangs, set
+  `VINEYARD_AGENT_BUILDER_CONNECTOR_ID=finance-ollama-fallback`.

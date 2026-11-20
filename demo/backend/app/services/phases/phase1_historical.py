@@ -86,7 +86,7 @@ async def run_phase1(
         historical_hits = _mock_historical()
 
     # LLM analysis
-    _progress(on_progress, "Analyzing historical patterns with GPT-OSS 120B...")
+    _progress(on_progress, "Analyzing historical patterns with Nemotron 3.5 Lightning (vLLM)...")
     prompt = PHASE1_HISTORICAL.format(
         sensor_context=sensor.summary,
         historical_hits=_format_hits(historical_hits),

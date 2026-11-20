@@ -1,6 +1,4 @@
-import httpx
-
-from app.config import settings
+from app.services.llm import chat_messages
 from app.services.search import hybrid_search
 
 
@@ -39,20 +37,10 @@ async def rag_query(message: str, history: list[dict] | None = None) -> dict:
         "content": f"Context from database:\n{context}\n\nUser question: {message}",
     })
 
-    # Step 3: Generate response via Ollama
-    async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(
-            f"{settings.OLLAMA_LLM_URL}/api/chat",
-            json={
-                "model": settings.LLM_MODEL,
-                "messages": messages,
-                "stream": False,
-            },
-        )
-        resp.raise_for_status()
-        data = resp.json()
+    # Step 3: Generate response via the local LLM (vLLM or Ollama, per LLM_BACKEND)
+    answer = await chat_messages(messages)
 
     return {
-        "response": data["message"]["content"],
+        "response": answer,
         "sources": sources,
     }

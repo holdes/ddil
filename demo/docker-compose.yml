@@ -120,6 +120,11 @@ services:
       - VINEYARD_DGX_SPARK_HOST=spark.ddil
       - VINEYARD_OLLAMA_EMBED_URL=http://ollama.ddil:11434
       - VINEYARD_OLLAMA_LLM_URL=http://ollama.ddil:11434
+      # Backend LLM (agent phases, RAG, Need-to-Know analyst): Nemotron 3.5 Lightning
+      # on the Spark's vLLM. Port 8000 is vLLM's default: confirm on kit. The model id
+      # is discovered from /v1/models. Set LLM_BACKEND=ollama to fall back.
+      - VINEYARD_LLM_BACKEND=vllm
+      - VINEYARD_VLLM_URL=http://vllm.ddil:8000
       # SEC query embedding: Jina Embeddings v5 Omni on the Spark (768-d). The
       # sec_10k_2026 index must be re-embedded with Jina before the demo; it was
       # built with 768-d nomic (same dims, different vector space).

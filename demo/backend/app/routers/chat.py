@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse
 
 from app.models.schemas import ChatRequest, ChatResponse
 from app.models.agent_models import AgentChatRequest
+from app.services.llm import model_label
 
 router = APIRouter()
 
@@ -88,7 +89,7 @@ async def agent_stream(req: AgentChatRequest):
         yield _sse("phase_start", {"phase_id": "risk", "progress_pct": 40})
         yield _sse("phase_start", {"phase_id": "recommendation", "progress_pct": 40})
         yield _sse("phase_start", {"phase_id": "action_plan", "progress_pct": 40})
-        yield _sse("phase_progress", {"phase_id": "risk", "message": "Running risk, recommendation, and action plan in parallel via GPT-OSS 120B..."})
+        yield _sse("phase_progress", {"phase_id": "risk", "message": "Running risk, recommendation, and action plan in parallel via Nemotron 3.5 Lightning (vLLM)..."})
 
         try:
             # Get variety from sensor block
@@ -179,7 +180,7 @@ async def agent_stream(req: AgentChatRequest):
             yield _sse("job_complete", {
                 "results": {
                     "action_plan": {"summary": action_data.get("summary", "Analysis complete.")},
-                    "model": "gpt-oss:120b",
+                    "model": model_label(),
                     "phases_completed": 5,
                 }
             })

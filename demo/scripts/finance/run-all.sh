@@ -4,11 +4,14 @@
 # Prereqs (see SEC-AIRGAP-SETUP.md):
 #   • Local ES (GPU node) + Kibana up
 #   • Jina Embeddings v5 Omni server on the Spark (:8081)
-#   • Ollama on the Spark with nemotron-3.5-lightning pulled (Agent Builder LLM)
+#   • vLLM on the Spark serving Nemotron 3.5 Lightning (Agent Builder LLM),
+#     default http://vllm.ddil:8000 (port: confirm on kit), started with the
+#     guidance structured-output backend (see SEC-AIRGAP-SETUP.md)
 #   • The corpus text on the box: sec_10k_bulk.ndjson (or any NDJSON with `text`)
 #
 # Usage:
 #   EP="<elastic-password>" SRC=/data/sec/sec_10k_bulk.ndjson bash run-all.sh
+#   Optional: VLLM=http://vllm.ddil:8000 MODEL=<served id> FALLBACK=ollama
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -29,8 +32,9 @@ python3 reembed-local.py --src "$SRC" --out "$OUT" --backend jina --jina "$JINA"
 echo "── 2/5  create + bulk-load the local sec_10k_2026 index ───────────────"
 bash setup-index-local.sh "$OUT"
 
-echo "── 3/5  create local Ollama LLM connector in Kibana ───────────────────"
-EP="$EP" bash provision-connector-local.sh
+echo "── 3/5  create local vLLM (Nemotron) connector in Kibana ──────────────"
+EP="$EP" VLLM="${VLLM:-http://vllm.ddil:8000}" MODEL="${MODEL:-}" FALLBACK="${FALLBACK:-}" \
+  bash provision-connector-local.sh
 
 echo "── 4/5  provision Agent Builder finance.* tools + finance-analyst ─────"
 EP="$EP" bash provision-agent-local.sh
