@@ -1,4 +1,5 @@
-import { ArrowRight, ArrowLeft, Workflow, Bot, ExternalLink, Play, Calendar } from "lucide-react";
+import { useState, useEffect, Fragment } from "react";
+import { ArrowRight, ArrowLeft, Workflow, Bot, ExternalLink, Play, Calendar, Database, FileText, Send } from "lucide-react";
 import { ChapterShell } from "../shared/ChapterShell";
 import { useFinanceConfig } from "../lib/financeConfig";
 
@@ -56,6 +57,9 @@ export function Chapter04_5_Workflows() {
       }
     >
       <div className="space-y-5">
+        {/* Animated end-to-end flow */}
+        <E2EFlow />
+
         {/* Two-direction bridge */}
         <div className="grid grid-cols-2 gap-4">
           <DirectionCard
@@ -133,6 +137,65 @@ export function Chapter04_5_Workflows() {
         </div>
       </div>
     </ChapterShell>
+  );
+}
+
+// ── Animated end-to-end flow: Trigger → Agent → Tools → Answer → Action ──────
+const FLOW_NODES = [
+  { icon: Calendar, kicker: "Trigger", title: "09:00 UTC", sub: "schedule · alert · manual", color: "#0B64DD" },
+  { icon: Bot, kicker: "ai.agent", title: "finance-analyst", sub: "same agent as the chat", color: "#02BCB7" },
+  { icon: Database, kicker: "Tool calls", title: "ES|QL × N", sub: "sector_breakdown · compare", color: "#02BCB7" },
+  { icon: FileText, kicker: "Answer", title: "AI-risk digest", sub: "cited · grounded in 10-Ks", color: "#02BCB7" },
+  { icon: Send, kicker: "Action", title: "console → slack", sub: "write where teams live", color: "#76b900" },
+] as const;
+
+function E2EFlow() {
+  // A pulse (step 1..N) walks the chain, then resets to 0 (all dim) and repeats.
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setStep((s) => (s + 1) % (FLOW_NODES.length + 1)), 1150);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="border border-slate-50 bg-slate-900 p-5 shadow-[7px_7px_0_0_rgba(29,30,36,0.07)]">
+      <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-slate-400 mb-4">
+        <span className="w-2 h-2 bg-[var(--color-elastic)]" />
+        End-to-end · one workflow run · no human at the keyboard
+      </div>
+      <div className="flex items-stretch">
+        {FLOW_NODES.map((n, i) => (
+          <Fragment key={i}>
+            <FlowBox node={n} on={step > i} pulse={step === i + 1} />
+            {i < FLOW_NODES.length - 1 && <FlowArrow on={step > i + 1} />}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FlowBox({ node, on, pulse }: { node: (typeof FLOW_NODES)[number]; on: boolean; pulse: boolean }) {
+  const Icon = node.icon;
+  return (
+    <div
+      className={`flex-1 border bg-slate-900 px-3 py-3 transition-all duration-500 ${on ? "border-slate-50 opacity-100" : "border-slate-700 opacity-45"}`}
+      style={pulse ? { boxShadow: `0 0 0 3px ${node.color}33`, borderColor: node.color } : undefined}
+    >
+      <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.1em] mb-2" style={{ color: node.color }}>
+        <Icon size={13} />
+        {node.kicker}
+      </div>
+      <div className="text-[15px] font-bold tracking-[-0.01em] text-slate-50 leading-tight">{node.title}</div>
+      <div className="font-mono text-[10px] text-slate-400 mt-1 leading-snug">{node.sub}</div>
+    </div>
+  );
+}
+
+function FlowArrow({ on }: { on: boolean }) {
+  return (
+    <div className={`flex items-center px-1 transition-colors duration-500 ${on ? "text-[var(--color-elastic)]" : "text-slate-300"}`}>
+      <ArrowRight size={16} strokeWidth={2.5} />
+    </div>
   );
 }
 
