@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, RotateCcw, Zap, Cpu } from "lucide-react";
 import {
-  LineChart,
+  ComposedChart,
+  Area,
   Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
-  Tooltip,
 } from "recharts";
 import { useRaceMetrics, type PathMetrics } from "../../hooks/useRaceMetrics";
 import { formatNumber, formatDuration } from "../../lib/utils";
@@ -37,11 +37,13 @@ function MetricsCard({
   label,
   icon,
   color,
+  yMax,
 }: {
   path: PathMetrics;
   label: string;
   icon: React.ReactNode;
   color: "amber" | "emerald";
+  yMax?: number;
 }) {
   const pct = path.totalDocs > 0 ? (path.docsIndexed / path.totalDocs) * 100 : 0;
   const borderColor =
@@ -98,29 +100,30 @@ function MetricsCard({
         </div>
       </div>
 
-      {/* Sparkline */}
-      <div className="mt-4 h-20">
+      {/* Throughput chart — SHARED y-scale across both cards (yMax) so the cuVS
+          line towers over the flat CPU line; per-chart autoscaling otherwise
+          hides the ~10× gap. Filled area gives the GPU side visual mass. */}
+      <div className="mt-4 h-32">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={path.history}>
+          <ComposedChart data={path.history} margin={{ top: 6, right: 2, bottom: 0, left: 2 }}>
+            <defs>
+              <linearGradient id={`rf-${color}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color === "amber" ? "#E79A06" : "#02BCB7"} stopOpacity={color === "amber" ? 0.1 : 0.42} />
+                <stop offset="100%" stopColor={color === "amber" ? "#E79A06" : "#02BCB7"} stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <XAxis dataKey="time" hide />
-            <YAxis hide domain={["auto", "auto"]} />
-            <Tooltip
-              contentStyle={{
-                background: "#1e293b",
-                border: "1px solid #334155",
-                borderRadius: "6px",
-                fontSize: "12px",
-              }}
-              labelStyle={{ color: "#94a3b8" }}
-            />
+            <YAxis hide domain={[0, yMax || "auto"]} />
+            <Area type="monotone" dataKey="throughput" stroke="none" fill={`url(#rf-${color})`} isAnimationActive={false} />
             <Line
               type="monotone"
               dataKey="throughput"
-              stroke={color === "amber" ? "#f59e0b" : "#10b981"}
-              strokeWidth={2}
+              stroke={color === "amber" ? "#E79A06" : "#02BCB7"}
+              strokeWidth={color === "emerald" ? 3.25 : 1.75}
               dot={false}
+              isAnimationActive={false}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
@@ -186,21 +189,51 @@ export function RaceDashboard({ onComplete, autoStart }: { onComplete?: () => vo
         </div>
       </div>
 
-      {/* Split Screen */}
-      <div className="flex gap-4 flex-1">
-        <MetricsCard
-          path={metrics.cpu}
-          label="CPU HNSW (Port 9201)"
-          icon={<Cpu size={18} />}
-          color="amber"
-        />
-        <MetricsCard
-          path={metrics.gpu}
-          label="GPU HNSW — cuVS (Port 9200)"
-          icon={<Zap size={18} />}
-          color="emerald"
-        />
-      </div>
+      {/* Split Screen — shared y-scale (yMax) makes cuVS tower; live N× badge */}
+      {(() => {
+        const yMax =
+          Math.max(
+            1,
+            ...metrics.cpu.history.map((h) => h.throughput),
+            ...metrics.gpu.history.map((h) => h.throughput),
+          ) * 1.08;
+        const speedup =
+          metrics.cpu.throughput > 0 ? metrics.gpu.throughput / metrics.cpu.throughput : 0;
+        return (
+          <div className="flex gap-4 flex-1 items-stretch">
+            <MetricsCard
+              path={metrics.cpu}
+              label="CPU HNSW (Port 9201)"
+              icon={<Cpu size={18} />}
+              color="amber"
+              yMax={yMax}
+            />
+            {speedup > 1.5 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center justify-center shrink-0 px-1 select-none"
+              >
+                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">cuVS</div>
+                <div
+                  className="font-bold text-emerald-500 leading-none tabular-nums"
+                  style={{ fontSize: 40 }}
+                >
+                  {speedup < 10 ? speedup.toFixed(1) : Math.round(speedup)}×
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">faster</div>
+              </motion.div>
+            )}
+            <MetricsCard
+              path={metrics.gpu}
+              label="GPU HNSW — cuVS (Port 9200)"
+              icon={<Zap size={18} />}
+              color="emerald"
+              yMax={yMax}
+            />
+          </div>
+        );
+      })()}
 
       {/* GPU finished explainer — appears while CPU is still running */}
       {metrics.gpu.complete && !metrics.cpu.complete && (

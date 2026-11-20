@@ -69,7 +69,9 @@ class Settings(BaseSettings):
     KIBANA_USER: str | None = None
     KIBANA_PASSWORD: str | None = None
     AGENT_BUILDER_AGENT_ID: str = "finance-analyst"
-    AGENT_BUILDER_CONNECTOR_ID: str | None = None
+    # Default to the stable tool-calling Qwen3 connector (NOT the old
+    # finance-ollama-llm id, which doesn't exist → 404 on the SEC agent).
+    AGENT_BUILDER_CONNECTOR_ID: str = "ddil-agent-qwen3"
     # Tool-calling LLM connector every Choose-Your-Adventure agent converses through.
     # Qwen3 (ddil-agent-qwen3) — NOT Nemotron (leaks tool-call tokens). See apply-agents.sh.
     AGENT_LLM_CONNECTOR: str = "ddil-agent-qwen3"
