@@ -63,6 +63,8 @@ export interface AgentChatOptions {
   endpoint?: string;
   /** When set, sent as `agent_id` in the body (the generic /api/agent/converse proxy). */
   agentId?: string;
+  /** When set, sent as `connector_id` — switches the LLM brain (local vs cloud cheat). */
+  connectorId?: string;
 }
 
 export function useAgentChat(opts: AgentChatOptions = {}) {
@@ -88,7 +90,11 @@ export function useAgentChat(opts: AgentChatOptions = {}) {
       resp = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(opts.agentId ? { input, agent_id: opts.agentId } : { input }),
+        body: JSON.stringify({
+          input,
+          ...(opts.agentId ? { agent_id: opts.agentId } : {}),
+          ...(opts.connectorId ? { connector_id: opts.connectorId } : {}),
+        }),
         signal: ctrl.signal,
       });
     } catch (e) {
@@ -139,7 +145,7 @@ export function useAgentChat(opts: AgentChatOptions = {}) {
     }
 
     setState((s) => (s.status === "streaming" ? { ...s, status: "done" } : s));
-  }, [endpoint, opts.agentId]);
+  }, [endpoint, opts.agentId, opts.connectorId]);
 
   return { state, send, reset };
 }

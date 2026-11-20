@@ -59,12 +59,14 @@ export function AgentChat() {
   const [history, setHistory] = useState<CachedConversation[]>(loadCached);
   const [viewingCached, setViewingCached] = useState<CachedConversation | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [brain, setBrain] = useState<"local" | "cheat">("local");
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { state, send, reset } = useAgentChat({
     endpoint: "/api/agent/converse",
     agentId: "vineyard-advisor",
+    connectorId: brain === "cheat" ? "ddil-cheat-bedrock" : "ddil-agent-qwen3",
   });
   const { pendingQuery, setPendingQuery, selectedBlockId } = useAppContext();
 
@@ -127,22 +129,42 @@ export function AgentChat() {
 
   return (
     <div className="p-6 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 gap-4">
         <div>
-          <h2 className="text-2xl font-bold">AI Agronomist</h2>
-          <p className="text-sm text-slate-400 mt-1">
-            Elastic Agent Builder &middot; <span className="font-mono">vineyard-advisor</span> &middot; live tool-calling
-          </p>
+          <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-2">
+            <span className="w-2 h-2 bg-emerald-500" />
+            Elastic Agent Builder &middot; vineyard-advisor &middot; live tool-calling
+          </div>
+          <h2 className="text-[30px] leading-none font-bold tracking-[-0.02em] text-slate-50">AI Agronomist</h2>
         </div>
-        {running && (
-          <div className="flex items-center gap-2 text-sm text-slate-400"><Clock size={14} />{elapsed}s</div>
-        )}
-        {(state.status === "done" || viewingCached) && (
-          <button onClick={() => { setViewingCached(null); reset(); }}
-            className="text-sm px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">
-            New Query
-          </button>
-        )}
+        <div className="flex items-center gap-3 shrink-0">
+          {running && (
+            <div className="flex items-center gap-1.5 font-mono text-[12px] text-slate-400"><Clock size={14} />{elapsed}s</div>
+          )}
+          {/* On-box (local) ↔ Cloud (Bedrock Claude cheat) brain toggle */}
+          <div className="inline-flex border border-slate-50 font-mono text-[11px] uppercase tracking-wider">
+            <button
+              onClick={() => setBrain("local")}
+              disabled={running}
+              className={`px-3 py-1.5 transition-colors disabled:opacity-60 ${brain === "local" ? "bg-slate-50 text-slate-950" : "bg-slate-900 text-slate-400 hover:text-slate-50"}`}
+            >
+              ⚡ On-box
+            </button>
+            <button
+              onClick={() => setBrain("cheat")}
+              disabled={running}
+              className={`px-3 py-1.5 border-l border-slate-50 transition-colors disabled:opacity-60 ${brain === "cheat" ? "bg-blue-500 text-white" : "bg-slate-900 text-slate-400 hover:text-slate-50"}`}
+            >
+              ☁ Cloud · Claude
+            </button>
+          </div>
+          {(state.status === "done" || viewingCached) && (
+            <button onClick={() => { setViewingCached(null); reset(); }}
+              className="font-mono text-[11px] uppercase tracking-wider px-3 py-1.5 border border-slate-700 text-slate-400 hover:border-slate-50 hover:text-slate-50 transition-colors">
+              New Query
+            </button>
+          )}
+        </div>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-auto min-h-0">
