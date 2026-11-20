@@ -293,11 +293,11 @@ export function Dashboard() {
               >
                 <TileLayer url="/tiles/{z}/{x}/{y}.png" />
                 {vineyardConfig.blocks.map((block) => {
-                  const blockData = data.block_summaries.find((s) => s.block_id === block.id);
-                  const isAlert = blockData && (blockData.moisture > 45 || blockData.moisture < 25);
-                  const isWatch = blockData && (blockData.moisture > 40 || blockData.moisture < 30);
-                  const status = isAlert ? "alert" : isWatch ? "watch" : "healthy";
-                  const fillColor = status === "alert" ? "#ef4444" : status === "watch" ? "#f59e0b" : "#10b981";
+                  const blockAlert = ALERTS.find((a) => a.block === block.id);
+                  const status =
+                    blockAlert?.severity === "critical" ? "alert" : blockAlert ? "watch" : "healthy";
+                  const fillColor =
+                    status === "alert" ? "#F04E98" : status === "watch" ? "#FEC514" : "#02BCB7";
                   const positions: LatLngExpression[] = block.polygon.map(
                     (p) => [p.lat, p.lon] as LatLngExpression
                   );
