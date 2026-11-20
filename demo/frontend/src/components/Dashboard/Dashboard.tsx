@@ -92,17 +92,17 @@ function KPICard({
   subtitle?: string;
 }) {
   return (
-    <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
-      <div className="flex items-center gap-2 text-slate-400 text-xs mb-3">
+    <div className="bg-slate-900 border border-slate-50 rounded-none p-5 shadow-[7px_7px_0_0_rgba(29,30,36,0.07)]">
+      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-slate-400 mb-3">
         {icon}
         {label}
       </div>
-      <div className="text-3xl font-mono font-bold text-slate-100">
+      <div className="text-[40px] leading-none font-bold tracking-[-0.02em] text-slate-50 tabular-nums">
         {value}
-        {unit && <span className="text-base text-slate-500 ml-1">{unit}</span>}
+        {unit && <span className="text-xl text-slate-400 ml-1 font-semibold">{unit}</span>}
       </div>
       {subtitle && (
-        <div className="text-xs text-slate-500 mt-1">{subtitle}</div>
+        <div className="font-mono text-[11px] text-slate-400 mt-2.5">{subtitle}</div>
       )}
     </div>
   );
@@ -115,33 +115,33 @@ function AlertItem({
   alert: (typeof ALERTS)[0];
   onClick: () => void;
 }) {
-  const colors = {
-    critical: "border-red-500/40 bg-red-500/5",
-    warning: "border-amber-500/30 bg-amber-500/5",
-    info: "border-blue-500/20 bg-blue-500/5",
+  const strip = {
+    critical: "border-l-rose-500",
+    warning: "border-l-amber-500",
+    info: "border-l-blue-500",
   };
   const badges = {
-    critical: "bg-red-500/20 text-red-400",
-    warning: "bg-amber-500/20 text-amber-400",
-    info: "bg-blue-500/20 text-blue-400",
+    critical: "bg-rose-500 text-white",
+    warning: "bg-amber-500 text-white",
+    info: "bg-blue-500 text-white",
   };
 
   return (
     <div
       onClick={onClick}
-      className={`border rounded-lg p-3 cursor-pointer hover:brightness-125 transition-all ${colors[alert.severity as keyof typeof colors]}`}
+      className={`bg-slate-900 border border-slate-700 border-l-[3px] ${strip[alert.severity as keyof typeof strip]} rounded-none p-3.5 cursor-pointer hover:border-slate-50 transition-colors`}
     >
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2">
-          <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${badges[alert.severity as keyof typeof badges]}`}>
-            {alert.severity.toUpperCase()}
+          <span className={`text-[9px] px-1.5 py-0.5 font-mono font-semibold uppercase tracking-wider ${badges[alert.severity as keyof typeof badges]}`}>
+            {alert.severity}
           </span>
-          <span className="text-xs text-slate-500">{alert.block}</span>
+          <span className="font-mono text-[11px] text-slate-400">{alert.block}</span>
         </div>
-        <span className="text-[10px] text-slate-600">{alert.time}</span>
+        <span className="font-mono text-[10px] text-slate-400">{alert.time}</span>
       </div>
-      <div className="text-sm text-slate-200 font-medium">{alert.title}</div>
-      <div className="text-xs text-slate-400 mt-1">{alert.message}</div>
+      <div className="text-sm text-slate-50 font-semibold tracking-[-0.01em]">{alert.title}</div>
+      <div className="text-xs text-slate-400 mt-1 leading-relaxed">{alert.message}</div>
     </div>
   );
 }
@@ -217,14 +217,25 @@ export function Dashboard() {
   return (
     <div className="p-6 h-full overflow-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Grape size={24} className="text-emerald-400" />
-          {data.vineyard}
-        </h2>
-        <p className="text-sm text-slate-400 mt-1">
-          Walla Walla AVA &middot; 6 blocks &middot; {data.total_docs.toLocaleString()} indexed documents
-        </p>
+      <div className="flex items-end justify-between mb-6 gap-4">
+        <div>
+          <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-slate-400 mb-2">
+            <span className="w-2 h-2 bg-emerald-500" />
+            Vineyard Intelligence &middot; Walla Walla AVA
+          </div>
+          <h2 className="text-[34px] leading-none font-bold tracking-[-0.02em] text-slate-50">
+            {data.vineyard}
+          </h2>
+          <p className="font-mono text-[12px] text-slate-400 mt-2.5">
+            6 blocks &middot; {data.total_docs.toLocaleString()} indexed documents across 5 indices
+          </p>
+        </div>
+        <button
+          onClick={() => investigate("Which blocks need attention this week?")}
+          className="bg-slate-50 text-slate-950 hover:bg-emerald-500 hover:text-white font-mono text-[12px] font-semibold uppercase tracking-[0.08em] px-4 py-2.5 transition-colors shrink-0"
+        >
+          Ask the Agronomist →
+        </button>
       </div>
 
       {/* KPI Row */}
@@ -323,9 +334,15 @@ export function Dashboard() {
                 variety: "Unknown",
                 color: "slate",
               };
-              const isAlert = block.moisture > 45 || block.moisture < 25;
-              const isWatch = block.moisture > 40 || block.moisture < 30;
-              const status = isAlert ? "alert" : isWatch ? "watch" : "healthy";
+              // Status reflects the actual alerts for this block, not raw moisture
+              // thresholds (which don't fit this estate's low-moisture readings).
+              const blockAlert = ALERTS.find((a) => a.block === block.block_id);
+              const status =
+                blockAlert?.severity === "critical"
+                  ? "alert"
+                  : blockAlert
+                  ? "watch"
+                  : "healthy";
 
               return (
                 <motion.button
@@ -333,12 +350,12 @@ export function Dashboard() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => investigateBlock(block.block_id)}
-                  className={`p-4 rounded-xl border text-left transition-all ${
+                  className={`p-4 rounded-none text-left bg-slate-900 border border-slate-700 border-t-[3px] shadow-[5px_5px_0_0_rgba(29,30,36,0.06)] hover:border-slate-50 transition-colors ${
                     status === "alert"
-                      ? "border-red-500/40 bg-red-500/5 hover:bg-red-500/10"
+                      ? "border-t-rose-500"
                       : status === "watch"
-                      ? "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10"
-                      : "border-slate-800 bg-slate-900/40 hover:bg-slate-900/60"
+                      ? "border-t-amber-500"
+                      : "border-t-emerald-500"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
