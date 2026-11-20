@@ -28,7 +28,7 @@ export function EconomicsPanel({ gpuTotalMs, cpuTotalMs }: Props) {
         <Fact
           Icon={Bot}
           title="Inference on the kit"
-          body="NVIDIA Nemotron 3.5 Lightning through Ollama on the DGX Spark. Agent Builder reaches it through a Kibana connector."
+          body="NVIDIA Nemotron 3.5 Lightning through vLLM on the DGX Spark. Agent Builder reaches it through a Kibana connector."
         />
         <Fact
           Icon={Sparkles}

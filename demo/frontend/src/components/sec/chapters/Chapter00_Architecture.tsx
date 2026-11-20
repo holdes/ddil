@@ -111,7 +111,7 @@ export function Chapter00_Architecture() {
               { icon: <Server size={16} />,      label: "CPU",    value: "GB10 Arm CPU",           detail: "aarch64" },
               { icon: <MemoryStick size={16} />, label: "Memory", value: "128 GB",                 detail: "unified CPU + GPU memory" },
               { icon: <Zap size={16} />,         label: "GPU",    value: "NVIDIA GB10 Blackwell",  detail: "cuVS GPU vector indexing" },
-              { icon: <Bot size={16} />,         label: "Role",   value: "es-gpu · Ollama · Jina", detail: "Nemotron 3.5 Lightning :11434 · Jina Embeddings v5 Omni :8081" },
+              { icon: <Bot size={16} />,         label: "Role",   value: "es-gpu · vLLM · Jina", detail: "Nemotron 3.5 Lightning (vLLM) · Jina Embeddings v5 Omni :8081" },
             ]}
             esConfig={[
               { setting: "node.name",                value: "spark-gpu" },

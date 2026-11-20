@@ -88,7 +88,7 @@ function quality(q: Row["quality"]) {
 }
 
 // The Elastic agent runs on the airgapped kit: Nemotron 3.5 Lightning via
-// Ollama on the DGX Spark, query embeddings from Jina Embeddings v5 Omni on the
+// vLLM on the DGX Spark, query embeddings from Jina Embeddings v5 Omni on the
 // same box. There is no per-query bill, and no time band is claimed here: the
 // receipts row below shows the measured time of the run that just happened.
 export function TraditionalComparison({ meta, toolCallCount }: Props) {

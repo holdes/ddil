@@ -9,6 +9,12 @@ import {
   type Analyst, type DlsHit, type Figure, type AnswerSource,
 } from "../lib/api";
 
+// Need-to-Know corpus on the kit (pmc-unstructured): 198 papers, 9,636 text
+// chunks. The API reports only the analyst-visible count, so the total is fixed
+// here (enablement/FACTS.md).
+const CORPUS_DOCS = 198;
+
+
 const EXAMPLES = [
   "What methods are used for single-cell RNA sequencing?",
   "Summarize findings on CRISPR off-target effects",
@@ -47,7 +53,7 @@ export function NeedToKnow() {
       </div>
       <h2 className="text-3xl font-bold text-slate-100 mb-1">Research corpus under document-level security</h2>
       <p className="text-sm text-slate-400 mb-6 max-w-3xl">
-        509 research papers, marked with a fictional classification model. Switch analyst and watch the
+        {CORPUS_DOCS} research papers, marked with a fictional classification model. Switch analyst and watch the
         accessible corpus — and every answer — change. Retrieval is hybrid (BM25 + kNN RRF) with a DLS
         pre-filter; the analyst can never retrieve, cite, or even count what they aren't cleared to see.
       </p>
@@ -71,7 +77,7 @@ export function NeedToKnow() {
             <div>
               <div className="text-2xl font-bold text-slate-100 leading-none">
                 {result.accessible.docs}
-                <span className="text-sm font-normal text-slate-500"> / 509 docs</span>
+                <span className="text-sm font-normal text-slate-500"> / {CORPUS_DOCS} docs</span>
               </div>
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mt-0.5">
                 visible to {current?.name ?? "—"}

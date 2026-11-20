@@ -140,7 +140,7 @@ export function RaceIntro({ adventure, onContinue }: Props) {
           <span>&middot;</span>
           <div>Framework Desktop &middot; Ryzen AI Max+ 395</div>
           <span>&middot;</span>
-          <div>Elasticsearch 9.4.2</div>
+          <div>Elasticsearch 9.5.6</div>
         </div>
 
         {/* CTA */}

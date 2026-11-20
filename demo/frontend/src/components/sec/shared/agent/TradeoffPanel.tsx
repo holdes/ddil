@@ -12,7 +12,7 @@ interface Props {
  * Below-the-answer panel: pairs the live run's latency and token counts with the
  * "Search is changing" spectrum + Elastic context-management story.
  *
- * The agent runs on the airgapped kit (Nemotron 3.5 Lightning via Ollama on the
+ * The agent runs on the airgapped kit (Nemotron 3.5 Lightning via vLLM on the
  * DGX Spark), so there is no per-token bill to compute or project.
  *
  * Numbers cited:

@@ -28,8 +28,11 @@ export interface ServiceResult {
 export const SERVICES: ServiceCheck[] = [
   { id: 'es-gpu',      label: 'Elasticsearch (GPU)',  endpoint: 'http://es.ddil:9200/_cluster/health',         detail: 'cuVS HNSW · DGX Spark' },
   { id: 'es-cpu',      label: 'Elasticsearch (CPU)',  endpoint: 'http://framework.ddil:9200/_cluster/health',  detail: 'Standard HNSW · Framework' },
-  { id: 'ollama-llm',  label: 'Ollama LLM',           endpoint: 'http://ollama.ddil:11434/api/tags',           detail: 'gpt-oss:120b · DGX Spark' },
-  { id: 'ollama-embed',label: 'Ollama Embeddings',    endpoint: 'http://ollama.ddil:11434/api/tags',           detail: 'nomic-embed-text · DGX Spark' },
+  // Labels show the 9.5.6 lineup. The two endpoints below still probe Ollama; the
+  // live checks for vLLM (/v1/models) and the Jina server (:8081/health) are an
+  // open item in enablement/FACTS.md section 0 (confirm on kit before MOCK=false).
+  { id: 'ollama-llm',  label: 'Local LLM',            endpoint: 'http://ollama.ddil:11434/api/tags',           detail: 'Nemotron 3.5 Lightning · vLLM · DGX Spark' },
+  { id: 'ollama-embed',label: 'Embeddings',           endpoint: 'http://ollama.ddil:11434/api/tags',           detail: 'Jina Embeddings v5 Omni · DGX Spark' },
   { id: 'backend',     label: 'Demo Backend',         endpoint: '/api/health',                                detail: 'FastAPI · Framework' },
   { id: 'sensors',     label: 'Field Sensor Bus',     endpoint: '/api/sensors/status',                        detail: 'RS485 Modbus · Telemetry' },
 ]

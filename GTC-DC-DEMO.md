@@ -45,7 +45,7 @@ real cuVS build is `CUVS-AARCH64-BUILD.md`. The kiosk's **RALLY** easter egg
 ### 2. Multimodal + Need-to-Know (Jina / DLS)  ✅ verified in-repo
 **Where:** `~/ddil` adventure app, `adventure === "jina"` (`components/jina/`).
 Two scenes: **Search by Image** ("type words, get pictures" via one native ES kNN
-with `query_vector_builder`) and **Need-to-Know** — 509 research papers under a
+with `query_vector_builder`) and **Need-to-Know** — 198 research papers under a
 document-level-security model, hybrid RRF + a clearance-scoped generative Research
 Paper Analyst. Backed by the local **Jina omni server** (:8081, Blackwell cu128
 build). Setup: `demo/scripts/jina/JINA-SETUP.md`. See CLAUDE.md § "Multimodal + DLS".

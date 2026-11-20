@@ -6,8 +6,8 @@ import { SecretTap } from '../../components/SecretTap'
 const TICKER_LINES = [
   '◆  Multi-index hybrid retrieval — dense + BM25 + RRF',
   '◆  GPU vector indexing on cuVS — 8× faster than CPU baseline',
-  '◆  Local LLM inference on DGX Spark — llama3.1:70b',
-  '◆  Local embeddings on Framework — nomic-embed-text',
+  '◆  Local LLM inference on DGX Spark — Nemotron 3.5 Lightning (vLLM)',
+  '◆  Local embeddings on DGX Spark — Jina Embeddings v5 Omni',
   '◆  Fully airgapped — zero cloud dependency',
   '◆  Context engineering anywhere — even disconnected',
   '◆  Pluggable demo runtimes — swap apps, keep the stack',
@@ -94,7 +94,7 @@ export function BrandingPage({ onSecretUnlock }: Props) {
             cuVS GPU
           </div>
           <div className="px-3 py-1 rounded-full border border-white/15 bg-white/5 text-white/60 text-[10px] uppercase tracking-widest">
-            llama3.1:70b
+            Nemotron 3.5
           </div>
         </div>
       </div>

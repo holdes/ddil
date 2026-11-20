@@ -34,7 +34,7 @@ export function AgentConfigCard() {
       </div>
 
       <Row Icon={Bot}       label="Agent"         value={s.agent_id}    sub={`space · ${s.space}`}              href={kbAgent} />
-      <Row Icon={Cpu}       label="LLM"           value={s.llm_model}   sub="Ollama on the DGX Spark · via Kibana connector" href={kbConnector} />
+      <Row Icon={Cpu}       label="LLM"           value={s.llm_model}   sub="vLLM on the DGX Spark · via Kibana connector" href={kbConnector} />
       <Row Icon={Layers}    label="Embedder"      value={s.embed_model} sub="Jina v5 Omni on the DGX Spark · 768-d · corpus + queries" />
       <Row Icon={Database}  label="Default index" value={s.sec_index}   sub="93,541 chunks · 503 filings"
            chip={{ label: "GPU-built", title: "Built on the DGX Spark GB10 GPU node in chapter 01." }} />
@@ -43,7 +43,7 @@ export function AgentConfigCard() {
         <div className="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400">Manage in Kibana</div>
         <Link href={kbAgent}     label="Open agent in Agent Builder" />
         <Link href={kbWorkflows} label="Workflows · invoke this agent on a schedule" />
-        <Link href={kbConnector} label="Ollama connector · local Nemotron model" />
+        <Link href={kbConnector} label="vLLM connector · local Nemotron model" />
       </div>
     </div>
   );

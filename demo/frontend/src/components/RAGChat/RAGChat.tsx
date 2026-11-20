@@ -90,7 +90,7 @@ export function RAGChat() {
     <div className="p-6 h-full flex flex-col">
       <h2 className="text-2xl font-bold mb-1">AI Agronomist</h2>
       <p className="text-sm text-slate-400 mb-4">
-        RAG Chat &middot; Elastic Retrieval + llama3.1:70b on DGX Spark
+        RAG Chat &middot; Elastic Retrieval + Nemotron 3.5 Lightning on DGX Spark
       </p>
 
       {/* Messages */}

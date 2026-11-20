@@ -283,7 +283,9 @@ ES_MAIN_URL = http://es-cpu:9200          (Framework CPU node, local to backend 
 ES_GPU_URL = http://192.168.1.20:9200     (DGX Spark GPU node)
 OLLAMA_EMBED_URL = http://192.168.1.20:11434
 OLLAMA_LLM_URL = http://192.168.1.20:11434
-LLM_MODEL = gpt-oss:120b
+LLM_BACKEND = vllm                        (or ollama for the previous /api/chat path)
+VLLM_URL = http://vllm.ddil:8000          (port: confirm on kit)
+LLM_MODEL = nemotron-3.5-lightning        (vllm: first /v1/models id if not served)
 EMBED_MODEL = nomic-embed-text
 DATA_DIR = /data                          (container mount from ./data/preprocessed)
 ```
@@ -318,7 +320,7 @@ The **Multimodal Intelligence** chooser card (`adventure === "jina"` →
 - **Search by Image** (opener) — `jina-multimodal` index (768-d); "type words,
   get pictures" via one native ES kNN with `query_vector_builder` (ES embeds the
   query through the on-box omni inference endpoint).
-- **Need-to-Know** (main) — `pmc-unstructured` index (1024-d bbq_hnsw); 509
+- **Need-to-Know** (main) — `pmc-unstructured` index (1024-d bbq_hnsw); 198
   research papers under a fictional **document-level-security** model. Hybrid RRF
   (BM25+kNN) with a DLS pre-filter, cross-modal figure strip, and a generative
   **Research Paper Analyst** — all scoped to the selected analyst's clearance.
@@ -326,7 +328,8 @@ The **Multimodal Intelligence** chooser card (`adventure === "jina"` →
 - **Backend:** `app/routers/jina.py` → `/api/jina/{analysts,state,multimodal/search,search,analyst/answer,figimg,pdf,image}`.
   DLS model in `app/services/jina_dls.py` (clearance hierarchy U<CUI<C<S<TS,
   4 personas, `terms_set` subset rule for compartments, NOFORN gating). Generative
-  answer reuses `services/llm.py` (gpt-oss via Ollama), grounded only in
+  answer reuses `services/llm.py` (Nemotron 3.5 Lightning via vLLM by default,
+  `LLM_BACKEND`), grounded only in
   DLS-visible passages. Embeds via the local Jina omni server (`JINA_OMNI_URL`).
 - **On-box data (run on box):** `demo/scripts/jina/` — `setup-indices-local.sh`
   (both indices + ES inference endpoint + caption pipeline), `ingest-multimodal.py`,

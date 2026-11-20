@@ -91,7 +91,7 @@ export function SystemOverview() {
           services={[
             "FastAPI Backend (:8000)",
             "React Frontend (:3000)",
-            "Ollama — nomic-embed-text (:11434)",
+            "Kibana (:5601) — Agent Builder",
             "Sensor Data Ingestion (RS485)",
           ]}
         />
@@ -102,7 +102,8 @@ export function SystemOverview() {
           services={[
             "Elasticsearch GPU (:9200) — cuVS",
             "Elasticsearch CPU (:9201)",
-            "Ollama — llama3.1:70b (:11434)",
+            "vLLM — Nemotron 3.5 Lightning",
+            "Jina Embeddings v5 Omni (:8081)",
             "128GB Unified Memory",
           ]}
         />

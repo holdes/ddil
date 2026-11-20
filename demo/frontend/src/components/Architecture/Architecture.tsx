@@ -114,10 +114,10 @@ export function Architecture({ onContinue }: Props) {
               "NVIDIA cuVS Library (HNSW acceleration)",
             ]}
             services={[
-              { name: "Elasticsearch (GPU)", detail: "9.4.2 + cuVS JAR", color: "bg-emerald-500" },
-              { name: "Ollama — GPT-OSS 120B", detail: "65 GB MXFP4", color: "bg-emerald-500" },
-              { name: "Ollama — Jina v4", detail: "4.6 GB Embeddings", color: "bg-emerald-500" },
-              { name: "Inference Endpoint", detail: "ES → Ollama", color: "bg-emerald-500" },
+              { name: "Elasticsearch (GPU)", detail: "9.5.6 + cuVS JAR", color: "bg-emerald-500" },
+              { name: "vLLM — Nemotron 3.5 Lightning", detail: "30B MoE · 3B active", color: "bg-emerald-500" },
+              { name: "Jina Embeddings v5 Omni", detail: "Text + image · 768-d", color: "bg-emerald-500" },
+              { name: "Inference Endpoint", detail: "ES → Jina v5 Omni", color: "bg-emerald-500" },
             ]}
           />
 
@@ -134,7 +134,7 @@ export function Architecture({ onContinue }: Props) {
               "CPU HNSW (race comparison node)",
             ]}
             services={[
-              { name: "Elasticsearch (CPU)", detail: "9.4.2 stock", color: "bg-blue-500" },
+              { name: "Elasticsearch (CPU)", detail: "9.5.6 stock", color: "bg-blue-500" },
               { name: "Kibana", detail: "Agent Builder + Workflows", color: "bg-blue-500" },
               { name: "React Frontend", detail: "Vite + Tailwind", color: "bg-blue-500" },
               { name: "FastAPI Backend", detail: "Python 3.12", color: "bg-blue-500" },
@@ -216,7 +216,7 @@ export function Architecture({ onContinue }: Props) {
 
             <div className="flex-1 text-center">
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 mb-2">
-                <div className="text-emerald-400 font-medium">GPT-OSS 120B</div>
+                <div className="text-emerald-400 font-medium">Nemotron 3.5 Lightning</div>
                 <div className="text-slate-500">On-device inference</div>
               </div>
             </div>
@@ -242,7 +242,7 @@ export function Architecture({ onContinue }: Props) {
           {[
             { value: "869K", label: "Documents Indexed", icon: <Database size={14} /> },
             { value: "2 nodes", label: "Mixed Arch Cluster", icon: <Server size={14} /> },
-            { value: "120B", label: "Parameter LLM", icon: <Brain size={14} /> },
+            { value: "30B", label: "MoE LLM · 3B active", icon: <Brain size={14} /> },
             { value: "12x", label: "GPU Index Speedup", icon: <Zap size={14} /> },
             { value: "<50 lbs", label: "Pelican Air 1615", icon: <HardDrive size={14} /> },
           ].map((stat, i) => (

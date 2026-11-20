@@ -5,7 +5,7 @@ server + two Elasticsearch indices on the kit. Two tracks:
 
 - **Search by Image** (`jina-multimodal`, 768-d) — "type words, get pictures";
   text + image share one vector space. 10 synthetic shapes.
-- **Need-to-Know** (`pmc-unstructured`, 1024-d) — 509 research papers under a
+- **Need-to-Know** (`pmc-unstructured`, 1024-d) — 198 research papers under a
   fictional document-level-security model: hybrid RRF retrieval + cross-modal
   figures + a generative **Research Paper Analyst**, all enforced by clearance.
 

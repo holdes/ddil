@@ -26,7 +26,7 @@ const RECAP: RecapTier[] = [
   { number: "03", Icon: Search,   title: "Data Interface", headline: "One index, two audiences",
     detail: "Analyst search vs developer API · cURL/Python/Dev Tools · sector chips · kNN over 93K chunks, query embedded by Jina v5 Omni on the kit." },
   { number: "04", Icon: Bot,      title: "Agentic Action", headline: "Reason · retrieve · synthesise",
-    detail: "finance-analyst agent on NVIDIA Nemotron 3.5 Lightning via Ollama on the DGX Spark, plus custom finance.* ES|QL tools. Every call stays on the kit." },
+    detail: "finance-analyst agent on NVIDIA Nemotron 3.5 Lightning via vLLM on the DGX Spark, plus custom finance.* ES|QL tools. Every call stays on the kit." },
   { number: "—",  Icon: Workflow, title: "Workflows",      headline: "Agents on autopilot",
     detail: "Daily 10-K AI-Risk Digest workflow calls the same agent on a schedule, writes back the digest. Two-way bridge." },
 ];
