@@ -1,0 +1,17 @@
+{
+  "id": "vineyard-npk-trend",
+  "type": "esql",
+  "description": "Analyze nutrient trends over time by quarter. Essential for detecting the potassium cliff in Block C since mid-2022.",
+  "tags": [
+    "vineyard"
+  ],
+  "configuration": {
+    "query": "FROM vineyard-npk | WHERE block_id == ?block_id | STATS avg_k = AVG(soil_potassium_mgkg), avg_n = AVG(soil_nitrogen_mgkg), avg_ph = AVG(ph) BY BUCKET(timestamp, 3 months) | SORT `BUCKET(timestamp, 3 months)` ASC",
+    "params": {
+      "block_id": {
+        "type": "string",
+        "description": "Block ID (BLK-A through BLK-F)"
+      }
+    }
+  }
+}

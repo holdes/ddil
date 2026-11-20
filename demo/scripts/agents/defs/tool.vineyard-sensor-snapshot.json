@@ -1,0 +1,17 @@
+{
+  "id": "vineyard-sensor-snapshot",
+  "type": "esql",
+  "description": "Get latest soil sensor readings (moisture, temperature, EC) for a vineyard block. Use for current conditions.",
+  "tags": [
+    "vineyard"
+  ],
+  "configuration": {
+    "query": "FROM vineyard-soil | WHERE block_id == ?block_id | SORT timestamp DESC | LIMIT 1 | KEEP block_id, block_name, soil_moisture_pct, soil_temp_6in_c, electrical_conductivity, depth_cm, air_temp_c, precip_mm, timestamp",
+    "params": {
+      "block_id": {
+        "type": "string",
+        "description": "Block ID (BLK-A through BLK-F)"
+      }
+    }
+  }
+}

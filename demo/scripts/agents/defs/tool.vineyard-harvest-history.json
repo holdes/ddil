@@ -1,0 +1,17 @@
+{
+  "id": "vineyard-harvest-history",
+  "type": "esql",
+  "description": "Look up harvest yield and wine quality across vintages for a block. Shows brix, yield, quality score per year.",
+  "tags": [
+    "vineyard"
+  ],
+  "configuration": {
+    "query": "FROM vineyard-harvest | WHERE block_id == ?block_id | STATS avg_brix = AVG(sugar_brix), total_kg = SUM(grape_mass_kg), avg_quality = AVG(quality_score) BY vintage_year | SORT vintage_year ASC",
+    "params": {
+      "block_id": {
+        "type": "string",
+        "description": "Block ID (BLK-A through BLK-F)"
+      }
+    }
+  }
+}

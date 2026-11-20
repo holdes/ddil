@@ -1,0 +1,27 @@
+{
+  "id": "research.search_papers",
+  "type": "esql",
+  "description": "Search the research-paper corpus for passages matching a topic, RESTRICTED to the analysts clearance. Only returns papers classified at or below the clearance (U<CUI<C<S<TS). Use this for every retrieval; never bypass the clearance.",
+  "tags": [
+    "research",
+    "dls",
+    "need-to-know"
+  ],
+  "configuration": {
+    "query": "FROM pmc-unstructured METADATA _score | EVAL lvl = CASE(classification==\"U\",0, classification==\"CUI\",1, classification==\"C\",2, classification==\"S\",3, classification==\"TS\",4, 99) | EVAL clr = CASE(?clearance==\"U\",0, ?clearance==\"CUI\",1, ?clearance==\"C\",2, ?clearance==\"S\",3, ?clearance==\"TS\",4, 0) | WHERE lvl <= clr AND MATCH(content, ?topic) | SORT _score DESC | KEEP parent_id, doc_title, journal, year, classification, section, content, _score | LIMIT ?top_n",
+    "params": {
+      "topic": {
+        "type": "string",
+        "description": "Natural-language topic to search for."
+      },
+      "clearance": {
+        "type": "string",
+        "description": "Analyst clearance: one of U, CUI, C, S, TS. Papers above this are excluded."
+      },
+      "top_n": {
+        "type": "integer",
+        "description": "Max passages to return. Default 6."
+      }
+    }
+  }
+}

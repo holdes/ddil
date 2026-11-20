@@ -1,0 +1,17 @@
+{
+  "id": "vineyard-npk-profile",
+  "type": "esql",
+  "description": "Get latest NPK nutrient readings (N, P, K, pH) for a block. Critical for detecting potassium crash in Block C.",
+  "tags": [
+    "vineyard"
+  ],
+  "configuration": {
+    "query": "FROM vineyard-npk | WHERE block_id == ?block_id | SORT timestamp DESC | LIMIT 5 | KEEP block_id, block_name, soil_nitrogen_mgkg, soil_phosphorus_mgkg, soil_potassium_mgkg, ph, timestamp",
+    "params": {
+      "block_id": {
+        "type": "string",
+        "description": "Block ID (BLK-A through BLK-F)"
+      }
+    }
+  }
+}

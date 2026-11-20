@@ -1,0 +1,17 @@
+{
+  "id": "vineyard-disease-scan",
+  "type": "esql",
+  "description": "Search drone imagery for disease detections in a block. Shows disease types and frequency.",
+  "tags": [
+    "vineyard"
+  ],
+  "configuration": {
+    "query": "FROM vineyard-imagery | WHERE block_id == ?block_id | STATS disease_count = COUNT(*) BY classification | SORT disease_count DESC",
+    "params": {
+      "block_id": {
+        "type": "string",
+        "description": "Block ID (BLK-A through BLK-F)"
+      }
+    }
+  }
+}
