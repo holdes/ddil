@@ -222,7 +222,7 @@
     h += '<div class="row" style="margin-top:22px">';
     h += node("NVIDIA DGX Spark", "192.168.1.20 — AI/ML Powerhouse", "var(--teal)",
       ["Grace Blackwell GB10 — 1 PFLOP AI", "128 GB Unified Memory", "aarch64 Architecture", "NVIDIA cuVS Library (HNSW acceleration)"],
-      [["Elasticsearch (GPU)", "9.5.6 + cuVS JAR"], ["Ollama — Nemotron 3.5 Lightning", "NVIDIA NeMo LLM"], ["Jina Embeddings v5 Omni", "Text + image embeddings"], ["Inference Endpoint", "ES → Jina (jina-omni-text)"]]);
+      [["Elasticsearch (GPU)", "9.5.6 + cuVS JAR"], ["vLLM — Nemotron 3.5 Lightning", "30B MoE · 3B active"], ["Jina Embeddings v5 Omni", "Text + image embeddings"], ["Inference Endpoint", "ES → Jina (jina-omni-text)"]]);
     h += node("Framework Desktop", "192.168.1.10 — Presentation Layer", "var(--blue)",
       ["Ryzen AI Max+ 395 — 64 GB RAM", "x86_64 Architecture", "Demo App Frontend + Backend", "CPU HNSW (race comparison node)"],
       [["Elasticsearch (CPU)", "9.5.6 stock"], ["Kibana", "Agent Builder + Workflows"], ["React Frontend", "Vite + Tailwind"], ["FastAPI Backend", "Python 3.12"]]);
@@ -238,7 +238,7 @@
     });
     h += "</div></div>";
     h += '<div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:16px">';
-    [["869K", "Documents Indexed"], ["2 nodes", "Mixed Arch Cluster"], ["Nemotron", "3.5 Lightning on the Spark"], ["12x", "GPU Index Speedup"], ["<50 lbs", "Pelican Air 1615"]].forEach(function (s) {
+    [["869K", "Documents Indexed"], ["2 nodes", "Mixed Arch Cluster"], ["30B", "MoE LLM · 3B active"], ["12x", "GPU Index Speedup"], ["<50 lbs", "Pelican Air 1615"]].forEach(function (s) {
       h += '<div class="panel pad stat center"><div class="v">' + esc(s[0]) + '</div><div class="l">' + esc(s[1]) + "</div></div>";
     });
     h += "</div>";
@@ -496,8 +496,8 @@
       return '<div class="panel kpi"><div class="l">' + s[0] + '</div><div class="v">' + esc(s[1]) + '</div><div class="s">' + esc(s[2]) + "</div></div>";
     }).join("") + "</div>";
     h += '<div class="grid" style="grid-template-columns:1fr 1fr;margin-top:14px">';
-    h += '<div class="panel pad"><b>Framework Desktop</b> <span class="mono tiny muted">192.168.1.10</span><ul class="small" style="color:var(--char)"><li>FastAPI Backend (:8000)</li><li>React Frontend (:3000)</li><li>Sensor Data Ingestion (RS485)</li></ul></div>';
-    h += '<div class="panel pad"><b>NVIDIA DGX Spark</b> <span class="mono tiny muted">192.168.1.20</span><ul class="small" style="color:var(--char)"><li>Elasticsearch GPU (:9200) — cuVS</li><li>Elasticsearch CPU (:9201)</li><li>Ollama — Nemotron 3.5 Lightning (:11434)</li><li>Jina Embeddings v5 Omni (:8081)</li><li>128GB Unified Memory</li></ul></div></div>';
+    h += '<div class="panel pad"><b>Framework Desktop</b> <span class="mono tiny muted">192.168.1.10</span><ul class="small" style="color:var(--char)"><li>FastAPI Backend (:8000)</li><li>React Frontend (:3000)</li><li>Kibana (:5601) — Agent Builder</li><li>Sensor Data Ingestion (RS485)</li></ul></div>';
+    h += '<div class="panel pad"><b>NVIDIA DGX Spark</b> <span class="mono tiny muted">192.168.1.20</span><ul class="small" style="color:var(--char)"><li>Elasticsearch GPU (:9200) — cuVS</li><li>Elasticsearch CPU (:9201)</li><li>vLLM — Nemotron 3.5 Lightning</li><li>Jina Embeddings v5 Omni (:8081)</li><li>128GB Unified Memory</li></ul></div></div>';
     h += '<div class="center" style="margin-top:22px"><button class="btn ghost" data-act="resetDemo">&#8634; Reset Demo</button></div>';
     return h + "</div>";
   }

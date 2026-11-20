@@ -274,15 +274,15 @@
         status: "STAGED",
         say: [
           "This is the whole kit: two computers, a gateway and a switch in one Pelican case.",
-          "The DGX Spark (192.168.1.20) runs the GPU Elasticsearch node, NVIDIA Nemotron 3.5 Lightning in Ollama and Jina Embeddings v5 Omni. The Framework Desktop (192.168.1.10) runs the CPU node, Kibana and this app.",
+          "The DGX Spark (192.168.1.20) runs the GPU Elasticsearch node, NVIDIA Nemotron 3.5 Lightning on vLLM and Jina Embeddings v5 Omni. The Framework Desktop (192.168.1.10) runs the CPU node, Kibana and this app.",
           "Every query, embedding and answer today runs inside this case. Click Continue.",
         ],
         proof: "Point at the two boxes in the case. The IPs on screen are the IPs on the hardware.",
-        honest: "This screen is a static diagram. Correct two labels if asked: the AI Agronomist is a Python pipeline that calls Ollama, not Agent Builder; the Jina server and the ES inference endpoint on the DGX card serve the Multimodal adventure, not this one. The 12x stat is a UI claim. Pre-show: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni.",
+        honest: "This screen is a static diagram. Correct two labels if asked: the AI Agronomist is a Python pipeline that calls the local model (Nemotron on vLLM), not Agent Builder; the Jina server and the ES inference endpoint on the DGX card serve the Multimodal adventure, not this one. The 12x stat is a UI claim. Pre-show: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni.",
         questions: [
           { q: "Is this one cluster or two?", a: "One cluster, ddil-vineyard, with one node on each machine. The GPU node carries node.attr.accel=gpu so indices can be pinned to it." },
           { q: "Which Elasticsearch version?", a: "Elasticsearch and Kibana 9.5.6 on both machines. The GPU node adds the aarch64 cuVS library." },
-          { q: "Does the model need the cloud?", a: "No. NVIDIA Nemotron 3.5 Lightning runs in Ollama on the DGX Spark. Embeddings come from Jina Embeddings v5 Omni on the same box. Jina is part of Elastic." },
+          { q: "Does the model need the cloud?", a: "No. NVIDIA Nemotron 3.5 Lightning runs on vLLM on the DGX Spark. Embeddings come from Jina Embeddings v5 Omni on the same box. Jina is part of Elastic." },
           { q: "What does it weigh?", a: "The screen says under 50 lbs. Weigh your own kit before you quote it." },
         ],
         fails: "This screen needs no backend. If the page will not load, the frontend container on the Framework (port 3000) is down: run docker compose up -d in ~/demo on the Framework, or present this view from the deck.",
@@ -366,9 +366,9 @@
           "Fill the wait. Each phase is a full model call on local hardware. Open each card as it completes.",
         ],
         proof: "Phase 0 numbers match the BLK-C card on the Dashboard: same index, same moment, no cloud call.",
-        honest: "Elasticsearch queries and model calls are live. Three on-screen claims are wrong: the chooser and Architecture say Elastic Agent Builder, but this is Python calling Ollama; the progress line says phases 2 to 4 run in parallel, but they run one after another; the system prompt carries the estate background, so the model knows the stories before it searches. Say: \"A Python orchestrator calls Elasticsearch and Nemotron 3.5 Lightning on the Spark in five steps.\" Timing on the kit: four sequential model calls, each capped at 120 s. Budget 1.5 to 3 minutes per question; the worst case is about 8 minutes. FACTS has no measured timing. Kit pace in the mock runs about 80 s.",
+        honest: "Elasticsearch queries and model calls are live. Three on-screen claims are wrong: the chooser and Architecture say Elastic Agent Builder, but this is Python calling the local model (Nemotron on vLLM); the progress line says phases 2 to 4 run in parallel, but they run one after another; the system prompt carries the estate background, so the model knows the stories before it searches. Say: \"A Python orchestrator calls Elasticsearch and Nemotron 3.5 Lightning on the Spark in five steps.\" Timing on the kit: four sequential model calls, each capped at 120 s. Budget 1.5 to 3 minutes per question; the worst case is about 8 minutes. FACTS has no measured timing. Kit pace in the mock runs about 80 s.",
         questions: [
-          { q: "Is this Agent Builder?", a: "No. This pipeline is Python plus Ollama. The SEC adventure shows Agent Builder with ES|QL tools." },
+          { q: "Is this Agent Builder?", a: "No. This pipeline is Python plus the local model (Nemotron on vLLM). The SEC adventure shows Agent Builder with ES|QL tools." },
           { q: "Why is it slow?", a: "Four sequential model calls on one GB10, fully disconnected, each a full generation with no network." },
           { q: "Can it hallucinate?", a: "The model sees the sensor snapshot, the kNN matches and the estate background. Open the phase cards to show the retrieved numbers the answer used." },
           { q: "Why did it analyse a different block?", a: "Typed questions and chips send no block id, so Phase 0 reads whichever block reported last. Start from a block card, the map or an alert when the block matters." },
@@ -407,13 +407,13 @@
         ],
         proof: "Reset Demo returns to the chooser and clears Recent Investigations.",
         honest: "Do not present the System screen. It is stale: 615K+ vectors, GPU ~22s / CPU ~150s, and a CPU Elasticsearch node on the Spark at :9201. None of that matches the kit.",
-        questions: [{ q: "Can we run this on our own hardware?", a: "Yes. It is stock Elasticsearch plus the cuVS library on the GPU node, Ollama for the model, and a small FastAPI and React app. Size the GPU node for the model you choose." }],
+        questions: [{ q: "Can we run this on our own hardware?", a: "Yes. It is stock Elasticsearch plus the cuVS library on the GPU node, vLLM for the model, and a small FastAPI and React app. Size the GPU node for the model you choose." }],
         fails: "Reset Demo does not reset the race on the server. The next Start Race reinitialises it.",
       } },
   ];
 
   var drills = {
-    llm: { label: "LLM timeout", see: "AI Agronomist: Phase 1 never completes. After 120 s the stream ends without job_complete and the screen stays \"running\" with the spinner.", fix: "Navigate away (Search) and back to reset the screen, then open a cached run from Recent Investigations. Narrate the five phases from the cached cards. After the session: check ollama ps on the Spark and warm the model." },
+    llm: { label: "LLM timeout", see: "AI Agronomist: Phase 1 never completes. After 120 s the stream ends without job_complete and the screen stays \"running\" with the spinner.", fix: "Navigate away (Search) and back to reset the screen, then open a cached run from Recent Investigations. Narrate the five phases from the cached cards. After the session: check vLLM GET /v1/models on the Spark and warm the model." },
     search: { label: "Search fallback", see: "Dashboard, Map and Phase 0 show staged numbers with no error. Search returns the canned Block B3 and Block B7 soil-station results. The tell: totals of exactly 869,000 and 32.4% / 18.2°C.", fix: "Keep presenting; the story still holds on staged numbers. Do not claim the numbers are live. After the session: give the backend ES credentials (F1)." },
     es: { label: "ES down", see: "Dashboard and Map look normal (silent fallback). The agent still runs, but Phase 0 shows BLK-C mock values (46.2%, K 50) for any block, and Phase 1 shows the two mock matches (2020 BLK-B, 2022 BLK-C).", fix: "Investigate Block C so the mock values fit the story. Avoid other blocks. After the session: check docker ps on both nodes and GET _cluster/health." },
   };

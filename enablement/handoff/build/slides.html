@@ -25,7 +25,7 @@
     <div class="lr lat"><span class="n">1</span><div><div class="h">Carry handles</div><div class="x">Lift by the handle and the rear grate. Never by the touchscreen or a cable.</div></div></div>
     <div class="lr lat"><span class="n">2</span><div><div class="h">Touchscreen kiosk<small>2U · 1280x400 · :3100</small></div><div class="x">HDMI and USB-A to the Framework. Shows status and branding, not the demos.</div></div></div>
     <div class="lr lat"><span class="n">3</span><div><div class="h">Framework Desktop<small>192.168.1.10 · x86_64</small></div><div class="x">Behind blank panels. CPU Elasticsearch node, Kibana, demo app, kiosk.</div></div></div>
-    <div class="lr lat"><span class="n">4</span><div><div class="h">DGX Spark<small>192.168.1.20 · aarch64 · GB10</small></div><div class="x">GPU Elasticsearch node, Ollama with Nemotron 3.5 Lightning, Jina Embeddings v5 Omni server.</div></div></div>
+    <div class="lr lat"><span class="n">4</span><div><div class="h">DGX Spark<small>192.168.1.20 · aarch64 · GB10</small></div><div class="x">GPU Elasticsearch node, vLLM with Nemotron 3.5 Lightning, Jina Embeddings v5 Omni server.</div></div></div>
     <div class="lr lat"><span class="n">5</span><div><div class="h">JetKVM<small>remote console</small></div><div class="x">Travels out of its bay. Ethernet, HDMI and USB-C power.</div></div></div>
     <div class="lr lat"><span class="n">6</span><div><div class="h">UniFi Express 7<small>192.168.1.1 · Wi-Fi DDIL</small></div><div class="x">Gateway, DHCP and Wi-Fi. Its USB-C power lead is unplugged for transport.</div></div></div>
     <div class="lr lat"><span class="n">7</span><div><div class="h">Switch Flex Mini<small>5-port GbE</small></div><div class="x">Wires the UniFi, the Framework and the Spark together.</div></div></div>
@@ -106,7 +106,7 @@
 
 <!-- 6 what runs where -->
 <section class="slide soft" data-fx="where" data-foot="What runs where"
- data-notes="Flat view of the services, by machine. The DGX Spark at .20 is aarch64: the GPU Elasticsearch node built from 9.5.6 plus the cuVS jar, Ollama under systemd with NVIDIA Nemotron 3.5 Lightning, and the Jina Embeddings v5 Omni server on 8081, which you start by hand. The Framework at .10 is x86_64: the CPU Elasticsearch node, Kibana with Agent Builder on 5601, the FastAPI backend on 8000, the frontend on 3000 and the kiosk on 3100. Both Elasticsearch nodes form one cluster, ddil-vineyard. The presenter device joins Wi-Fi DDIL and opens 192.168.1.10 port 3000. Two checks before a show. All nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. And the .ddil names exist in config but are untested on the box; use raw IPs when in doubt.">
+ data-notes="Flat view of the services, by machine. The DGX Spark at .20 is aarch64: the GPU Elasticsearch node built from 9.5.6 plus the cuVS jar, vLLM serving NVIDIA Nemotron 3.5 Lightning on port 8000 (confirm on kit), Ollama under systemd for the Vineyard search embedder and the fallback connector, and the Jina Embeddings v5 Omni server on 8081, which you start by hand. The Framework at .10 is x86_64: the CPU Elasticsearch node, Kibana with Agent Builder on 5601, the FastAPI backend on 8000, the frontend on 3000 and the kiosk on 3100. Both Elasticsearch nodes form one cluster, ddil-vineyard. The presenter device joins Wi-Fi DDIL and opens 192.168.1.10 port 3000. Two checks before a show. All nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. And the .ddil names exist in config but are untested on the box; use raw IPs when in doubt.">
   <div class="z">
     <div class="eyebrow in1">What runs where</div>
     <h1 class="in2 h2">One cluster across two machines. <span class="b">Every model on the box.</span></h1>
@@ -114,14 +114,15 @@
   <div class="mc lat" style="left:72px;width:524px;top:170px">
     <div class="mh"><b>DGX Spark</b><span>192.168.1.20</span><em>aarch64 · GB10 · 128 GB</em></div>
     <div class="sv"><span class="k">es-gpu</span><span class="d">Elasticsearch 9.5.6 + cuVS, GPU vector indexing on, security on</span><span class="p">:9200</span></div>
-    <div class="sv"><span class="k">Ollama</span><span class="d">NVIDIA Nemotron 3.5 Lightning, native under systemd</span><span class="p">:11434</span></div>
+    <div class="sv"><span class="k">vLLM</span><span class="d">NVIDIA Nemotron 3.5 Lightning. Port: confirm on kit</span><span class="p">:8000</span></div>
+    <div class="sv"><span class="k">Ollama</span><span class="d">Vineyard search embedder, fallback LLM connector</span><span class="p">:11434</span></div>
     <div class="sv warn"><span class="k">Jina server</span><span class="d">Jina Embeddings v5 Omni, text and images. Start by hand after boot</span><span class="p">:8081</span></div>
   </div>
   <div class="mc lat" style="left:620px;width:588px;top:170px">
     <div class="mh"><b>Framework Desktop</b><span>192.168.1.10</span><em>x86_64 · Ryzen AI Max+ 395 · 64 GB</em></div>
     <div class="sv"><span class="k">es-cpu</span><span class="d">Elasticsearch 9.5.6, security on</span><span class="p">:9200</span></div>
     <div class="sv"><span class="k">Kibana</span><span class="d">9.5.6, Agent Builder for SEC Findings</span><span class="p">:5601</span></div>
-    <div class="sv"><span class="k">backend</span><span class="d">FastAPI, calls ES, Ollama and Jina</span><span class="p">:8000</span></div>
+    <div class="sv"><span class="k">backend</span><span class="d">FastAPI, calls ES, vLLM, Jina and Ollama</span><span class="p">:8000</span></div>
     <div class="sv"><span class="k">frontend</span><span class="d">The demo app and its chooser</span><span class="p">:3000</span></div>
     <div class="sv warn"><span class="k">kiosk</span><span class="d">Touchscreen app, mock health by default</span><span class="p">:3100</span></div>
   </div>
@@ -165,7 +166,7 @@
 
 <!-- 8 vineyard -->
 <section class="slide soft" data-fx="vin" data-foot="Demo 1 · Vineyard Intelligence"
- data-notes="Vineyard. Domaine de la Cote Cachee is a fictional estate in the Walla Walla AVA with six blocks and eight years of synthetic data from one causal model. Block C, La Riviere, has declined since a drainage failure in mid-2022 that pulled potassium from 210 toward a 50 mg/kg floor. The agronomist finds that story. Before the race starts, say it is a timed simulation: indexer.py sleeps, never calls Elasticsearch, and ends at 15 seconds for GPU and 55 for CPU because those are constants. Never quote a speedup, a vectors-per-second figure or recall from it. Dashboard and map are live only if the pre-show checks passed; otherwise they silently show fallback numbers, and a total of exactly 869,000 is the tell. The alerts are scripted. Start the investigation from the map so the block id is passed; typed questions carry no block. The five phases are a Python pipeline in the backend with four sequential Nemotron 3.5 Lightning calls through Ollama. It is not Agent Builder, whatever the chooser card says, and the phases run in sequence even though the stream says in parallel. Budget one and a half to three minutes per question. Skip Search, Crop Health and System: they are canned.">
+ data-notes="Vineyard. Domaine de la Cote Cachee is a fictional estate in the Walla Walla AVA with six blocks and eight years of synthetic data from one causal model. Block C, La Riviere, has declined since a drainage failure in mid-2022 that pulled potassium from 210 toward a 50 mg/kg floor. The agronomist finds that story. Before the race starts, say it is a timed simulation: indexer.py sleeps, never calls Elasticsearch, and ends at 15 seconds for GPU and 55 for CPU because those are constants. Never quote a speedup, a vectors-per-second figure or recall from it. Dashboard and map are live only if the pre-show checks passed; otherwise they silently show fallback numbers, and a total of exactly 869,000 is the tell. The alerts are scripted. Start the investigation from the map so the block id is passed; typed questions carry no block. The five phases are a Python pipeline in the backend with four sequential Nemotron 3.5 Lightning calls to vLLM on the Spark. It is not Agent Builder, whatever the chooser card says, and the phases run in sequence even though the stream says in parallel. Budget one and a half to three minutes per question. Skip Search, Crop Health and System: they are canned.">
   <div class="z">
     <div class="eyebrow in1">Demo 1 · Vineyard Intelligence</div>
     <h1 class="in2 h2">The agronomist in the case. <span class="b">Search first, then reason.</span></h1>
@@ -210,7 +211,7 @@
 
 <!-- 10 multimodal -->
 <section class="slide soft" data-fx="mm" data-foot="Demo 3 · Multimodal and need-to-know"
- data-notes="Open with the line from the runbook: the papers are public research, the security markings are synthetic and assigned by a fixed rule, and the application applies each analyst's clearance as a filter on every query. Search by Image: Elasticsearch embeds the words through a local inference endpoint and runs kNN over ten synthetic shapes; toggle image vectors and caption vectors. Need-to-Know: start as Public User, ask one question, then switch to Analyst A, Analyst B and the Senior Analyst with the same question. The visible corpus grows with clearance; on the kit the counts are 85, 163, 187 and 198 papers. The real corpus is 198 papers, 9,636 text chunks and about 2,218 figure references; the 509 on screen is a stale label from an older ingest path, so read the numerator and say of 198. The answer is one Nemotron 3.5 Lightning call grounded only in passages the analyst may see. Enforcement is application-side; it is not Elasticsearch document level security, which a production design would use through roles. The embedding model is Jina Embeddings v5 Omni, jina-embeddings-v5-omni-small, on the Spark. The committed kit names the scenes Search by Image and Need-to-Know; the mock uses the newer names Vector Search and AI Analyst.">
+ data-notes="Open with the line from the runbook: the papers are public research, the security markings are synthetic and assigned by a fixed rule, and the application applies each analyst's clearance as a filter on every query. Search by Image: Elasticsearch embeds the words through a local inference endpoint and runs kNN over ten synthetic shapes; toggle image vectors and caption vectors. Need-to-Know: start as Public User, ask one question, then switch to Analyst A, Analyst B and the Senior Analyst with the same question. The visible corpus grows with clearance; on the kit the counts are 85, 163, 187 and 198 papers. The real corpus is 198 papers, 9,636 text chunks and about 2,218 figure references; the app now prints of 198 as a fixed total, because the API reports only the visible count. The answer is one Nemotron 3.5 Lightning call grounded only in passages the analyst may see. Enforcement is application-side; it is not Elasticsearch document level security, which a production design would use through roles. The embedding model is Jina Embeddings v5 Omni, jina-embeddings-v5-omni-small, on the Spark. The committed kit names the scenes Search by Image and Need-to-Know; the mock uses the newer names Vector Search and AI Analyst.">
   <div class="z">
     <div class="eyebrow in1">Demo 3 · Multimodal and need-to-know</div>
     <h1 class="in2 h2">Same question, different clearance. <span class="b">Different answer.</span></h1>
@@ -218,7 +219,7 @@
   <div class="shot lat" style="left:72px;top:172px;width:283px"><img src="{{IMG:mock-19-jina-image.webp}}" alt="Search by Image"></div>
   <div class="shot lat" style="left:365px;top:172px;width:283px"><img src="{{IMG:mock-26-jina-analyst-analystA.webp}}" alt="Analyst answer as Analyst A"></div>
   <div class="shotc" style="left:72px;top:356px;width:576px">Practice mock: Search by Image, and an answer scoped to Analyst A.</div>
-  <div class="box lat" style="left:72px;width:576px;top:392px;padding:10px 14px"><span class="k">The real numbers</span>Kit corpus: <b>198 papers</b>, 9,636 text chunks, about 2,218 figure references. Visible per analyst on the kit: Public 85 · Analyst A 163 · Analyst B 187 · Senior 198. The "509" in the app is a stale label; the numerator is measured.</div>
+  <div class="box lat" style="left:72px;width:576px;top:392px;padding:10px 14px"><span class="k">The real numbers</span>Kit corpus: <b>198 papers</b>, 9,636 text chunks, about 2,218 figure references. Visible per analyst on the kit: Public 85 · Analyst A 163 · Analyst B 187 · Senior 198. The app prints "/ 198 docs"; the numerator is measured, the total is fixed.</div>
   <div class="beats" style="left:680px;right:72px;top:172px">
     <div class="bt lat"><span class="tm">0:30</span><div><div class="h">Search by Image</div><div class="x">"a red square". ES embeds the words through a local endpoint; kNN over ten shapes.</div></div><span class="bd lv">Live</span></div>
     <div class="bt lat"><span class="tm">2:00</span><div><div class="h">Image vectors vs caption vectors</div><div class="x">Toggle and rerun. Both live in one space.</div></div><span class="bd lv">Live</span></div>
@@ -259,7 +260,7 @@
 
 <!-- 12 before you go -->
 <section class="slide soft" data-fx="before" data-foot="Before you go · checklist and open items"
- data-notes="Left: the pre-show checklist from the quick reference card. Run it every time, and allow fifteen minutes per demo for the scenario checks on top. Middle: what is still open on the kit itself. The showcase configuration is the big one: all nodes and Kibana on 9.5.6 with security settings matched, and the models set to Nemotron 3.5 Lightning and Jina v5 Omni, per runbook 02. The backend container also gets no Elasticsearch credentials, so with security on every query 401s and Vineyard silently shows fallback numbers. The kiosk is mocked until someone flips MOCK to false. The Wi-Fi passphrase lives with the kit lead and stays out of every file, including this one. Right: nine blanks the setup guide marks confirm on kit, because no source records them. Fill them in on the kit the first time you run it, in the setup guide, and send them back so the guide can be updated.">
+ data-notes="Left: the pre-show checklist from the quick reference card. Run it every time, and allow fifteen minutes per demo for the scenario checks on top. Middle: what is still open on the kit itself. The showcase configuration is the big one: all nodes and Kibana on 9.5.6 with security settings matched, and the models set to Nemotron 3.5 Lightning and Jina v5 Omni, per runbook 02. The backend container also gets no Elasticsearch credentials, so with security on every query 401s and Vineyard silently shows fallback numbers. The connector and the backend now point at vLLM in code; the vLLM port, the served model id, the guidance-backend flag name and tool calling through the connector are confirmed on the kit. Vineyard search still embeds with nomic through Ollama until its index is re-embedded. The kiosk is mocked until MOCK is flipped to false as a load-order step after the backend is up, and its health endpoints still probe Ollama. The need-to-know screen now prints of 198. The Wi-Fi passphrase lives with the kit lead and stays out of every file, including this one. Right: nine blanks the setup guide marks confirm on kit, because no source records them. Fill them in on the kit the first time you run it, in the setup guide, and send them back so the guide can be updated.">
   <div class="z">
     <div class="eyebrow in1">Before you go</div>
     <h1 class="in2 h2">Check it every time. <span class="b">Know what is still open.</span></h1>
@@ -267,7 +268,7 @@
   <div class="ckc lat" style="left:72px;width:356px">
     <div class="ch"><i></i>Pre-show checklist</div>
     <div class="ci"><span>Power on; network, Spark, then Framework.</span></div>
-    <div class="ci"><span>Spark: <code>docker compose up -d</code>; <code>ollama list</code> shows <code>nemotron-3.5-lightning</code>.</span></div>
+    <div class="ci"><span>Spark: <code>docker compose up -d</code>; vLLM <code>/v1/models</code> lists Nemotron.</span></div>
     <div class="ci"><span>Start Jina v5 Omni by hand; <code>:8081/health</code> answers.</span></div>
     <div class="ci"><span>Framework: <code>vm.max_map_count</code> 262144; compose up in <code>demo/</code>.</span></div>
     <div class="ci"><span><code>_cat/nodes</code> lists spark-gpu and framework-cpu.</span></div>
@@ -279,9 +280,11 @@
   </div>
   <div class="ckc o lat" style="left:460px;width:356px">
     <div class="ch"><i></i>Open on the kit · kit owner</div>
-    <div class="ci"><span><b>Showcase config.</b> Elastic 9.5.6 on all nodes and Kibana, security matched; Nemotron 3.5 Lightning and Jina v5 Omni. Runbook 02.</span></div>
+    <div class="ci"><span><b>Showcase config.</b> Elastic 9.5.6 on all nodes and Kibana, security matched. Load order in runbook 02.</span></div>
+    <div class="ci"><span><b>vLLM.</b> Connector and backend point at it in code. Confirm port 8000, model id, guidance flag, tool calling.</span></div>
     <div class="ci"><span><b>No ES credentials in the backend container.</b> Every query 401s; Vineyard silently falls back.</span></div>
-        <div class="ci"><span><b>Kiosk MOCK = true.</b> Health tiles are simulated until flipped.</span></div>
+    <div class="ci"><span><b>Vineyard search</b> still embeds with nomic via Ollama. Needs a re-embed.</span></div>
+    <div class="ci"><span><b>Kiosk MOCK = true.</b> Flip after the backend is up; health still probes Ollama.</span></div>
     <div class="ci"><span><b>.ddil names</b> untested on the box.</span></div>
     <div class="ci"><span><b>Wi-Fi passphrase</b> stays with the kit lead. Never in a file.</span></div>
   </div>

@@ -6,7 +6,7 @@
 import { LLM_NAME } from "./vineyard.mjs";
 
 export const EMBED_NAME = "jina-embeddings-v5-omni-small"; // Jina Embeddings v5 Omni
-const LLM_TAG = "nemotron-3.5-lightning"; // Nemotron 3.5 Lightning via Ollama
+const LLM_TAG = "nemotron-3.5-lightning"; // Nemotron 3.5 Lightning via vLLM (finance-ollama-llm connector id kept)
 const EMBED_DIMS = 768;
 
 const TOPICS = [

@@ -65,7 +65,7 @@
       <div class="cb">
         <ul>
           <li>One Elasticsearch cluster, <code>ddil-vineyard</code>, with a GPU node on the DGX Spark and a CPU node on the Framework Desktop.</li>
-          <li>NVIDIA Nemotron 3.5 Lightning, an open-weight NeMo model, on Ollama on the DGX Spark.</li>
+          <li>NVIDIA Nemotron 3.5 Lightning, an open-weight NeMo model, on vLLM on the DGX Spark.</li>
           <li>Jina Embeddings v5 Omni (Elastic) for text and images, on the DGX Spark.</li>
           <li>Kibana with Agent Builder, the demo backend and the demo frontend on the Framework Desktop.</li>
         </ul>
@@ -76,7 +76,7 @@
   <h3 class="mt2">The hardware in the case</h3>
   <table class="t">
     <tr><th>Item</th><th>Address</th><th>Specification</th><th>Role</th></tr>
-    <tr><td class="k">DGX Spark</td><td><code>192.168.1.20</code></td><td>GB10 Blackwell, 128 GB unified memory, aarch64</td><td>ES GPU node with cuVS, Ollama, Jina embedding server</td></tr>
+    <tr><td class="k">DGX Spark</td><td><code>192.168.1.20</code></td><td>GB10 Blackwell, 128 GB unified memory, aarch64</td><td>ES GPU node with cuVS, vLLM, Ollama, Jina embedding server</td></tr>
     <tr><td class="k">Framework Desktop</td><td><code>192.168.1.10</code></td><td>Ryzen AI Max+ 395, 64 GB, x86_64</td><td>ES CPU node, Kibana, demo backend and frontend, kiosk display</td></tr>
     <tr><td class="k">Gateway</td><td><code>192.168.1.1</code></td><td>UniFi Express 7</td><td>Routing, DHCP pool 192.168.1.100-199 (documented only)</td></tr>
     <tr><td class="k">Switch</td><td>n/a</td><td>Switch Flex Mini, 5-port GbE</td><td>Connects the nodes on the kit LAN</td></tr>
@@ -107,13 +107,13 @@
 
   <table class="t">
     <tr><th style="width:118px">Adventure</th><th>What the audience sees</th><th>Elastic capability that is live</th><th>Main staged content</th></tr>
-    <tr><td class="k">Vineyard<br>Intelligence</td><td>Architecture screen, an indexing race, then an app for a fictional 6-block estate in Walla Walla: Dashboard, Vineyard map, AI Agronomist, Search, Crop Health, System.</td><td>ES queries and kNN on 8-dim soil vectors. A five-phase AI Agronomist pipeline that calls Nemotron 3.5 Lightning four times through Ollama.</td><td>The race (timed simulation), Crop Health, System, alerts, the Architecture stat strip. Search semantic and hybrid modes fall back to canned results.</td></tr>
+    <tr><td class="k">Vineyard<br>Intelligence</td><td>Architecture screen, an indexing race, then an app for a fictional 6-block estate in Walla Walla: Dashboard, Vineyard map, AI Agronomist, Search, Crop Health, System.</td><td>ES queries and kNN on 8-dim soil vectors. A five-phase AI Agronomist pipeline that calls Nemotron 3.5 Lightning four times through vLLM.</td><td>The race (timed simulation), Crop Health, System, alerts, the Architecture stat strip. Search semantic and hybrid modes fall back to canned results.</td></tr>
     <tr><td class="k">SEC Findings</td><td>An eight-chapter presenter deck over S&amp;P 500 10-K filings: the kit's two nodes, speed race, kit economics, semantic search, an agent, a workflow, a recap.</td><td>Semantic kNN search over <code>sec_10k_2026</code> (Chapter 03). A Kibana Agent Builder agent, <code>finance-analyst</code>, with three ES|QL tools (Chapter 04).</td><td>The kit hardware face-off text, the same race simulator, the presenter TCO figures, the workflow chapter.</td></tr>
     <tr><td class="k">Multimodal +<br>Need-to-Know</td><td>Search by Image over a small set of synthetic shape images. Need-to-Know: four analyst personas query research papers and get answers scoped to their clearance.</td><td>Native ES kNN with <code>query_vector_builder</code> through an inference endpoint. Hybrid RRF (BM25 plus kNN) with a clearance filter. A grounded answer from Nemotron 3.5 Lightning.</td><td>The "509" corpus total. The security markings are a synthetic model. The clearance filter is applied by the application.</td></tr>
   </table>
 
   <h3 class="mt">Where Agent Builder appears</h3>
-  <p>Agent Builder runs in one place: SEC Findings, Chapter 04. The Vineyard chooser card reads "AI Agronomist · Elastic Agent Builder" and the Vineyard Architecture screen shows Agent Builder in its data flow. The AI Agronomist code never calls Kibana or Agent Builder. It is a Python pipeline in the demo backend that queries Elasticsearch and calls Ollama directly. Describe it that way.</p>
+  <p>Agent Builder runs in one place: SEC Findings, Chapter 04. The Vineyard chooser card reads "AI Agronomist · Elastic Agent Builder" and the Vineyard Architecture screen shows Agent Builder in its data flow. The AI Agronomist code never calls Kibana or Agent Builder. It is a Python pipeline in the demo backend that queries Elasticsearch and calls the model on vLLM directly. Describe it that way.</p>
 
   <h3>Suggested pairing by audience</h3>
   <table class="t tight">
@@ -237,7 +237,7 @@
       <div class="cb">
         <ul class="chk">
           <li>Brings up the Spark and the Framework in the documented order.</li>
-          <li>Runs the health checks and confirms both ES nodes, Ollama models, the Jina server, Kibana and the backend.</li>
+          <li>Runs the health checks and confirms both ES nodes, vLLM and Ollama, the Jina server, Kibana and the backend.</li>
           <li>Confirms the backend is not serving fallback data.</li>
           <li>Confirms 9.5.6 on every node and the config on Nemotron 3.5 Lightning and Jina v5 Omni.</li>
           <li>Warms Nemotron 3.5 Lightning before the first audience question.</li>
@@ -282,7 +282,7 @@
     <tr><td class="k">Dashboard KPIs</td><td><span class="tag fb">Fallback</span></td><td>Live counts and averages from ES when the backend answers. If the call fails or returns no block summaries, the screen shows canned values (total 869,000) with no error.</td><td>Confirm live data in the pre-show check. If confirmed: "These figures come from the indices on the kit." If not confirmed, do not attribute them to the kit.</td></tr>
     <tr><td class="k">Dashboard alerts</td><td><span class="tag staged">Staged</span></td><td>Four fixed alerts (BLK-C potassium depletion, BLK-C high moisture, BLK-D disease risk, BLK-B drought watch).</td><td>"These alerts are scripted to match the story in the synthetic data."</td></tr>
     <tr><td class="k">Vineyard map</td><td><span class="tag fb">Fallback</span></td><td>Offline map tiles. Per-block summaries from ES. Any block whose call errors or has no moisture value shows canned values.</td><td>"The map tiles are served locally. Block readings come from the soil and NPK indices."</td></tr>
-    <tr><td class="k">AI Agronomist</td><td><span class="tag live">Live</span> <span class="tag fb">Fallback</span></td><td>Five phases in Python. Phase 0 reads the latest soil and NPK docs. Phase 1 runs kNN on the 8-dim <code>reading_vector</code>. Phases 1 to 4 each call Nemotron 3.5 Lightning through Ollama, one after another. Phases 0 and 1 fall back to mock data if ES fails. No Agent Builder call.</td><td>"Each step queries Elasticsearch on the kit and then calls Nemotron 3.5 Lightning on the DGX Spark. Nothing leaves the case." The screen says phases 2 to 4 run in parallel. They run in sequence; say "in sequence".</td></tr>
+    <tr><td class="k">AI Agronomist</td><td><span class="tag live">Live</span> <span class="tag fb">Fallback</span></td><td>Five phases in Python. Phase 0 reads the latest soil and NPK docs. Phase 1 runs kNN on the 8-dim <code>reading_vector</code>. Phases 1 to 4 each call Nemotron 3.5 Lightning through vLLM, one after another. Phases 0 and 1 fall back to mock data if ES fails. No Agent Builder call.</td><td>"Each step queries Elasticsearch on the kit and then calls Nemotron 3.5 Lightning on the DGX Spark. Nothing leaves the case." The screen says phases 2 to 4 run in parallel. They run in sequence; say "in sequence".</td></tr>
     <tr><td class="k">Search</td><td><span class="tag staged">Staged</span></td><td>Semantic and Hybrid modes send a 768-dim query against an 8-dim field, fail, and show canned results for blocks outside the estate. The 12 ms embed latency is hardcoded. BM25 is likely to error (unverified).</td><td>Skip this screen in customer sessions on the current build.</td></tr>
     <tr><td class="k">Crop Health</td><td><span class="tag staged">Staged</span></td><td>Every upload returns the same result: Black Rot, 0.942, 847 similar, blocks B3, B7, C2. No model runs.</td><td>Skip. If shown: "This screen is a design mock of an image-similarity workflow."</td></tr>
     <tr><td class="k">System</td><td><span class="tag staged">Staged</span></td><td>Stale static figures: 615K+ vectors and an ES CPU node on the Spark at 9201. Wrong for this kit.</td><td>Skip. Use the Architecture guide (01) for system facts.</td></tr>
@@ -319,7 +319,7 @@
     <tr><td class="k">Search by Image</td><td><span class="tag live">Live</span></td><td>Native ES kNN with <code>query_vector_builder</code>. ES calls the inference endpoint <code>jina-omni-text</code>, which calls the local Jina server. Corpus is a 10-document synthetic shapes set.</td><td>"Elasticsearch embeds the words through a local inference endpoint and finds matching images. The set is small and synthetic so the result is easy to judge."</td></tr>
     <tr><td class="k">Model name</td><td><span class="tag staged">Staged</span></td><td>Config and UI say <code>jina-embeddings-v5-omni-small</code>.</td><td>"Jina Embeddings v5 Omni, served locally on the DGX Spark. Jina is part of Elastic."</td></tr>
     <tr><td class="k">Clearance filter</td><td><span class="tag live">Live</span></td><td>The backend adds a filter for classification level, compartments (the analyst must hold all of a document's compartments) and NOFORN to every query, facet, figure and answer. No ES roles or native document level security are configured.</td><td>"The application applies the analyst's clearance as a query filter. Elasticsearch also supports document level security natively through roles; this demo does not configure it."</td></tr>
-    <tr><td class="k">Corpus meter</td><td><span class="tag live">Live</span> <span class="tag staged">Staged</span></td><td>The numerator (documents and chunks visible to the persona) is measured. The denominator "509" is hardcoded text.</td><td>"The analyst can see this many documents." Do not quote 509 as a count from the index.</td></tr>
+    <tr><td class="k">Corpus meter</td><td><span class="tag live">Live</span> <span class="tag staged">Staged</span></td><td>The numerator (documents and chunks visible to the persona) is measured. The denominator "198" is fixed text that matches the kit corpus.</td><td>"The analyst can see this many documents." Do not quote 509; it is a stale label.</td></tr>
     <tr><td class="k">Markings</td><td><span class="tag staged">Staged</span></td><td>Deterministic synthetic markings from a hash of each paper's id: U 40 %, CUI 25 %, C 15 %, S 13 %, TS 7 %, plus compartments, NOFORN and ORCON rules.</td><td>"The papers are public research. The markings are synthetic and assigned by a fixed rule for the demo."</td></tr>
     <tr><td class="k">Analyst answer</td><td><span class="tag live">Live</span></td><td>Hybrid RRF retrieval under the same filter, then Nemotron 3.5 Lightning answers from those passages only. No sources gives a canned "No documents in your accessible corpus match this question" reply.</td><td>"The model only sees passages this analyst is cleared for."</td></tr>
   </table>
@@ -348,7 +348,7 @@
   <ol>
     <li><b>Label before the reveal.</b> Say "this is a timed simulation" before the race starts.</li>
     <li><b>Point at the live proof.</b> In the live screens, point to the measured value: <code>took_ms</code> on SEC search, the visible-document count on Need-to-Know, the phase timeline in the AI Agronomist.</li>
-    <li><b>Name the model that is running.</b> NVIDIA Nemotron 3.5 Lightning on Ollama and Jina Embeddings v5 Omni on the local server, both on the DGX Spark. Ignore model names printed on canned panels.</li>
+    <li><b>Name the model that is running.</b> NVIDIA Nemotron 3.5 Lightning on vLLM and Jina Embeddings v5 Omni on the local server, both on the DGX Spark. Ignore model names printed on canned panels.</li>
     <li><b>Skip the dead screens.</b> Search, Crop Health and System add risk and no proof.</li>
     <li><b>Never quote a speedup or TCO percentage from the kit screens.</b> Refer the customer to Elastic's published GPU indexing material and offer a follow-up.</li>
   </ol>
@@ -362,7 +362,7 @@
     <tr><td class="k">869K, 841K</td><td>Fallback constants and docs. Live counts come from <code>_count</code>.</td><td>The live count, checked pre-show</td></tr>
     <tr><td class="k">78 % TCO, scale projection</td><td>Presenter panel in SEC Chapter 01: a cited webinar figure and an enterprise cost model.</td><td>"An illustrative model"</td></tr>
     <tr><td class="k">503 filings, 93,541 chunks</td><td>Static text and agent instructions.</td><td>Count the index pre-show</td></tr>
-    <tr><td class="k">509 papers</td><td>Hardcoded denominator. The kit ingests 198 papers and 9,636 text chunks. A local work-in-progress build says 208.</td><td>The persona's visible count</td></tr>
+    <tr><td class="k">198 docs</td><td>Fixed denominator matching the kit corpus: 198 papers and 9,636 text chunks. Older builds printed 509; a local work-in-progress build says 208.</td><td>The persona's visible count</td></tr>
     <tr><td class="k">"&lt;50 lbs", "&lt;1.2ms latency"</td><td>Static UI text.</td><td>Omit</td></tr>
   </table>
 

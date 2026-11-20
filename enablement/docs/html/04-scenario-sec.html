@@ -298,7 +298,7 @@ ul.chk li::before{content:'';position:absolute;left:0;top:3px;width:10px;height:
   <div class="eyebrow mt">Likely questions</div>
   <table class="t sm">
     <tr><th style="width:170px">Question</th><th>Accurate answer</th></tr>
-    <tr><td class="k">Which model is the agent using?</td><td>NVIDIA Nemotron 3.5 Lightning on Ollama on the DGX Spark, through the Kibana connector <code>finance-ollama-llm</code>. The config card reads the model name from the backend.</td></tr>
+    <tr><td class="k">Which model is the agent using?</td><td>NVIDIA Nemotron 3.5 Lightning on vLLM on the DGX Spark, through the Kibana connector <code>finance-ollama-llm</code>. The config card reads the model name from the backend.</td></tr>
     <tr><td class="k">How are the filings embedded?</td><td>On the kit, with Jina Embeddings v5 Omni at 768 dimensions, cosine HNSW, on the DGX Spark. Jina is part of Elastic.</td></tr>
     <tr><td class="k">What tools does the agent have?</td><td>Three ES|QL tools: <code>finance.company_disclosures</code>, <code>finance.compare_companies</code>, <code>finance.sector_breakdown</code>. Plus seven platform tools such as search, <code>execute_esql</code> and <code>generate_esql</code>. Instructions cap it at six tool calls and require ticker and accession citations.</td></tr>
     <tr><td class="k">How many filings?</td><td>Quote the count from pre-show check 8. The "503" and "93,541 chunks" on screen are static text.</td></tr>

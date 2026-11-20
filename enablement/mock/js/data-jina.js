@@ -46,7 +46,7 @@
   var bm25Note = "Practice retrieval is keyword BM25 in your browser over the real corpus. On the kit, Elasticsearch fuses BM25 with Jina kNN (RRF), so semantic matches with no shared words also appear.";
 
   var dlsHonest = "Enforcement is an application-side query filter, not Elasticsearch document level security on roles (C22). Say \"need-to-know filtering on every query\" and, for production, \"Elasticsearch document and field level security on roles\". Markings are fictional, assigned by markings.py from a hash of each paper id.";
-  var countHonest = "Counts: the kit index holds 198 papers, 9,636 text chunks and about 2,200 figure documents. The committed kit UI prints \"/ 509 docs\" as a fixed label from the older JATS ingest path, so the meter can read \"85 / 509\". Do not say 509 unless the meter shows it; say \"85 of the 198 papers\". On the kit Public sees 85, Analyst A 163, Analyst B 187, Senior Analyst 198. The mock shows its own real counts for its 100-paper subset.";
+  var countHonest = "Counts: the kit index holds 198 papers, 9,636 text chunks and about 2,200 figure documents. The kit UI prints \"/ 198 docs\" as a fixed total, because the API reports only the visible count, so the meter reads \"85 / 198\". Say \"85 of the 198 papers\". Never say 509: it was a stale label from the older JATS ingest path. On the kit Public sees 85, Analyst A 163, Analyst B 187, Senior Analyst 198. The mock shows its own real counts for its 100-paper subset.";
 
   var steps = [
     { id: "image", title: "Search by Image", scene: "image", target: 90,
@@ -95,7 +95,7 @@
         honest: "On the kit the answer is one live Nemotron 3.5 Lightning call (max 900 tokens, 120 s cap) over the top 6 DLS-visible passages (1,200 characters each). FACTS has no measured timing; budget up to a minute. The mock answer is extractive: it quotes the best-matching sentence from the top visible papers. Label it that way if you show the mock. " + bm25Note,
         questions: [
           { q: "Could the model leak a hidden paper?", a: "Retrieval applies the filter first and the model sees only those passages. If nothing matches, the kit answers that the accessible corpus has no match." },
-          { q: "Can this run on other models?", a: "Yes. The answer step calls a chat model through one function; swap the model in Ollama or point it at an Elasticsearch inference endpoint." },
+          { q: "Can this run on other models?", a: "Yes. The answer step calls a chat model through one function; the backend speaks to vLLM by default and to Ollama as a fallback, or it can point at an Elasticsearch inference endpoint." },
         ],
         fails: "Answer spinner past 2 minutes: the model is cold or stuck (F6 pattern). Go back to Vector Search and narrate from the retrieved passages." } },
     { id: "wrap", title: "Wrap", scene: "vector", target: 45,

@@ -28,7 +28,7 @@
 
 <!-- 3 what sovereign AI at the edge requires -->
 <section class="slide" data-fx="needs" data-foot="What sovereign AI at the edge requires"
- data-notes="Six requirements, each paired with what the kit uses today. Models: NVIDIA Nemotron 3.5 Lightning in Ollama on the Spark, and Jina Embeddings v5 Omni on port 8081 for text and images in one vector space. Jina is part of Elastic. Data and retrieval: one Elasticsearch cluster across both machines. Agents: Kibana Agent Builder with a connector that points at the local Ollama endpoint. Access: the need-to-know demo applies clearance rules in the backend; it is an application-side filter, not Elasticsearch document-level security, so do not sell it as DLS. Names: the .ddil names were added in the latest commit and have not been verified on the box yet.">
+ data-notes="Six requirements, each paired with what the kit uses today. Models: NVIDIA Nemotron 3.5 Lightning on vLLM on the Spark, and Jina Embeddings v5 Omni on port 8081 for text and images in one vector space. Jina is part of Elastic. Data and retrieval: one Elasticsearch cluster across both machines. Agents: Kibana Agent Builder with a connector that points at the local vLLM endpoint. Access: the need-to-know demo applies clearance rules in the backend; it is an application-side filter, not Elasticsearch document-level security, so do not sell it as DLS. Names: the .ddil names were added in the latest commit and have not been verified on the box yet.">
   <div class="z">
     <div class="eyebrow in1">Requirements</div>
     <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Sovereign means every piece <span class="b">is inside the case.</span></h1>
@@ -41,7 +41,7 @@
 
 <!-- 4 the kit -->
 <section class="slide soft" data-fx="kit" data-foot="The kit"
- data-notes="Build the kit piece by piece. The DGX Spark at .20 is the GPU node: GB10 Blackwell, 128 GB unified memory, aarch64. It runs the GPU Elasticsearch node, Ollama and the Jina embedding server. The Framework Desktop at .10 is x86_64 with a Ryzen AI Max+ 395 and 64 GB. It runs the CPU Elasticsearch node, Kibana, the backend and the frontend. A UniFi Express 7 is the gateway at .1, with a Switch Flex Mini for the wired ports. The touchscreen runs a separate kiosk app on port 3100; by default it shows mock health, so flip the MOCK flag before you point at it. Case weight and the touchscreen model are not in the fact base; do not quote them.">
+ data-notes="Build the kit piece by piece. The DGX Spark at .20 is the GPU node: GB10 Blackwell, 128 GB unified memory, aarch64. It runs the GPU Elasticsearch node, vLLM, Ollama and the Jina embedding server. The Framework Desktop at .10 is x86_64 with a Ryzen AI Max+ 395 and 64 GB. It runs the CPU Elasticsearch node, Kibana, the backend and the frontend. A UniFi Express 7 is the gateway at .1, with a Switch Flex Mini for the wired ports. The touchscreen runs a separate kiosk app on port 3100; by default it shows mock health, so flip the MOCK flag before you point at it. Case weight and the touchscreen model are not in the fact base; do not quote them.">
   <div class="z">
     <div class="eyebrow in1">The kit</div>
     <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">Two computers, one network, <span class="b">one case.</span></h1>
@@ -53,7 +53,7 @@
 
 <!-- 5 architecture -->
 <section class="slide" data-fx="arch" data-foot="Architecture"
- data-notes="One Elasticsearch cluster, ddil-vineyard, spans an aarch64 node and an x86_64 node. The GPU node is built from the Elasticsearch 9.5.6 image plus the aarch64 cuVS jar, with GPU vector indexing on. The CPU node and Kibana run stock 9.5.6. Inference stays on the Spark: Nemotron 3.5 Lightning in Ollama and Jina Embeddings v5 Omni on port 8081. Kibana and the apps run on the Framework. Pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni.">
+ data-notes="One Elasticsearch cluster, ddil-vineyard, spans an aarch64 node and an x86_64 node. The GPU node is built from the Elasticsearch 9.5.6 image plus the aarch64 cuVS jar, with GPU vector indexing on. The CPU node and Kibana run stock 9.5.6. Inference stays on the Spark: Nemotron 3.5 Lightning on vLLM and Jina Embeddings v5 Omni on port 8081. Kibana and the apps run on the Framework. Pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni.">
   <div class="z">
     <div class="eyebrow in1">Architecture</div>
     <h1 class="in2" style="font-size:40px;letter-spacing:-1.5px">One cluster across two architectures. <span class="b">Inference on the box.</span></h1>
@@ -116,7 +116,7 @@
 
 <!-- 9 agronomist pipeline -->
 <section class="slide" data-fx="agro" data-foot="Vineyard · the AI agronomist"
- data-notes="The agronomist streams five phases over server-sent events. Phase 0 reads the latest soil and NPK documents for the block from Elasticsearch, no model. Phase 1 builds an 8-dimension query vector and runs kNN for similar history, then asks the model. Phases 2 to 4 are three more model calls: risk, recommendation, action plan. They run one after another, even though the stream text says parallel. Each call has a 120 second timeout, so a cold model can stall the screen. Typed questions send no block id, so start from the map or the dashboard Investigate buttons to ground the answer on the block you mean. The pipeline is Python plus Ollama; it does not call Agent Builder, whatever the chooser card says.">
+ data-notes="The agronomist streams five phases over server-sent events. Phase 0 reads the latest soil and NPK documents for the block from Elasticsearch, no model. Phase 1 builds an 8-dimension query vector and runs kNN for similar history, then asks the model. Phases 2 to 4 are three more model calls: risk, recommendation, action plan. They run one after another, even though the stream text says parallel. Each call has a 120 second timeout, so a cold model can stall the screen. Typed questions send no block id, so start from the map or the dashboard Investigate buttons to ground the answer on the block you mean. The pipeline is Python plus Nemotron on vLLM; it does not call Agent Builder, whatever the chooser card says.">
   <div class="z">
     <div class="eyebrow in1">Vineyard · the AI agronomist</div>
     <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Five phases, streamed live. <span class="b">Search first, then reason.</span></h1>
@@ -184,7 +184,7 @@
 
 <!-- 13 SEC agentic RAG -->
 <section class="slide" data-fx="seca" data-foot="SEC Findings · Agent Builder"
- data-notes="Chapter 04 is live. The backend streams from Kibana's Agent Builder converse API. The agent is finance-analyst, provisioned by script with three custom ES|QL tools plus seven platform tools, and a connector named finance-ollama-llm that points at Nemotron 3.5 Lightning on the Spark. Semantic RAG on the previous slide retrieves passages for one query. Here the agent plans: it picks a tool, writes the ES|QL parameters, reads results and decides whether it needs another call, up to six. Caveat: the chat has no read timeout, so a hung model hangs the screen. The workflow chapter after this one links to a workflow nobody provisions.">
+ data-notes="Chapter 04 is live. The backend streams from Kibana's Agent Builder converse API. The agent is finance-analyst, provisioned by script with three custom ES|QL tools plus seven platform tools, and a connector named finance-ollama-llm that points at Nemotron 3.5 Lightning on vLLM on the Spark. The id is historical; the old Ollama connector is kept as finance-ollama-fallback. Semantic RAG on the previous slide retrieves passages for one query. Here the agent plans: it picks a tool, writes the ES|QL parameters, reads results and decides whether it needs another call, up to six. Caveat: the chat has no read timeout, so a hung model hangs the screen. The workflow chapter after this one links to a workflow nobody provisions.">
   <div class="z">
     <div class="eyebrow in1">SEC Findings · agentic retrieval</div>
     <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">The agent picks the tool. <span class="b">ES|QL does the counting.</span></h1>
@@ -212,7 +212,7 @@
     <div class="wb"><i></i><i></i><i></i><span>Kit frontend · Need-to-know</span><b>:3000</b></div>
     <img src="img/shot-mm.webp" alt="Need-to-know scene: research corpus header and the analyst question box" style="display:block;width:100%">
   </div>
-  <div class="z ac-cap lat" id="dcmm" style="position:absolute;left:520px;right:72px;top:502px;font-size:11px">Screenshot of the need-to-know scene. The 509 papers on screen is hardcoded text. The kit corpus is 198 papers and 9,636 text chunks.</div>
+  <div class="z ac-cap lat" id="dcmm" style="position:absolute;left:520px;right:72px;top:502px;font-size:11px">Screenshot of the need-to-know scene. The 509 papers on this screenshot is an old label. The kit UI now prints a fixed total of 198; the kit corpus is 198 papers and 9,636 text chunks.</div>
 </section>
 
 <!-- 15 text to image -->
@@ -235,7 +235,7 @@
 
 <!-- 16 need to know -->
 <section class="slide" data-fx="ntk" data-foot="Multimodal · need-to-know"
- data-notes="Four personas, one index. The backend adds three filter clauses to every query: the document's classification must be at or below the analyst's clearance, the analyst must hold every compartment on the document, and NOFORN documents are excluded unless the analyst is NOFORN-cleared. The same filter applies to the facets, the hits, the figure strip and the passages handed to the model, so the generated answer cannot cite what the analyst cannot see. The grid here is illustrative, drawn with the same marking mix the ingest script uses. Be precise: this is an application-side query filter. There are no Elasticsearch roles or document-level security behind it, so anyone with Elasticsearch credentials sees everything. The 509 total on the screen is hardcoded text; the accessible count above it is measured. The kit corpus is 198 papers and 9,636 text chunks.">
+ data-notes="Four personas, one index. The backend adds three filter clauses to every query: the document's classification must be at or below the analyst's clearance, the analyst must hold every compartment on the document, and NOFORN documents are excluded unless the analyst is NOFORN-cleared. The same filter applies to the facets, the hits, the figure strip and the passages handed to the model, so the generated answer cannot cite what the analyst cannot see. The grid here is illustrative, drawn with the same marking mix the ingest script uses. Be precise: this is an application-side query filter. There are no Elasticsearch roles or document-level security behind it, so anyone with Elasticsearch credentials sees everything. The 198 total on the screen is a fixed label, because the API reports only the visible count; the accessible count above it is measured. The kit corpus is 198 papers and 9,636 text chunks.">
   <div class="z">
     <div class="eyebrow in1">Multimodal · need-to-know</div>
     <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">One index, four analysts. <span class="b">Each sees a different corpus.</span></h1>
@@ -252,7 +252,7 @@
 
 <!-- 17 what runs where -->
 <section class="slide soft" data-fx="where" data-foot="What runs where"
- data-notes="Every service in the request path, by host and port. All of it is on the kit LAN. The models are NVIDIA Nemotron 3.5 Lightning in Ollama and Jina Embeddings v5 Omni on port 8081, both on the Spark. SEC query embedding defaults to Jina v5 Omni; the backend config carries no cloud model settings. Because the backend container never reads the .env file, set the model and embedder settings in the compose environment, not in .env. The newer local build adds an option to run the multimodal adventure against Elastic Cloud; that is not the kit configuration.">
+ data-notes="Every service in the request path, by host and port. All of it is on the kit LAN. The models are NVIDIA Nemotron 3.5 Lightning on vLLM and Jina Embeddings v5 Omni on port 8081, both on the Spark. SEC query embedding defaults to Jina v5 Omni; the backend config carries no cloud model settings. Because the backend container never reads the .env file, set the model and embedder settings in the compose environment, not in .env. The newer local build adds an option to run the multimodal adventure against Elastic Cloud; that is not the kit configuration.">
   <div class="z">
     <div class="eyebrow in1">What runs where</div>
     <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Every model, index and app <span class="b">on the kit network.</span></h1>
@@ -262,7 +262,7 @@
 
 <!-- 18 deployment and operations -->
 <section class="slide" data-fx="ops" data-foot="Deployment and operations"
- data-notes="Three stages. Bring-up: compose on each host, Ollama with Nemotron 3.5 Lightning pulled, the Jina v5 Omni server started by hand in its conda environment, and the .ddil names resolving. Before going dark: the backend and frontend images run pip and npm install at build time, so build them while you still have a network, and stage the data that is not in git. On stage: know the reset paths and the two checks that matter most. One, the backend container gets no Elasticsearch credentials, so every call returns 401 and the vineyard screens quietly show fallback numbers. Two, run the pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. Do not run the troubleshooting guide's model unload step; it deletes the model from disk.">
+ data-notes="Three stages. Bring-up: compose on each host, vLLM serving Nemotron 3.5 Lightning with the guidance structured-output backend applied and its model id confirmed from /v1/models, the Jina v5 Omni server started by hand in its conda environment, and the .ddil names resolving. Before going dark: the backend and frontend images run pip and npm install at build time, so build them while you still have a network, and stage the data that is not in git. On stage: know the reset paths and the two checks that matter most. One, the backend container gets no Elasticsearch credentials, so every call returns 401 and the vineyard screens quietly show fallback numbers. Two, run the pre-show check: all nodes and Kibana on 9.5.6 with security settings matched, and the kit config pointing at Nemotron 3.5 Lightning and Jina v5 Omni. Do not run the troubleshooting guide's model unload step; it deletes the model from disk.">
   <div class="z">
     <div class="eyebrow in1">Deployment and operations</div>
     <h1 class="in2" style="font-size:38px;letter-spacing:-1.4px">Stage it connected. <span class="b">Run it dark.</span></h1>

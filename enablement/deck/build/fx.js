@@ -35,12 +35,12 @@ FX.ddil=s=>{const L=[['Disconnected','No link at all. The team works on its own.
       g.globalAlpha=1;});};};
 
 /* 3 · requirements, each answered by what the kit uses */
-FX.needs=s=>{const R=[['Models','The model runs on the box','NVIDIA Nemotron 3.5 Lightning in Ollama on the Spark. Jina Embeddings v5 Omni on port 8081.'],
+FX.needs=s=>{const R=[['Models','The model runs on the box','NVIDIA Nemotron 3.5 Lightning on vLLM on the Spark. Jina Embeddings v5 Omni on port 8081.'],
   ['Data','The data lives on the box','One Elasticsearch cluster, <code>ddil-vineyard</code>, across the Spark and the Framework.'],
   ['Retrieval','Search is local','BM25, kNN, hybrid RRF and ES|QL against local indices. GPU vector indexing on the Spark node.'],
-  ['Agents','Agents call local tools','Kibana Agent Builder with the <code>finance-ollama-llm</code> connector pointed at Ollama on the Spark.'],
+  ['Agents','Agents call local tools','Kibana Agent Builder with the <code>finance-ollama-llm</code> connector pointed at vLLM on the Spark.'],
   ['Access','Answers respect clearance','Clearance, compartment and NOFORN rules applied to every query in the backend. Application side.'],
-  ['Names','Names resolve on the LAN','<code>es.ddil</code>, <code>ollama.ddil</code>, <code>jina.ddil</code>, <code>kibana.ddil</code>. Added in the latest commit, not yet verified on the box.']];
+  ['Names','Names resolve on the LAN','<code>es.ddil</code>, <code>vllm.ddil</code>, <code>ollama.ddil</code>, <code>jina.ddil</code>, <code>kibana.ddil</code>. Added in the latest commit, not yet verified on the box.']];
   $('nd').innerHTML=R.map((r,i)=>`<div class="req" id="rq${i}"><div class="k"><i>&#10003;</i>${r[0]}</div><div class="h">${r[1]}</div><div class="x">${r[2]}</div></div>`).join('');
   return t=>{R.forEach((_,i)=>{on('rq'+i,t>.4+i*.3);cls('rq'+i,'ok',t>2.6+i*.3);});on('ncut',t>4.8);};};
 
@@ -56,7 +56,7 @@ FX.kit=s=>{const P=[['F1',20,6,'Frame and handles','10 in mini rack, travels in 
   const im=$('kfig').querySelector('img'),fit=()=>{const f=$('kfig'),W=f.clientWidth,H=f.clientHeight,r=1122/1402,w=Math.min(W,H*r),h=w/r;Object.assign($('kmk').style,{left:(W-w)/2+'px',top:(H-h)/2+'px',width:w+'px',height:h+'px',right:'auto',bottom:'auto'});};fit();
   return seqCap('kitc',STEPS(5),[
   ['The kit','A 10 in mini rack holds the whole kit: two compute nodes, a gateway, a switch, a PDU and a touchscreen panel. It travels in a Pelican Air 1615 case.'],
-  ['DGX Spark · 192.168.1.20','GB10 Blackwell, 128 GB unified memory, aarch64. It runs the GPU Elasticsearch node, Ollama and the Jina embedding server.'],
+  ['DGX Spark · 192.168.1.20','GB10 Blackwell, 128 GB unified memory, aarch64. It runs the GPU Elasticsearch node, vLLM, Ollama and the Jina embedding server.'],
   ['Framework Desktop · 192.168.1.10','Ryzen AI Max+ 395, 64 GB, x86_64, behind the blank panels. It runs the CPU Elasticsearch node, Kibana, the backend and the frontend, all in Docker.'],
   ['The network','UniFi Express 7 is the gateway at 192.168.1.1 and a Switch Flex Mini carries the wired ports. A JetKVM gives a remote console. Services resolve by .ddil names on the kit LAN.'],
   ['The touchscreen','A separate kiosk app on port 3100 shows branding and system health. Its health view is mock data until the MOCK flag is set to false.']],
@@ -69,7 +69,7 @@ FX.arch=s=>{const T=(id,x,y,w,h,c,b,em,sm)=>`<div class="atl lat" id="${id}" sty
     `<div class="acl lat" id="acl"><span class="lb">One Elasticsearch cluster · ddil-vineyard</span><div class="xp">:9300<br>transport</div></div>`+
     T('ae0',16,92,488,68,'var(--blue)','es-gpu · node spark-gpu',':9200','Elasticsearch 9.5.6 + cuVS · accel=gpu · GPU vector indexing')+
     T('ae1',632,92,488,68,'var(--blue)','es-cpu · node framework-cpu',':9200','Elasticsearch 9.5.6 · accel=cpu · ML role')+
-    T('as0',0,194,254,126,'#1D2A5A','Ollama',':11434','Nemotron 3.5 Lightning<br>NVIDIA NeMo LLM<br>native, under systemd')+
+    T('as0',0,194,254,126,'#1D2A5A','vLLM',':8000','Nemotron 3.5 Lightning<br>NVIDIA NeMo LLM<br>port: confirm on kit')+
     T('as1',266,194,254,126,'var(--teal)','Jina v5 Omni server',':8081','Jina Embeddings v5 Omni<br>text and image embeddings<br>started by hand')+
     T('af0',616,194,254,58,'var(--pink)','Kibana 9.5.6',':5601','Agent Builder')+T('af1',882,194,254,58,'var(--ink)','Backend',':8000','FastAPI · three adventures')+
     T('af2',616,262,254,58,'var(--ink)','Frontend',':3000','React · Vite')+T('af3',882,262,254,58,'var(--grey-l)','Kiosk',':3100','touchscreen app')+
@@ -79,7 +79,7 @@ FX.arch=s=>{const T=(id,x,y,w,h,c,b,em,sm)=>`<div class="atl lat" id="${id}" sty
   return seqCap('archc',STEPS(4),[
   ['Two hosts','The DGX Spark is aarch64 with the GPU. The Framework is x86_64. Both sit on the same switch.'],
   ['One cluster','One Elasticsearch cluster, ddil-vineyard, seeded at each other\'s port 9300. Nodes carry accel=gpu or accel=cpu. The ML role sits on the x86 node so ELSER can allocate there.'],
-  ['Inference on the Spark','Ollama serves Nemotron 3.5 Lightning on port 11434. Jina Embeddings v5 Omni answers on 8081. No request goes to a hosted model.'],
+  ['Inference on the Spark','vLLM serves Nemotron 3.5 Lightning on port 8000 (confirm on kit). Jina Embeddings v5 Omni answers on 8081. Ollama stays for the Vineyard search embedder and a fallback connector. No request goes to a hosted model.'],
   ['Kibana and the apps','Kibana and Agent Builder on 5601, the FastAPI backend on 8000 for all three adventures, the React frontend on 3000. Both Elasticsearch nodes and Kibana run 9.5.6.']],
   k=>G.forEach((g,i)=>g.forEach(id=>on(id,i<=k))));};
 
@@ -113,9 +113,9 @@ FX.agro=s=>{const Q='Analyze the current status of block BLK-C and recommend act
   const P=[['Sensor Snapshot','sensors · latest soil and NPK docs for the block','ES'],['Historical Context','historical · kNN k=5 on reading_vector, block filter','ES + LLM'],
     ['Risk Analysis','risk · JSON from sensors, history and the question','LLM'],['Crop Recommendation','recommendation · variety-aware, Merlot for BLK-C','LLM'],['Action Plan','action_plan · tasks, assignee, deadline, cost','LLM']];
   $('aph').innerHTML=P.map((p,i)=>`<div class="ph" id="ap${i}"><span class="dot">${i}</span><div class="h">${p[0]}<small>${p[1]}</small></div><span class="t${p[2]==='ES'?'':' llm'}">${p[2]}</span></div>`).join('');
-  const R=[['Phase 0','Reads Elasticsearch directly on the GPU node. No model call.'],['Phase 1','8-d query vector from moisture and temperature, kNN k=5 with 100 candidates.'],['Model','Four sequential calls to Nemotron 3.5 Lightning through Ollama. Temperature 0.1, 120 s timeout each.'],['Transport','Server-sent events from the FastAPI backend. Heartbeats every 3 s while the model works.'],['Grounding','Start from the map or an Investigate button. Typed questions send no block id.']];
+  const R=[['Phase 0','Reads Elasticsearch directly on the GPU node. No model call.'],['Phase 1','8-d query vector from moisture and temperature, kNN k=5 with 100 candidates.'],['Model','Four sequential calls to Nemotron 3.5 Lightning on vLLM. Temperature 0.1, 120 s timeout each.'],['Transport','Server-sent events from the FastAPI backend. Heartbeats every 3 s while the model works.'],['Grounding','Start from the map or an Investigate button. Typed questions send no block id.']];
   $('ar').innerHTML=`<div class="card lat" id="arc"><div class="ch">How it runs <b>chat.py</b></div><div style="padding:6px 16px 10px">${R.map(r=>`<div class="kv"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div></div>`+
-    `<div class="bal lat" id="arb" style="margin-top:16px;box-shadow:none;padding:10px 14px"><div class="k">Say it straight</div><div class="x" style="font:500 13px/1.45 var(--sans);color:var(--char);margin-top:4px">This pipeline is Python plus Ollama. It does not call Agent Builder, whatever the chooser card says. Agent Builder is live in the SEC adventure.</div></div>`;
+    `<div class="bal lat" id="arb" style="margin-top:16px;box-shadow:none;padding:10px 14px"><div class="k">Say it straight</div><div class="x" style="font:500 13px/1.45 var(--sans);color:var(--char);margin-top:4px">This pipeline is Python plus the local model, Nemotron on vLLM. It does not call Agent Builder, whatever the chooser card says. Agent Builder is live in the SEC adventure.</div></div>`;
   const T0=1.9,D=1.35;
   return t=>{on('aw',t>.2);on('arc',t>1);on('arb',t>8.6);const n=Math.max(0,Math.min(Q.length,Math.floor((t-.5)*40)));$('aqt').textContent=Q.slice(0,n);
     let log=[];P.forEach((p,i)=>{const a=T0+i*D,b=a+D*.85;on('ap'+i,t>a);cls('ap'+i,'run',t>a&&t<b);cls('ap'+i,'done',t>=b);if(t>a)log.push(`<span class="m">phase</span> ${p[1].split(' ')[0]} · running`);if(t>=b)log.push(`<span class="m">phase</span> ${p[1].split(' ')[0]} · <span class="g">complete</span>`);});
@@ -155,7 +155,7 @@ FX.secs=s=>{const Q='AI model risk and governance disclosures';
     for(let i=0;i<5;i++)on('sk'+i,t>2.2+i*.18);on('smeta',t>3.3);on('scode',t>2.6);};};
 
 /* 13 · SEC agentic */
-FX.seca=s=>{const C1=[['Agent','finance-analyst · Financial Filings Analyst'],['Connector','finance-ollama-llm · .gen-ai to Nemotron 3.5 Lightning on the Spark'],['Custom tools','finance.company_disclosures · finance.compare_companies · finance.sector_breakdown'],['Platform','search · execute_esql · generate_esql · get_document_by_id · get_index_mapping · list_indices · index_explorer'],['Rules','At most 6 tool calls. Cite ticker and accession.']];
+FX.seca=s=>{const C1=[['Agent','finance-analyst · Financial Filings Analyst'],['Connector','finance-ollama-llm · .gen-ai to Nemotron 3.5 Lightning on vLLM on the Spark'],['Custom tools','finance.company_disclosures · finance.compare_companies · finance.sector_breakdown'],['Platform','search · execute_esql · generate_esql · get_document_by_id · get_index_mapping · list_indices · index_explorer'],['Rules','At most 6 tool calls. Cite ticker and accession.']];
   $('acl').innerHTML=C1.map(r=>`<div class="kv" style="grid-template-columns:86px 1fr;font-size:12.5px"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('');
   const T=[['var(--ink)','Analyst','Across the S&amp;P 500, which sector has the most filings citing supply-chain disruption?'],['#6B4FD8','Reasoning','The question asks for a count by sector, so passages alone will not answer it.'],
     ['var(--pink)','Tool call · finance.sector_breakdown','<span style="color:var(--ink)">FROM sec_10k_2026 | WHERE MATCH(text, ?topic)<br>| STATS filings = COUNT_DISTINCT(accession) BY sector</span><br>topic = "supply-chain disruption"'],
@@ -191,15 +191,15 @@ FX.ntk=s=>{const LV=['U','CUI','C','S','TS'],COL={U:'#9AA5B8',CUI:'#7FB0F5',C:'#
     PER.forEach((_,i)=>{if(n>=i){$('nb'+i).style.width=(cnt[i]/72*100)+'%';$('nc'+i).textContent=cnt[i];}else{$('nb'+i).style.width='0';$('nc'+i).innerHTML='&nbsp;';}});};};
 
 /* 17 · what runs where */
-FX.where=s=>{const H=[['DGX Spark','192.168.1.20 · aarch64',[['es-gpu','Elasticsearch 9.5.6 + cuVS',':9200'],['Ollama','Nemotron 3.5 Lightning',':11434'],['Jina v5 Omni server','text and image embeddings',':8081']]],
-    ['Framework Desktop','192.168.1.10 · x86_64',[['es-cpu','Elasticsearch 9.5.6',':9200'],['Kibana','Agent Builder · connector to Ollama',':5601'],['Backend','FastAPI · three adventures',':8000'],['Frontend','React · Vite dev server',':3000'],['Kiosk','touchscreen app',':3100']]]];
+FX.where=s=>{const H=[['DGX Spark','192.168.1.20 · aarch64',[['es-gpu','Elasticsearch 9.5.6 + cuVS',':9200'],['vLLM','Nemotron 3.5 Lightning',':8000'],['Ollama','Vineyard search embedder · fallback',':11434'],['Jina v5 Omni server','text and image embeddings',':8081']]],
+    ['Framework Desktop','192.168.1.10 · x86_64',[['es-cpu','Elasticsearch 9.5.6',':9200'],['Kibana','Agent Builder · connector to vLLM',':5601'],['Backend','FastAPI · three adventures',':8000'],['Frontend','React · Vite dev server',':3000'],['Kiosk','touchscreen app',':3100']]]];
   let n=0;$('wh').innerHTML=H.map((h,j)=>`<div class="host" id="wh${j}"><div class="hh"><b>${h[0]}</b><span>${h[1]}</span></div>${h[2].map(s=>`<div class="svc" id="sv${n++}"><div>${s[0]}<small>${s[1]}</small></div><em>${s[2]}</em></div>`).join('')}</div>`).join('')+
-    `<div><div class="host" id="wh2"><div class="hh"><b>Kit LAN</b><span>UniFi Express 7 · .1</span></div><div style="padding:10px 16px;font:500 12px/1.75 var(--mono);color:var(--char)">spark.ddil · es.ddil<br>ollama.ddil · jina.ddil<br>framework.ddil · kibana.ddil<br><span style="color:var(--grey)">ES transport stays on raw IPs</span></div></div>`+
+    `<div><div class="host" id="wh2"><div class="hh"><b>Kit LAN</b><span>UniFi Express 7 · .1</span></div><div style="padding:10px 16px;font:500 12px/1.75 var(--mono);color:var(--char)">spark.ddil · es.ddil · vllm.ddil<br>ollama.ddil · jina.ddil<br>framework.ddil · kibana.ddil<br><span style="color:var(--grey)">ES transport stays on raw IPs</span></div></div>`+
     `<div class="bal lat" id="wh3" style="margin-top:16px;box-shadow:none;padding:12px 14px"><div class="k">Pre-show check</div><div class="x" style="font:500 12.5px/1.5 var(--sans);color:var(--char);margin-top:4px">All nodes and Kibana on 9.5.6, security settings matched. Kit config points at Nemotron 3.5 Lightning and Jina v5 Omni. Set it in the compose environment; the container never reads .env.</div></div></div>`;
   return t=>{for(let j=0;j<3;j++)on('wh'+j,t>.3+j*.5);for(let i=0;i<n;i++)on('sv'+i,t>1+i*.3);on('wh3',t>4);};};
 
 /* 18 · deployment and operations */
-FX.ops=s=>{const O=[['var(--blue)','Bring-up','On each host',['Spark: <code>sg docker -c "docker compose up -d"</code>','Framework: <code>docker compose up -d</code>','Pull <code>nemotron-3.5-lightning</code> in Ollama; no repo script does it','Start the Jina v5 Omni server by hand on :8081','<code>vm.max_map_count=262144</code> on the Framework']],
+FX.ops=s=>{const O=[['var(--blue)','Bring-up','On each host',['Spark: <code>sg docker -c "docker compose up -d"</code>','Framework: <code>docker compose up -d</code>','vLLM <code>/v1/models</code> lists Nemotron; guidance backend applied','Start the Jina v5 Omni server by hand on :8081','<code>vm.max_map_count=262144</code> on the Framework']],
     ['var(--teal)','Before going dark','While a network exists',['Build backend and frontend images: pip and npm run at build time','Stage the data that is not in git: vineyard JSONL, SEC NDJSON, Jina media','SEC <code>run-all.sh</code>: re-embed, index, connector, agent, Kibana','es-gpu needs <code>ELASTIC_PASSWORD</code> and its transport cert','Give the backend ES credentials in the compose environment']],
     ['var(--pink)','On stage','Reset and recover',['<b>Reset Demo</b> returns to the chooser; the race resets separately','SEC: Reset conversation in chapter 04. Esc exits SEC and Multimodal','<b>F1</b> backend has no ES credentials: 401s, silent fallbacks','<b>Check</b> all nodes and Kibana on 9.5.6, security matched; config on Nemotron 3.5 Lightning and Jina v5 Omni','Never run the guide\'s model unload; it deletes the model']]];
   $('op').innerHTML=O.map((o,i)=>`<div class="dfc2" id="oc${i}" style="--c:${o[0]}"><div class="k">${i+1} · ${o[2]}</div><div class="h">${o[1]}</div><ul>${o[3].map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
@@ -208,7 +208,7 @@ FX.ops=s=>{const O=[['var(--blue)','Bring-up','On each host',['Spark: <code>sg d
 /* 20 · appendix: live vs staged */
 FX.status=s=>{const S=[['Vineyard Intelligence','click path: chooser, architecture, race, app','Dashboard KPIs and per-block map when ES answers · agronomist phases 0 and 1 on ES · four Nemotron 3.5 Lightning calls','Race (simulator) · architecture and system screens · dashboard alerts · Crop Health scanner · Search hybrid and semantic (fall back to mock) · silent fallbacks when ES fails'],
     ['SEC Findings','eight chapters, Esc exits','Chapter 03 search and sector facets · chapter 04 Agent Builder chat · took_ms, hits, sector counts','Chapter 00 kit hardware text · chapter 01 race and presenter TCO figures · 503 and 93,541 text · workflows chapter (not provisioned)'],
-    ['Multimodal and need-to-know','two scenes, Esc exits','Search by Image kNN · need-to-know hybrid search · accessible docs and chunks · analyst answer from Nemotron 3.5 Lightning','509 total in the corpus meter (kit corpus: 198 papers, 9,636 chunks) · personas and markings are a fictional model · the filter is application side']];
+    ['Multimodal and need-to-know','two scenes, Esc exits','Search by Image kNN · need-to-know hybrid search · accessible docs and chunks · analyst answer from Nemotron 3.5 Lightning','198 total in the corpus meter, a fixed label (kit corpus: 198 papers, 9,636 chunks) · personas and markings are a fictional model · the filter is application side']];
   $('stt').innerHTML=`<div class="sth"><div>Adventure</div><div style="color:var(--teal)">Live when the stack is healthy</div><div style="color:var(--pink)">Staged or canned</div></div>`+
     S.map((r,i)=>`<div class="st" id="st${i}"><div class="a">${r[0]}<small>${r[1]}</small></div><div class="lv">${r[2]}</div><div class="sg">${r[3]}</div></div>`).join('')+
     `<div class="bal lat" id="stb" style="margin-top:16px;box-shadow:none;padding:10px 16px"><div class="k">Check first, or nothing above is live</div><div class="x" style="font:500 12.5px/1.5 var(--sans);color:var(--char);margin-top:4px">F1 give the backend container ES credentials · all nodes and Kibana on 9.5.6, security settings matched · kit config on Nemotron 3.5 Lightning and Jina v5 Omni. The .ddil names are not yet verified on the box.</div></div>`;

@@ -1,6 +1,6 @@
 # DDIL dev stub
 
-A stand-in for the kit backend (`demo/backend/app`) that runs on a laptop with no kit. It serves the in-scope screens of the live demo frontend (`demo/frontend`) with the same request and response shapes, the same streaming formats and kit-like timing. It needs no Elasticsearch, Ollama, Jina server or internet.
+A stand-in for the kit backend (`demo/backend/app`) that runs on a laptop with no kit. It serves the in-scope screens of the live demo frontend (`demo/frontend`) with the same request and response shapes, the same streaming formats and kit-like timing. It needs no Elasticsearch, vLLM, Ollama, Jina server or internet.
 
 - Node 22 or later, standard library only. No `npm install`, no Python packages.
 - Binds `127.0.0.1` only. Makes no outbound network calls. Map tiles come from `demo/data/tiles` or a generated placeholder.
@@ -102,7 +102,7 @@ Validation errors return 422 in the FastAPI shape; unknown paths return 404 `{"d
 - Retrieval is a keyword BM25 stand-in for the kit's BM25 plus Jina kNN fused with RRF. It reuses `enablement/mock/js/corpus-search.js`: DLS pre-filter before scoring, collapse to the best chunk per paper, top 8, figure strip from the top papers. Semantic matches with no shared words do not appear. Scores are shown in RRF scale.
 - Reference-list chunks (858 of 4,894, detected by citation density or a References section) are blanked before indexing so keyword retrieval lands on body text.
 - Analyst answer: extractive. It quotes the best-matching sentence from the top visible papers with `[PMCxxxxxxx]` citations and a closing line that labels it as stand-in. With no visible sources it returns the kit's no-answer text. On the kit Nemotron 3.5 Lightning writes the answer from the same filtered passages. The answer arrives after 6 to 10 s at pace 1.
-- Known kit UI text: the meter prints a fixed "/ 509 docs"; the stub corpus has 100 papers. The kit's example chips (single-cell RNA sequencing, CRISPR, tumour imaging) have little keyword overlap with the subset; "gut microbiome and immunity" works well.
+- Known kit UI text: the meter prints a fixed "/ 198 docs" (the kit corpus total); the stub corpus has 100 papers, so the stub meter reads N / 198. The kit's example chips (single-cell RNA sequencing, CRISPR, tumour imaging) have little keyword overlap with the subset; "gut microbiome and immunity" works well.
 
 ## Verify
 

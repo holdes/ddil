@@ -158,10 +158,10 @@
       coach: { status: "LIVE",
         say: ["This is Elastic Agent Builder. The finance-analyst agent has three ES|QL tools (company disclosures, compare companies, sector breakdown) plus platform tools.", "Send the first example. Reasoning and tool calls stream; the answer cites ticker and accession for every claim.", "Open a tool call to show the ES|QL it ran. Open in Kibana shows the same conversation in Agent Builder."],
         proof: "Each claim carries a ticker and accession from a tool result.",
-        honest: "The chat runs live through Kibana Agent Builder and Nemotron 3.5 Lightning on the Spark, through the finance-ollama-llm connector. The config card is mostly canned. The Tradeoffs panel shows this run's time and tokens and states there is no cloud spend. Rehearse this chapter on your kit and budget one to two minutes per question. Kit pace in the mock runs about 45 to 60 s.",
+        honest: "The chat runs live through Kibana Agent Builder and Nemotron 3.5 Lightning on vLLM on the Spark, through the finance-ollama-llm connector. The config card is mostly canned. The Tradeoffs panel shows this run's time and tokens and states there is no cloud spend. Rehearse this chapter on your kit and budget one to two minutes per question. Kit pace in the mock runs about 45 to 60 s.",
         questions: [
           { q: "What tools can the agent use?", a: "Ten: three custom ES|QL tools and seven platform tools (search, execute_esql, generate_esql, get_document_by_id, get_index_mapping, list_indices, index_explorer). It is told to use at most six calls per question." },
-          { q: "Where does the model run?", a: "NVIDIA Nemotron 3.5 Lightning in Ollama on the DGX Spark, through a Kibana OpenAI-compatible connector named finance-ollama-llm." },
+          { q: "Where does the model run?", a: "NVIDIA Nemotron 3.5 Lightning on vLLM on the DGX Spark, through a Kibana OpenAI-compatible connector named finance-ollama-llm. The id is historical; the old Ollama connector stays as finance-ollama-fallback." },
           { q: "How do I trust the answer?", a: "Open the tool calls. The agent answers from what its ES|QL queries returned and must cite ticker and accession." },
         ],
         fails: "Spinner with no events after 60 s: Agent Builder or the model is hung, and the backend has no read timeout (F9). Click Reset conversation and ask the sector-breakdown example (one tool call), or go back to chapter 03. Pre-run one question before the session to warm Nemotron 3.5 Lightning." } },

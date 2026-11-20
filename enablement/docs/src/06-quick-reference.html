@@ -18,18 +18,19 @@
         <tr><td class="k">Kibana</td><td><code>http://192.168.1.10:5601</code></td></tr>
         <tr><td class="k">es-cpu 9.5.6</td><td><code>192.168.1.10:9200</code> (transport 9300)</td></tr>
         <tr><td class="k">es-gpu 9.5.6</td><td><code>192.168.1.20:9200</code> (transport 9300)</td></tr>
+        <tr><td class="k">vLLM (Nemotron)</td><td><code>http://vllm.ddil:8000</code> (port: confirm on kit)</td></tr>
         <tr><td class="k">Ollama</td><td><code>http://192.168.1.20:11434</code></td></tr>
         <tr><td class="k">Jina server</td><td><code>http://192.168.1.20:8081/health</code></td></tr>
         <tr><td class="k">Kiosk</td><td><code>192.168.1.10:3100</code> (mock health)</td></tr>
         <tr><td class="k">Gateway</td><td><code>192.168.1.1</code></td></tr>
       </table>
-      <p class="small">.ddil names: es, ollama, jina, spark = .20; kibana, framework = .10. Untested on the box.</p>
+      <p class="small">.ddil names: es, vllm, ollama, jina, spark = .20; kibana, framework = .10. Untested on the box.</p>
     </div>
     <div>
       <h3 style="margin-top:0">Pre-show checklist</h3>
       <ul class="chk">
         <li>Power on: network, Spark, then Framework.</li>
-        <li>Spark: <code>docker compose up -d</code> via <code>sg docker</code>; <code>ollama list</code> shows <code>nemotron-3.5-lightning</code>; Jina v5 Omni server started by hand.</li>
+        <li>Spark: <code>docker compose up -d</code> via <code>sg docker</code>; <code>vllm.ddil:8000/v1/models</code> lists Nemotron 3.5 Lightning; Jina v5 Omni server started by hand.</li>
         <li>Framework: <code>vm.max_map_count</code> 262144; <code>docker compose up -d</code> in <code>demo/</code>.</li>
         <li><code>_cat/nodes</code> lists spark-gpu and framework-cpu.</li>
         <li><code>_cat/indices</code>: record vineyard, <code>sec_10k_2026</code>, <code>jina-multimodal</code>, <code>pmc-unstructured</code> counts.</li>
@@ -37,7 +38,7 @@
         <li>All nodes and Kibana on 9.5.6, security settings matched. Kit config points at Nemotron 3.5 Lightning and Jina v5 Omni.</li>
         <li><code>/api/jina/analysts</code>: four personas.</li>
         <li><code>:8081/health</code> answers.</li>
-        <li>Warm <code>nemotron-3.5-lightning</code> with one chat call.</li>
+        <li>Warm Nemotron 3.5 Lightning with one chat call to vLLM.</li>
         <li>One full click-through of each adventure, then reset.</li>
       </ul>
     </div>
@@ -45,9 +46,9 @@
 
   <h3>Health commands</h3>
   <pre class="code">curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cat/nodes?v&amp;h=name,version'
-curl -s http://192.168.1.20:11434/api/tags ; curl -s http://192.168.1.20:8081/health
+curl -s http://vllm.ddil:8000/v1/models ; curl -s http://192.168.1.20:8081/health
 curl -s http://192.168.1.10:8000/api/finance/agent/state
-curl -s http://192.168.1.20:11434/api/chat -d '{"model":"nemotron-3.5-lightning","stream":false,"messages":[{"role":"user","content":"ready"}]}'</pre>
+curl -s http://vllm.ddil:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{"model":"&lt;id from /v1/models&gt;","messages":[{"role":"user","content":"ready"}]}'</pre>
 
   <h3>Reset between audiences</h3>
   <table class="t tight sm">
@@ -102,7 +103,7 @@ curl -s http://192.168.1.20:11434/api/chat -d '{"model":"nemotron-3.5-lightning"
     <tr><td class="k">SEC Workflows</td><td><span class="tag staged">Staged</span></td><td>"An example definition, not deployed here."</td></tr>
     <tr><td class="k">Search by Image</td><td><span class="tag live">Live</span></td><td>"ES kNN through a local inference endpoint." Ten synthetic shapes.</td></tr>
     <tr><td class="k">Need-to-Know filter</td><td><span class="tag live">Live</span></td><td>"Application-side clearance filter." Not native ES document level security.</td></tr>
-    <tr><td class="k">"509 docs", markings</td><td><span class="tag staged">Staged</span></td><td>Numerator is measured; 509 is static. The kit corpus is 198 papers. Markings are synthetic.</td></tr>
+    <tr><td class="k">"198 docs", markings</td><td><span class="tag staged">Staged</span></td><td>Numerator is measured; 198 is fixed text matching the kit corpus. Markings are synthetic.</td></tr>
   </table>
   <!--foot-->
 </div>

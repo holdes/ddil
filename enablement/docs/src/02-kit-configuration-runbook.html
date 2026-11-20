@@ -15,12 +15,13 @@
       <tr><th style="width:40px">#</th><th style="width:170px">Stage</th><th>Outcome</th><th style="width:60px">Page</th></tr>
       <tr><td class="k">1</td><td>Read the known issues</td><td>You know which committed settings need attention on this kit.</td><td>2</td></tr>
       <tr><td class="k">2</td><td>Power on in order</td><td>Network, then the DGX Spark, then the Framework Desktop.</td><td>3</td></tr>
-      <tr><td class="k">3</td><td>Bring up services</td><td>es-gpu, Ollama and the Jina server on the Spark. es-cpu, Kibana, backend and frontend on the Framework.</td><td>4-5</td></tr>
+      <tr><td class="k">3</td><td>Bring up services</td><td>es-gpu, vLLM, Ollama and the Jina server on the Spark. es-cpu, Kibana, backend and frontend on the Framework.</td><td>4-5</td></tr>
       <tr><td class="k">4</td><td>Health checks</td><td>Every service answers. The backend serves live data, not fallbacks. The model is warm.</td><td>6-7</td></tr>
       <tr><td class="k">5</td><td>Stage data (first time)</td><td>Indices, inference endpoint, agent and Kibana objects exist for each adventure.</td><td>8</td></tr>
       <tr><td class="k">6</td><td>Present, then reset</td><td>Each adventure returns to the chooser in a known state.</td><td>10</td></tr>
       <tr><td class="k">7</td><td>Shut down</td><td>Services stop in reverse order with data intact.</td><td>10</td></tr>
       <tr><td class="k">8</td><td>Showcase configuration (once per kit)</td><td>Elastic 9.5.6 on every node and Kibana. Nemotron 3.5 Lightning and Jina Embeddings v5 Omni on the Spark.</td><td>13-14</td></tr>
+      <tr><td class="k">9</td><td>Cutover load order</td><td>Snapshot, secrets, artifacts, upgrade, models, provisioning, deploy and kiosk, in that order.</td><td>15-16</td></tr>
     </table>
   </div>
   <div class="band">
@@ -57,13 +58,13 @@
       <p>Compose sets no <code>VINEYARD_ES_USER</code> or <code>VINEYARD_ES_PASSWORD</code>, has no <code>env_file</code>, and <code>.env</code> is excluded from the image. Every backend call to the secured node returns 401. Vineyard screens then show fallback numbers with no error; SEC and Multimodal show errors. <b>Fix options (not yet in the repo):</b> add both variables to the backend <code>environment</code> in <code>demo/docker-compose.yml</code>, or run the backend natively with <code>demo/backend/run.sh</code>, which reads <code>demo/backend/.env</code>.</p>
 
       <h3>K3 · Showcase model lineup: Nemotron 3.5 Lightning and Jina v5 Omni</h3>
-      <p>The kit showcases NVIDIA Nemotron 3.5 Lightning and Jina Embeddings v5 Omni. Change from the committed config: <code>gpt-oss:120b</code>, <code>nomic-embed-text</code>, <code>EMBED_BACKEND=bedrock</code> and the <code>serve_jina_v4.py</code> server. <code>.env.airgapped</code> is not read inside the container, so set values in the compose environment. The SEC code on this branch embeds queries with Jina v5 Omni (<code>EMBED_BACKEND=jina</code>, 768 dims) and the SEC index must be re-embedded to match (page 14). With the Jina server down, SEC Chapter 03 search returns 502 "Query embed failed". <b>Fix:</b> page 14. <b>Check:</b> <code>/api/finance/agent/state</code>.</p>
+      <p>The kit showcases NVIDIA Nemotron 3.5 Lightning and Jina Embeddings v5 Omni. Nemotron runs on vLLM on the Spark; the backend (<code>LLM_BACKEND=vllm</code>) and the SEC connector point there. Change from the committed config: <code>gpt-oss:120b</code>, <code>nomic-embed-text</code>, <code>EMBED_BACKEND=bedrock</code> and the <code>serve_jina_v4.py</code> server. <code>.env.airgapped</code> is not read inside the container, so set values in the compose environment. The SEC code on this branch embeds queries with Jina v5 Omni (<code>EMBED_BACKEND=jina</code>, 768 dims) and the SEC index must be re-embedded to match (page 14). With the Jina server down, SEC Chapter 03 search returns 502 "Query embed failed". <b>Fix:</b> page 14. <b>Check:</b> <code>/api/finance/agent/state</code>.</p>
 
       <h3>K4 · The .ddil names are untested on the box</h3>
       <p>Commit 5114c3a switched backend defaults to <code>es.ddil</code>, <code>ollama.ddil</code>, <code>jina.ddil</code> and <code>kibana.ddil</code> while the app was not running. If resolution fails, every cross-host call fails. <b>Check</b> from inside the backend container (page 6). <b>Fallback:</b> set the URL variables to raw IP addresses.</p>
 
       <h3>K5 · Stale TROUBLESHOOTING.md step deletes the model</h3>
-      <p>The "Unload unused models" step calls Ollama <code>DELETE /api/delete</code>. That call deletes the model from disk. Re-pulling <code>nemotron-3.5-lightning</code> needs an internet connection the kit does not have. <b>Never run it.</b> The same file names containers, ports and models that the kit does not use. Use it only for generic Elasticsearch fixes (memlock, <code>vm.max_map_count</code>, allocation explain).</p>
+      <p>The "Unload unused models" step calls Ollama <code>DELETE /api/delete</code>. That call deletes the model from disk. Re-pulling <code>nomic-embed-text</code> or the fallback model needs an internet connection the kit does not have. <b>Never run it.</b> The same file names containers, ports and models that the kit does not use. Use it only for generic Elasticsearch fixes (memlock, <code>vm.max_map_count</code>, allocation explain).</p>
     </div>
   </div>
 
@@ -81,11 +82,11 @@
   <div class="rh"><span>02 · Kit configuration runbook</span><span>Power on</span></div>
   <div class="eyebrow">Power on</div>
   <h2>Network first, <span class="hl">then the Spark, then the Framework.</span></h2>
-  <p>The repo does not document a power-on order. This order follows the service dependencies: the backend on the Framework calls Elasticsearch, Ollama and the Jina server on the Spark, and the two ES nodes discover each other on <code>:9300</code>.</p>
+  <p>The repo does not document a power-on order. This order follows the service dependencies: the backend on the Framework calls Elasticsearch, vLLM, Ollama and the Jina server on the Spark, and the two ES nodes discover each other on <code>:9300</code>.</p>
   <table class="t tight">
     <tr><th style="width:36px">#</th><th style="width:150px">Device</th><th>Action</th><th>Ready when</th></tr>
     <tr><td class="k">1</td><td>UniFi Express 7, Switch Flex Mini</td><td>Power on.</td><td>Gateway answers at <code>192.168.1.1</code>.</td></tr>
-    <tr><td class="k">2</td><td>DGX Spark</td><td>Power on. Ollama starts under systemd.</td><td><code>192.168.1.20</code> answers ping; <code>ollama list</code> works.</td></tr>
+    <tr><td class="k">2</td><td>DGX Spark</td><td>Power on. Ollama starts under systemd. Start vLLM as it is installed on the kit.</td><td><code>192.168.1.20</code> answers ping; <code>vllm.ddil:8000/v1/models</code> lists the model.</td></tr>
     <tr><td class="k">3</td><td>Framework Desktop</td><td>Power on. The kiosk starts on the touchscreen.</td><td><code>192.168.1.10</code> answers ping.</td></tr>
     <tr><td class="k">4</td><td>Presenter browser</td><td>Join the kit LAN.</td><td>Opens <code>http://192.168.1.10:3000</code> after bring-up.</td></tr>
   </table>
@@ -108,17 +109,17 @@ sudo sysctl -w vm.max_map_count=262144</pre>
 <div class="page">
   <div class="rh"><span>02 · Kit configuration runbook</span><span>Bring-up on the DGX Spark</span></div>
   <div class="eyebrow">Bring-up · DGX Spark (192.168.1.20)</div>
-  <h2>Elasticsearch, Ollama <span class="hl">and the Jina server.</span></h2>
+  <h2>Elasticsearch, vLLM <span class="hl">and the Jina server.</span></h2>
   <h3>Start Elasticsearch (es-gpu)</h3>
   <pre class="code">cd ~/ddil/docker
 sg docker -c "docker compose up -d"
 sg docker -c "docker compose ps"          <span class="c"># es-gpu should be Up</span>
 sg docker -c "docker compose logs --tail 50 es-gpu"</pre>
 
-  <h3>Confirm Ollama and its models</h3>
-  <pre class="code">systemctl status ollama --no-pager
-ollama list                                <span class="c"># expect nemotron-3.5-lightning</span></pre>
-  <p class="small">No repo script pulls the model. Pull it with <code>ollama pull nemotron-3.5-lightning</code> while connected (page 14). If it is missing, the kit cannot run the adventures until the model is copied in from a connected machine.</p>
+  <h3>Confirm vLLM (Nemotron 3.5 Lightning) and Ollama</h3>
+  <pre class="code">curl -s http://vllm.ddil:8000/v1/models     <span class="c"># first id is the served Nemotron model; port 8000: confirm on kit</span>
+systemctl status ollama --no-pager          <span class="c"># Ollama stays: Vineyard search embeddings and the fallback connector</span></pre>
+  <p class="small">No repo script starts vLLM or loads the weights. Start it with the guidance structured-output backend (page 14). If the model is missing, the kit cannot run the adventures until the weights are copied in from a connected machine.</p>
 
   <h3>Start the Jina Embeddings v5 Omni server</h3>
   <pre class="code"><span class="c"># in a tmux or screen session so it survives logout</span>
@@ -146,7 +147,7 @@ docker compose logs --tail 50 backend       <span class="c"># look for 401 or co
     <tr><th style="width:90px">Container</th><th style="width:60px">Port</th><th>What to expect</th></tr>
     <tr><td class="k">es-cpu</td><td>9200</td><td>Node <code>framework-cpu</code>, version 9.5.6 (page 13). Joins <code>ddil-vineyard</code> with matched security settings.</td></tr>
     <tr><td class="k">kibana</td><td>5601</td><td>Talks to <code>http://es-cpu:9200</code>. Agent Builder and the SEC data view and dashboard live here.</td></tr>
-    <tr><td class="k">backend</td><td>8000</td><td>FastAPI. Calls <code>es.ddil:9200</code>, <code>ollama.ddil:11434</code>, <code>jina.ddil:8081</code>, <code>kibana.ddil:5601</code>.</td></tr>
+    <tr><td class="k">backend</td><td>8000</td><td>FastAPI. Calls <code>es.ddil:9200</code>, <code>vllm.ddil:8000</code>, <code>ollama.ddil:11434</code>, <code>jina.ddil:8081</code>, <code>kibana.ddil:5601</code>.</td></tr>
     <tr><td class="k">frontend</td><td>3000</td><td>Vite dev server. Proxies <code>/api</code>, <code>/tiles</code> and <code>/ws</code> to the backend.</td></tr>
   </table>
 
@@ -169,8 +170,8 @@ curl -s http://192.168.1.10:8000/api/finance/agent/state</pre>
   <p>Run from any shell on the kit LAN. Each block lists the expected result.</p>
 
   <h3>Name resolution and the Elasticsearch cluster (K4, K1)</h3>
-  <pre class="code">cd ~/ddil/demo &amp;&amp; docker compose exec backend getent hosts es.ddil ollama.ddil jina.ddil kibana.ddil
-<span class="g"># expect .20, .20, .20, .10</span>
+  <pre class="code">cd ~/ddil/demo &amp;&amp; docker compose exec backend getent hosts es.ddil vllm.ddil ollama.ddil jina.ddil kibana.ddil
+<span class="g"># expect .20, .20, .20, .20, .10</span>
 curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cat/nodes?v&amp;h=name,version,node.role'
 <span class="g"># expect spark-gpu and framework-cpu, both 9.5.6</span>
 curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cluster/health?pretty'
@@ -179,12 +180,13 @@ curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_cat/indices/vine
 curl -s -u elastic:$ELASTIC_PASSWORD 'http://192.168.1.20:9200/_inference/text_embedding/jina-omni-text'</pre>
 
   <h3>Models</h3>
-  <pre class="code">curl -s http://192.168.1.20:11434/api/tags                <span class="g"># lists nemotron-3.5-lightning</span>
+  <pre class="code">curl -s http://vllm.ddil:8000/v1/models                   <span class="g"># lists the Nemotron model id</span>
 curl -s http://192.168.1.20:8081/health                   <span class="g"># model jina-embeddings-v5-omni-small</span></pre>
 
   <h3>Warm Nemotron 3.5 Lightning</h3>
-  <pre class="code">curl -s http://192.168.1.20:11434/api/chat -d '{"model":"nemotron-3.5-lightning","stream":false,
-  "messages":[{"role":"user","content":"Reply with the word ready."}]}' | head -c 200</pre>
+  <pre class="code">M=$(curl -s http://vllm.ddil:8000/v1/models | python3 -c 'import json,sys;print(json.load(sys.stdin)["data"][0]["id"])')
+curl -s http://vllm.ddil:8000/v1/chat/completions -H 'Content-Type: application/json' -d "{\"model\":\"$M\",
+  \"messages\":[{\"role\":\"user\",\"content\":\"Reply with the word ready.\"}]}" | head -c 200</pre>
   <p class="small">A cold load or slow generation beyond 120 s breaks the Vineyard pipeline mid-stream. Run this warm-up within a few minutes of the session and again after any long idle period.</p>
 
   <h3>Kibana and the app</h3>
@@ -265,8 +267,9 @@ curl -s -o /dev/null -w '%{http_code}\n' http://192.168.1.10:3000/             <
     <tr><td class="k">ES_MAIN_URL</td><td><code>http://es-cpu:9200</code></td><td>CPU client.</td></tr>
     <tr><td class="k">ES_CPU_HOST / ES_CPU_PORT</td><td>none / 9201</td><td>The CPU node listens on 9200; 9201 appears only in labels and this default.</td></tr>
     <tr><td class="k">ES_USER / ES_PASSWORD</td><td>none</td><td><b>Required</b> with security on (K2).</td></tr>
-    <tr><td class="k">OLLAMA_EMBED_URL / OLLAMA_LLM_URL</td><td><code>http://ollama.ddil:11434</code></td><td>Spark.</td></tr>
-    <tr><td class="k">EMBED_MODEL / LLM_MODEL</td><td><code>nomic-embed-text</code> / <code>gpt-oss:120b</code></td><td>Change from these. LLM: <code>nemotron-3.5-lightning</code>. Embedder: Jina v5 Omni (page 14).</td></tr>
+    <tr><td class="k">LLM_BACKEND / VLLM_URL</td><td><code>vllm</code> / <code>http://vllm.ddil:8000</code></td><td>Keep. Port: confirm on kit. <code>ollama</code> restores the previous <code>/api/chat</code> path.</td></tr>
+    <tr><td class="k">OLLAMA_EMBED_URL / OLLAMA_LLM_URL</td><td><code>http://ollama.ddil:11434</code></td><td>Spark. Vineyard search embeddings and the Ollama fallback.</td></tr>
+    <tr><td class="k">EMBED_MODEL / LLM_MODEL</td><td><code>nomic-embed-text</code> / <code>nemotron-3.5-lightning</code></td><td>LLM: used if <code>/v1/models</code> lists it, else the first served id. Embedder: Vineyard search only (page 14).</td></tr>
     <tr><td class="k">EMBED_BACKEND</td><td><code>jina</code></td><td>Keep. Change from <code>bedrock</code> at 5114c3a. <code>ollama</code> is the fallback (K3, page 14).</td></tr>
     <tr><td class="k">SEC_INDEX</td><td><code>sec_10k_2026</code></td><td>Keep.</td></tr>
     <tr><td class="k">KIBANA_URL / KIBANA_SPACE</td><td><code>http://kibana.ddil:5601</code> / <code>default</code></td><td>Keep.</td></tr>
@@ -351,7 +354,7 @@ sudo shutdown -h now
     <tr><th style="width:170px">Symptom</th><th style="width:190px">Likely cause</th><th>Fix</th></tr>
     <tr><td>SEC Chapter 03: 502 "Query embed failed", or a dims error</td><td>K3 Jina v5 Omni unreachable on <code>:8081</code>, or the SEC index is still 1536-d</td><td><code>curl :8081/health</code>; check <code>embed_backend</code> <code>jina</code> in <code>/api/finance/agent/state</code>; re-embed the index (page 14).</td></tr>
     <tr><td>SEC sector chips missing, 500 in the log</td><td><code>/api/finance/sectors</code> has no error handling; ES failed</td><td>Fix ES access. Confirm <code>sec_10k_2026</code> exists.</td></tr>
-    <tr><td>SEC agent never finishes</td><td>The agent call has no read timeout; a hung model run hangs the UI</td><td>"Reset conversation", reload, check Ollama and Kibana. Use a shorter example question.</td></tr>
+    <tr><td>SEC agent never finishes</td><td>The agent call has no read timeout; a hung model run hangs the UI</td><td>"Reset conversation", reload, check vLLM and Kibana. Use a shorter example question.</td></tr>
     <tr><td>SEC agent errors or shows malformed events</td><td>Agent or connector out of date after the 9.5.6 upgrade</td><td>Re-run <code>provision-connector-local.sh</code> and <code>provision-agent-local.sh</code>. Report the error to the kit owner.</td></tr>
     <tr><td>Workflows links return 404</td><td>The workflow is not provisioned</td><td>Do not click them. Describe the YAML only.</td></tr>
     <tr><td>Search by Image returns an error</td><td>Jina server stopped, or inference endpoint missing</td><td><code>curl :8081/health</code>; restart the server; check <code>_inference/text_embedding/jina-omni-text</code>.</td></tr>
@@ -396,26 +399,67 @@ curl -s -u elastic:$ELASTIC_PASSWORD http://192.168.1.10:5601/api/status | grep 
   <div class="rh"><span>02 · Kit configuration runbook</span><span>Showcase configuration · models</span></div>
   <div class="eyebrow pk">Showcase configuration · once per kit</div>
   <h2>Nemotron 3.5 Lightning <span class="hl">and Jina Embeddings v5 Omni.</span></h2>
-  <p>The kit showcases NVIDIA Nemotron 3.5 Lightning (Ollama tag <code>nemotron-3.5-lightning</code>) and Jina Embeddings v5 Omni (<code>jina-embeddings-v5-omni-small</code>) on the DGX Spark. The committed config names other models (K3). Pull the model while a network is available. Set backend values in the compose <code>environment</code> block (page 5).</p>
+  <p>The kit showcases NVIDIA Nemotron 3.5 Lightning 30B-A3B, served by vLLM on the DGX Spark, and Jina Embeddings v5 Omni (<code>jina-embeddings-v5-omni-small</code>). The vLLM port defaults to 8000 and the served model id comes from <code>GET /v1/models</code>: confirm both on kit. Set backend values in the compose <code>environment</code> block (page 5).</p>
   <table class="t sm">
     <tr><th style="width:150px">Setting</th><th style="width:150px">Change from</th><th>Change to</th></tr>
-    <tr><td class="k">Ollama on the Spark</td><td><code>gpt-oss:120b</code>, <code>nomic-embed-text</code></td><td><code>ollama pull nemotron-3.5-lightning</code></td></tr>
-    <tr><td class="k">VINEYARD_LLM_MODEL</td><td><code>gpt-oss:120b</code></td><td><code>nemotron-3.5-lightning</code></td></tr>
-    <tr><td class="k">Connector finance-ollama-llm</td><td><code>MODEL=gpt-oss:120b</code> default</td><td>Re-run <code>EP=... bash demo/scripts/finance/provision-connector-local.sh</code> (default <code>MODEL</code> is now <code>nemotron-3.5-lightning</code>)</td></tr>
+    <tr><td class="k">vLLM on the Spark</td><td>xgrammar structured-output backend (Agent Builder hang)</td><td>Restart vLLM with <code>--guided-decoding-backend guidance</code>. Flag name for the installed version: confirm on kit; newer vLLM uses <code>--structured-outputs-config</code> or <code>guided_decoding_backend</code>.</td></tr>
+    <tr><td class="k">Backend LLM</td><td>Ollama <code>/api/chat</code>, <code>gpt-oss:120b</code></td><td><code>VINEYARD_LLM_BACKEND=vllm</code>, <code>VINEYARD_VLLM_URL=http://vllm.ddil:8000</code> (in compose). <code>LLM_BACKEND=ollama</code> restores the previous path.</td></tr>
+    <tr><td class="k">Connector finance-ollama-llm</td><td>Ollama <code>/v1/chat/completions</code></td><td><code>EP=... bash demo/scripts/finance/provision-connector-local.sh</code>: vLLM <code>/v1/chat/completions</code>, model from <code>/v1/models</code>, name "Local vLLM (model)". <code>FALLBACK=ollama</code> adds <code>finance-ollama-fallback</code>.</td></tr>
     <tr><td class="k">Jina server :8081</td><td><code>serve_jina_v4.py</code>, <code>JINA_MODEL_ID</code> default <code>jinaai/jina-embeddings-v4</code></td><td>Serve <code>jinaai/jina-embeddings-v5-omni-small</code> (JINA-SETUP.md prerequisite 1). Server script, launch command and cu128 build for the GB10: confirm on kit.</td></tr>
     <tr><td class="k">Jina indices</td><td>Vectors from the old server</td><td>Re-run <code>setup-indices-local.sh</code>, <code>ingest-multimodal.py</code>, <code>ingest-pmc.py</code> (page 8). The setup script deletes and recreates both indices.</td></tr>
-    <tr><td class="k">VINEYARD_EMBED_BACKEND / EMBED_MODEL</td><td><code>bedrock</code> / <code>nomic-embed-text</code></td><td><code>jina</code> (code default on this branch). Compose sets <code>VINEYARD_EMBED_BACKEND=jina</code>, <code>VINEYARD_JINA_OMNI_URL</code> and <code>VINEYARD_SEC_EMBED_DIMS=768</code>. SEC queries call <code>/v1/embeddings</code>; Vineyard search still calls Ollama <code>/api/embed</code>.</td></tr>
-    <tr><td class="k">SEC corpus</td><td><code>reembed-local.py --model nomic-embed-text</code></td><td>Required before the demo: the committed index is 1536-d. <code>run-all.sh</code> runs <code>reembed-local.py --backend jina --dims 768</code>, then <code>setup-index-local.sh</code> with <code>DIMS=768</code> (drops and recreates only <code>sec_10k_2026</code>). STAGED, confirm on kit.</td></tr>
-    <tr><td class="k">VINEYARD_JINA_OMNI_MODEL</td><td><code>jina-embeddings-v5-omni-small</code></td><td>Keep. The <code>jina-omni-text</code> endpoint already names this model.</td></tr>
+    <tr><td class="k">VINEYARD_EMBED_BACKEND / EMBED_MODEL</td><td><code>bedrock</code> / <code>nomic-embed-text</code></td><td><code>jina</code> (code default on this branch). SEC queries call <code>/v1/embeddings</code>. Vineyard search and CCS collect still call Ollama <code>/api/embed</code> with <code>nomic-embed-text</code>; moving them needs a Vineyard re-embed (open item).</td></tr>
+    <tr><td class="k">SEC corpus</td><td>768-d <code>nomic-embed-text</code> vectors in the live index</td><td>Required before the demo. Same dims, different vector space, so the vectors must be regenerated: <code>run-all.sh</code> runs <code>reembed-local.py --backend jina --dims 768</code>, then <code>setup-index-local.sh</code> with <code>DIMS=768</code> (drops and recreates only <code>sec_10k_2026</code>).</td></tr>
   </table>
   <h3 class="mt">Verify</h3>
-  <pre class="code">curl -s http://192.168.1.20:11434/api/tags | grep -o 'nemotron-3.5-lightning[^"]*'
+  <pre class="code">curl -s http://vllm.ddil:8000/v1/models                <span class="g"># served Nemotron id</span>
 curl -s http://192.168.1.20:8081/health                <span class="g"># "model" names jina-embeddings-v5-omni-small</span>
 curl -s http://192.168.1.20:8081/v1/embeddings -H 'Content-Type: application/json' \
   -d '{"input":["ping"],"model":"jina-embeddings-v5-omni-small","dimensions":768}' | head -c 120
 curl -s http://192.168.1.10:8000/api/finance/agent/state
 <span class="g"># llm_model nemotron-3.5-lightning, embed_backend jina, connector_id finance-ollama-llm</span>
 curl -s -u elastic:$ELASTIC_PASSWORD http://192.168.1.10:5601/api/actions/connector/finance-ollama-llm
-<span class="g"># config.defaultModel nemotron-3.5-lightning</span></pre>
+<span class="g"># config.apiUrl .../v1/chat/completions on vllm.ddil, defaultModel = the /v1/models id</span></pre>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 15: CUTOVER LOAD ORDER 1 ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Cutover load order</span></div>
+  <div class="eyebrow pk">Cutover · once per kit</div>
+  <h2>Load order for the 9.5.6 + Nemotron <span class="hl">+ Jina cutover.</span></h2>
+  <p>Run the steps in this order. Each step depends on the one before it. Steps 1 to 3 need a network connection; steps 4 to 10 run on the kit LAN. Never run <code>docker compose down -v</code> at any step.</p>
+  <table class="t sm">
+    <tr><th style="width:24px">#</th><th style="width:140px">Step</th><th>Action</th><th style="width:150px">Done when</th></tr>
+    <tr><td class="k">1</td><td>Snapshot</td><td>Register a filesystem snapshot repository on <code>ddil-vineyard</code> (<code>path.repo</code> location: confirm on kit) and snapshot all indices with <code>include_global_state: true</code>. Save <code>_cat/nodes</code> and <code>_cat/indices</code> output.</td><td>Snapshot state <code>SUCCESS</code>.</td></tr>
+    <tr><td class="k">2</td><td>Rotate exposed secrets</td><td>Public commit <code>f85167a</code> exposed the Kibana encryption key and the ES passwords. Their current values live in the gitignored <code>demo/.env</code>. Set new <code>elastic</code> and <code>kibana_system</code> passwords through <code>_security/user/&lt;name&gt;/_password</code>, write them to <code>demo/.env</code> and <code>docker/.env</code>. Generate a new <code>KIBANA_ENCRYPTION_KEY</code>; keep the old key as a decryption-only key until saved objects are re-encrypted, or recreate the connector in step 7.</td><td>Old values fail to authenticate.</td></tr>
+    <tr><td class="k">3</td><td>Stage offline artifacts</td><td>ES and Kibana 9.5.6 images for arm64 (Spark) and x86_64 (Framework), plus the maps server image the compose file pins; the aarch64 cuVS Java jar for 9.5.6 (source: confirm on kit); the Jina Embeddings v5 Omni weights. Save images with <code>docker save</code>, load with <code>docker load</code>.</td><td><code>docker images</code> lists 9.5.6 on both hosts.</td></tr>
+    <tr><td class="k">4</td><td>Upgrade to 9.5.6</td><td>Page 13: es-gpu Dockerfile and jar, es-cpu, Kibana and maps server images to 9.5.6, then restart. The compose file on this branch still pins 9.4.2.</td><td><code>_cat/nodes</code> shows both nodes on 9.5.6; Kibana <code>/api/status</code> 9.5.6.</td></tr>
+    <tr><td class="k">5</td><td>vLLM and the guidance fix</td><td><code>curl -s http://vllm.ddil:8000/v1/models</code> returns the Nemotron id. Restart vLLM with the guidance structured-output backend (page 14; flag name: confirm on kit). Run the warm-up on page 5.</td><td>One chat completion returns text.</td></tr>
+  </table>
+  <!--foot-->
+</div>
+
+<!-- ============ PAGE 16: CUTOVER LOAD ORDER 2 ============ -->
+<div class="page">
+  <div class="rh"><span>02 · Kit configuration runbook</span><span>Cutover load order</span></div>
+  <div class="eyebrow pk">Cutover · once per kit</div>
+  <h2>Provision, re-embed, deploy, <span class="hl">then walk every screen.</span></h2>
+  <table class="t sm">
+    <tr><th style="width:24px">#</th><th style="width:140px">Step</th><th>Action</th><th style="width:150px">Done when</th></tr>
+    <tr><td class="k">6</td><td>Jina server at 768</td><td>Start the Jina Embeddings v5 Omni server on <code>:8081</code> (page 4). One <code>POST /v1/embeddings</code> with <code>"dimensions": 768</code>.</td><td><code>/health</code> names v5 Omni; the call returns 768 floats.</td></tr>
+    <tr><td class="k">7</td><td>Connector</td><td><code>EP=... FALLBACK=ollama bash demo/scripts/finance/provision-connector-local.sh</code>. Creates <code>finance-ollama-llm</code> on vLLM and the fallback <code>finance-ollama-fallback</code> on Ollama.</td><td>Kibana lists both connectors.</td></tr>
+    <tr><td class="k">8</td><td>Re-embed SEC</td><td><code>EP=... SRC=/data/sec/sec_10k_bulk.ndjson bash demo/scripts/finance/run-all.sh</code>. The live <code>sec_10k_2026</code> holds 768-d <code>nomic-embed-text</code> vectors: the dims match Jina at 768, the vector space does not, so every vector is regenerated. Step 3/5 of the script re-runs the connector.</td><td><code>sec_10k_2026</code> mapping shows 768; Chapter 03 returns hits.</td></tr>
+    <tr><td class="k">9</td><td>Backend and frontend</td><td>On the Framework: <code>cd ~/ddil/demo &amp;&amp; docker compose up -d --build backend frontend</code>. Never <code>down -v</code>.</td><td><code>/api/finance/agent/state</code> as on page 14.</td></tr>
+    <tr><td class="k">10</td><td>Kiosk</td><td>Only after step 9 passes: set <code>const MOCK = false</code> in <code>demo/kiosk/src/lib/health.ts</code> on the kit, then <code>npm run build &amp;&amp; sudo ./deploy/install.sh</code>. With <code>MOCK = false</code> before the backend is up, the screen shows failures. The LLM and embeddings checks still probe Ollama <code>/api/tags</code>.</td><td>Boot diagnostics pass on the panel.</td></tr>
+  </table>
+
+  <h3 class="mt2">Final verification walk</h3>
+  <ul class="chk">
+    <li>Health checks on pages 5 and 6 pass, including <code>getent hosts vllm.ddil</code>.</li>
+    <li>Vineyard: Architecture names Nemotron 3.5 Lightning and Elasticsearch 9.5.6; the AI Agronomist completes all five phases.</li>
+    <li>SEC: Chapter 03 returns hits; Chapter 04 finishes one agent question end to end through <code>finance-ollama-llm</code>. If it hangs, switch <code>VINEYARD_AGENT_BUILDER_CONNECTOR_ID</code> to <code>finance-ollama-fallback</code>.</li>
+    <li>Need-to-Know: the banner reads "N / 198 docs"; an analyst answer returns with citations.</li>
+    <li>Kiosk: Branding ticker names Nemotron 3.5 Lightning and Jina Embeddings v5 Omni; the ARCADE tap still opens.</li>
+  </ul>
   <!--foot-->
 </div>

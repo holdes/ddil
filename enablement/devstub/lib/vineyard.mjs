@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG = JSON.parse(fs.readFileSync(path.join(HERE, "..", "data", "vineyard-config.json"), "utf8"));
-export const LLM_NAME = "Nemotron 3.5 Lightning";
+export const LLM_NAME = "Nemotron 3.5 Lightning (vLLM)"; // matches backend progress text
 
 export function makeVineyard(M, { sleep, pace }) {
   const V = M.data.vineyard;
@@ -153,7 +153,7 @@ export function makeVineyard(M, { sleep, pace }) {
     ev("phase_complete", { phase_id: "action_plan", progress_pct: 100, data: {
       actions: R.actions.slice(0, 6).map((a) => ({ task: a.task, assignee: a.assignee, deadline: a.deadline, equipment: a.equipment || "" })),
       estimated_cost: R.cost, summary: R.summary } });
-    ev("job_complete", { results: { action_plan: { summary: R.summary }, model: LLM_NAME, phases_completed: 5 } });
+    ev("job_complete", { results: { action_plan: { summary: R.summary }, model: "nemotron-3.5-lightning", phases_completed: 5 } });
   }
 
   // ── /api/search (routers/search.py) ──────────────────────────────────────────
