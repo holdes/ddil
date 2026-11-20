@@ -47,7 +47,7 @@ function NodeCard({
           {icon}
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white">{title}</h3>
+          <h3 className="text-lg font-bold text-slate-50">{title}</h3>
           <div className="text-xs text-slate-500">{subtitle}</div>
         </div>
       </div>
@@ -92,7 +92,7 @@ export function Architecture({ onContinue }: Props) {
         <div className="text-xs font-mono text-slate-500 tracking-widest uppercase mb-2">
           DDIL Demo Kit
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">System Architecture</h1>
+        <h1 className="text-3xl font-bold text-slate-50 mb-2">System Architecture</h1>
         <p className="text-sm text-slate-400 max-w-xl mx-auto">
           Two compute nodes in a Pelican case — fully airgapped, GPU-accelerated AI search and inference.
         </p>
@@ -153,7 +153,7 @@ export function Architecture({ onContinue }: Props) {
             <div className="flex items-center gap-3">
               <Wifi size={16} className="text-amber-400" />
               <div>
-                <div className="text-sm font-medium text-white">UniFi Express 7</div>
+                <div className="text-sm font-medium text-slate-50">UniFi Express 7</div>
                 <div className="text-xs text-slate-500">Gateway + Wi-Fi 7 AP &middot; 192.168.1.1</div>
               </div>
             </div>
@@ -248,7 +248,7 @@ export function Architecture({ onContinue }: Props) {
           ].map((stat, i) => (
             <div key={i} className="bg-slate-900/50 border border-slate-800 rounded-lg p-3 text-center">
               <div className="flex justify-center mb-1 text-slate-500">{stat.icon}</div>
-              <div className="text-xl font-mono font-bold text-white">{stat.value}</div>
+              <div className="text-xl font-mono font-bold text-slate-50">{stat.value}</div>
               <div className="text-[10px] text-slate-500">{stat.label}</div>
             </div>
           ))}

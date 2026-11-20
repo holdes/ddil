@@ -56,7 +56,7 @@ export function RaceIntro({ adventure, onContinue }: Props) {
             <Database size={12} />
             {ctx.subtitle}
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3">{ctx.title}</h1>
+          <h1 className="text-4xl font-bold text-slate-50 mb-3">{ctx.title}</h1>
           <p className="text-slate-400 max-w-lg mx-auto">{ctx.description}</p>
         </div>
 
@@ -96,7 +96,7 @@ export function RaceIntro({ adventure, onContinue }: Props) {
               </div>
               <div className="text-lg font-bold text-emerald-400">NVIDIA cuVS</div>
               <div className="text-xs text-slate-500 mt-1">GPU-Accelerated HNSW</div>
-              <div className="text-3xl font-mono font-bold text-white mt-2">~28,500</div>
+              <div className="text-3xl font-mono font-bold text-slate-50 mt-2">~28,500</div>
               <div className="text-xs text-slate-400">vectors/second</div>
             </div>
 
@@ -116,14 +116,14 @@ export function RaceIntro({ adventure, onContinue }: Props) {
               </div>
               <div className="text-lg font-bold text-slate-400">Standard CPU</div>
               <div className="text-xs text-slate-500 mt-1">Traditional HNSW</div>
-              <div className="text-3xl font-mono font-bold text-white mt-2">~2,400</div>
+              <div className="text-3xl font-mono font-bold text-slate-50 mt-2">~2,400</div>
               <div className="text-xs text-slate-400">vectors/second</div>
             </div>
           </div>
 
           <div className="mt-5 pt-4 border-t border-slate-800/50 text-center">
             <p className="text-sm text-slate-400">
-              The NVIDIA DGX Spark's <span className="text-white font-medium">Blackwell GPU</span> accelerates
+              The NVIDIA DGX Spark's <span className="text-slate-50 font-medium">Blackwell GPU</span> accelerates
               vector index construction using <span className="text-emerald-400 font-medium">cuVS</span> — building
               HNSW graphs up to <span className="text-emerald-400 font-medium">12x faster</span> with identical
               recall quality. Same data, same search results, dramatically faster time-to-insight.

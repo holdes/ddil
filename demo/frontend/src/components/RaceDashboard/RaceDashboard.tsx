@@ -223,7 +223,7 @@ export function RaceDashboard({ onComplete, autoStart }: { onComplete?: () => vo
                 in <span className="text-emerald-400 font-medium">{formatDuration(metrics.gpu.elapsedMs)}</span> while
                 the CPU has only processed {formatNumber(metrics.cpu.docsIndexed)} of {formatNumber(metrics.cpu.totalDocs)}.
               </p>
-              <h4 className="text-sm font-semibold text-white mb-2">What's being accelerated?</h4>
+              <h4 className="text-sm font-semibold text-slate-50 mb-2">What's being accelerated?</h4>
               <div className="space-y-2 text-xs text-slate-400">
                 <div className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
@@ -316,7 +316,7 @@ export function RaceDashboard({ onComplete, autoStart }: { onComplete?: () => vo
             Both paths produced identical search indices. The GPU-accelerated node finished in{" "}
             <span className="text-emerald-400 font-medium">{formatDuration(metrics.gpu.elapsedMs)}</span>{" "}
             vs <span className="text-amber-400 font-medium">{formatDuration(metrics.cpu.elapsedMs)}</span>{" "}
-            on CPU — a <span className="text-white font-bold">{metrics.speedup.toFixed(1)}x improvement</span>{" "}
+            on CPU — a <span className="text-slate-50 font-bold">{metrics.speedup.toFixed(1)}x improvement</span>{" "}
             powered by NVIDIA cuVS on the Blackwell architecture.
           </div>
         </motion.div>

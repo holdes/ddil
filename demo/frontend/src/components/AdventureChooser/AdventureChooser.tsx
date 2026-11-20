@@ -215,7 +215,7 @@ export function AdventureChooser({ onChoose }: Props) {
               src={kitFront}
               alt="Front of the DDIL kit"
               draggable={false}
-              className="h-[224px] w-auto [filter:drop-shadow(0_0_1px_rgba(245,247,250,0.55))_drop-shadow(0_18px_28px_rgba(0,0,0,0.5))]"
+              className="h-[224px] w-auto [filter:drop-shadow(0_16px_20px_rgba(29,30,36,0.16))]"
             />
             <div className="mt-2.5 font-mono text-[10.5px] tracking-[0.12em] uppercase text-slate-500">
               The kit · front
@@ -235,7 +235,7 @@ export function AdventureChooser({ onChoose }: Props) {
               whileHover={{ x: -3, y: -3 }}
               whileTap={{ x: 0, y: 0 }}
               onClick={() => onChoose(c.id)}
-              className={`group relative flex flex-col text-left bg-slate-900 border border-slate-700 ${c.hoverBorder} rounded-none p-5 ${c.shadow} transition-colors`}
+              className={`group relative flex flex-col text-left bg-slate-900 border border-slate-50 ${c.hoverBorder} rounded-none p-5 shadow-[9px_9px_0_0_rgba(29,30,36,0.08)] hover:shadow-[13px_13px_0_0_rgba(29,30,36,0.12)] transition-all`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.12em] uppercase text-slate-400">

@@ -12,8 +12,8 @@ interface LayerProps {
 const TONES: Record<LayerProps["tone"], string> = {
   es:    "bg-blue-600 text-white",
   codec: "bg-teal-500/90 text-slate-900",
-  java:  "bg-purple-500/80 text-white",
-  cuvs:  "bg-purple-700/80 text-white",
+  java:  "bg-purple-500/80 text-slate-50",
+  cuvs:  "bg-purple-700/80 text-slate-50",
   gpu:   "bg-[var(--color-nvidia)]/90 text-slate-900",
   cpu:   "bg-sky-400/90 text-slate-900",
 };
